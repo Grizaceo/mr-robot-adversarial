@@ -389,6 +389,60 @@ def triage_artifact(filepath: str, scenario_id: str = "") -> str:
 
 
 @mcp.tool()
+def falsify_triage(filepath: str, scenario_id: str = "") -> str:
+    """
+    Run MR. Robot triage with Falsifier self-correction loop.
+
+    1. Runs all scanners on the file
+    2. Runs MR. Robot triage
+    3. Runs Falsifier to challenge the triage report
+    4. If Falsifier finds weaknesses, re-runs triage with counter-argument
+    5. Repeats until triage survives falsification or max iterations (3)
+
+    Args:
+        filepath: Absolute path to the file to triage
+        scenario_id: Optional scenario identifier for context
+
+    Returns:
+        JSON string with final triage report including correction history
+    """
+    start = time.perf_counter()
+    logger.info(f"falsify_triage: {filepath}")
+
+    if not Path(filepath).exists():
+        return json.dumps({"error": f"File not found: {filepath}"})
+
+    # Run scanners first
+    scanner_results = {
+        "skill_scanner": _run_scanner("skill_scanner", [filepath]),
+        "ioc_scanner": _run_scanner("ioc_scanner", [filepath]),
+        "yara": _run_scanner("scan_yara", [filepath]),
+        "secrets_detector": _run_scanner("secrets_detector", [filepath]),
+    }
+
+    # Run self-correction loop
+    try:
+        from triage_falsifier import run_self_correction_loop
+        final_report = run_self_correction_loop(
+            filepath,
+            scanner_findings=scanner_results,
+            confidence_threshold=0.7,
+            max_iterations=3,
+        )
+    except Exception as e:
+        logger.error(f"Self-correction loop failed: {e}")
+        # Fallback: run triage without correction
+        from agents.mr_robot.triage import triage
+        final_report = triage(filepath, findings=scanner_results, json_output=True)
+        final_report["_correction"] = {"error": str(e), "iterations": 0}
+
+    elapsed = time.perf_counter() - start
+    result = json.dumps(final_report, indent=2, default=str)
+    _log_tool("falsify_triage", {"filepath": filepath, "scenario_id": scenario_id}, result, start)
+    return result
+
+
+@mcp.tool()
 def get_baseline(scenario_id: str) -> str:
     """
     Retrieve baseline results for a scenario.
