@@ -1,0 +1,189 @@
+{
+  "generated_at": "2026-05-14T21:17:09.164635+00:00",
+  "provider": "nvidia-nim/mistralai/mistral-nemotron",
+  "pipeline": "scan_file \u2192 triage_artifact",
+  "note": "Some files skipped due to LLM timeouts on large inputs",
+  "metrics": {
+    "accuracy": 0.9048,
+    "precision": 0.9286,
+    "recall": 0.9286,
+    "f1": 0.9286,
+    "fpr": 0.1429
+  },
+  "confusion_matrix": {
+    "TP": 13,
+    "FP": 1,
+    "TN": 6,
+    "FN": 1
+  },
+  "results": [
+    {
+      "file": "bind_shell.py",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "conf": 0.95,
+      "outcome": "TP",
+      "time": 9.2
+    },
+    {
+      "file": "credentials.env",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "conf": 0.95,
+      "outcome": "TP",
+      "time": 9.8
+    },
+    {
+      "file": "env_exfil.js",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "conf": 0.95,
+      "outcome": "TP",
+      "time": 9.7
+    },
+    {
+      "file": "eval_payload.js",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "conf": 0.95,
+      "outcome": "TP",
+      "time": 11.3
+    },
+    {
+      "file": "k8s_daemonset.yml",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "conf": 0.95,
+      "outcome": "TP",
+      "time": 11.5
+    },
+    {
+      "file": "malicious_setup.py",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "conf": 0.95,
+      "outcome": "TP",
+      "time": 13.9
+    },
+    {
+      "file": "mr_robot_ai_account_takeover.py",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "conf": 0.95,
+      "outcome": "TP",
+      "time": 16.3
+    },
+    {
+      "file": "mr_robot_ai_zero_day.py",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "conf": 0.9,
+      "outcome": "TP",
+      "time": 69.5
+    },
+    {
+      "file": "mr_robot_npm_worm.js",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "conf": 0.95,
+      "outcome": "TP",
+      "time": 132.7
+    },
+    {
+      "file": "package-lock.json",
+      "gt": "MALICIOUS",
+      "pred": "SUSPICIOUS",
+      "conf": 0.6,
+      "outcome": "FN",
+      "time": 131.0
+    },
+    {
+      "file": "prompt_override.txt",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "conf": 0.95,
+      "outcome": "TP",
+      "time": 13.2
+    },
+    {
+      "file": "remote_pipe.sh",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "conf": 1.0,
+      "outcome": "TP",
+      "time": 15.9
+    },
+    {
+      "file": "reverse_shell.sh",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "conf": 1.0,
+      "outcome": "TP",
+      "time": 13.8
+    },
+    {
+      "file": "secrets.py",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "conf": 0.9,
+      "outcome": "TP",
+      "time": 12.4
+    },
+    {
+      "file": "safe_Dockerfile",
+      "gt": "BENIGN",
+      "pred": "BENIGN",
+      "conf": 1.0,
+      "outcome": "TN",
+      "time": 21.7
+    },
+    {
+      "file": "safe_app.py",
+      "gt": "BENIGN",
+      "pred": "BENIGN",
+      "conf": 1.0,
+      "outcome": "TN",
+      "time": 24.6
+    },
+    {
+      "file": "safe_ci.yml",
+      "gt": "BENIGN",
+      "pred": "BENIGN",
+      "conf": 1.0,
+      "outcome": "TN",
+      "time": 25.6
+    },
+    {
+      "file": "safe_deploy.sh",
+      "gt": "BENIGN",
+      "pred": "BENIGN",
+      "conf": 1.0,
+      "outcome": "TN",
+      "time": 31.2
+    },
+    {
+      "file": "safe_package.json",
+      "gt": "BENIGN",
+      "pred": "BENIGN",
+      "conf": 1.0,
+      "outcome": "TN",
+      "time": 13.2
+    },
+    {
+      "file": "safe_server.js",
+      "gt": "BENIGN",
+      "pred": "INCONCLUSIVE",
+      "conf": 0.0,
+      "outcome": "FP",
+      "time": 15.4
+    },
+    {
+      "file": "safe_setup.py",
+      "gt": "BENIGN",
+      "pred": "BENIGN",
+      "conf": 1.0,
+      "outcome": "TN",
+      "time": 42.6
+    }
+  ]
+}
