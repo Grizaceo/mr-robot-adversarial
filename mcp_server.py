@@ -30,6 +30,27 @@ from typing import Any
 from mcp.server.fastmcp import FastMCP
 from pydantic import BaseModel, Field
 
+# ── Execution Logger ──────────────────────────────────────────────────────────
+from execution_logger import get_logger
+
+audit = get_logger("logs/audit_trail.db")
+
+
+def _log_tool(tool_name: str, args: dict, result: str, start_time: float):
+    """Log a tool execution to the audit trail."""
+    import json as _json
+    duration_ms = (time.perf_counter() - start_time) * 1000
+    try:
+        output = _json.loads(result) if result.strip().startswith(("{", "[")) else {"text": result[:1000]}
+    except Exception:
+        output = {"text": result[:1000]}
+    audit.log(
+        tool_name=tool_name,
+        input_data=args,
+        output_data=output,
+        duration_ms=duration_ms,
+    )
+
 # ── Configuration ─────────────────────────────────────────────────────────────
 
 CYBERSEC_LAB = Path(os.getenv("CYBERSEC_LAB", "/home/gris/.hermes/workspace/cybersecurity-lab"))
@@ -242,7 +263,9 @@ def scan_file(filepath: str) -> str:
     elapsed = time.perf_counter() - start
     logger.info(f"scan_file complete: {verdict} ({elapsed:.1f}s)")
 
-    return output.model_dump_json(indent=2)
+    result = output.model_dump_json(indent=2)
+    _log_tool("scan_file", {"filepath": filepath}, result, start)
+    return result
 
 
 @mcp.tool()
@@ -347,7 +370,9 @@ def triage_artifact(filepath: str, scenario_id: str = "") -> str:
 
     logger.info(f"triage_artifact complete: {output.verdict} ({elapsed:.1f}s)")
 
-    return output.model_dump_json(indent=2)
+    result = output.model_dump_json(indent=2)
+    _log_tool("triage_artifact", {"filepath": filepath, "scenario_id": scenario_id}, result, start)
+    return result
 
 
 @mcp.tool()
@@ -365,6 +390,7 @@ def get_baseline(scenario_id: str) -> str:
         JSON string with baseline data if found
     """
     logger.info(f"get_baseline: {scenario_id}")
+    start = time.perf_counter()
 
     baselines_dir = CYBERSEC_LAB / "baselines"
     # Search for matching baseline files
@@ -386,7 +412,9 @@ def get_baseline(scenario_id: str) -> str:
         else:
             output = BaselineResult(scenario_id=scenario_id, exists=False)
 
-    return output.model_dump_json(indent=2)
+    result = output.model_dump_json(indent=2)
+    _log_tool("get_baseline", {"scenario_id": scenario_id}, result, start)
+    return result
 
 
 @mcp.tool()
@@ -400,6 +428,7 @@ def health() -> str:
     Returns:
         JSON string with component status
     """
+    start = time.perf_counter()
     components = {}
 
     # Check cybersecurity-lab directory
@@ -428,7 +457,9 @@ def health() -> str:
         timestamp=datetime.now(timezone.utc).isoformat(),
     )
 
-    return output.model_dump_json(indent=2)
+    result = output.model_dump_json(indent=2)
+    _log_tool("health", {}, result, start)
+    return result
 
 
 # ── CLI Entry Point ───────────────────────────────────────────────────────────

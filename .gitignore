@@ -22,3 +22,4 @@ temp/
 .env
 secrets.yaml
 credentials.json
+logs/audit_trail.db
