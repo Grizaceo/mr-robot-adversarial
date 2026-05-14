@@ -2,7 +2,9 @@ from pydantic import BaseModel
 from typing import List, Optional
 import yaml
 import logging
+import json
 from datetime import datetime
+from pathlib import Path
 
 class ThreatAlert(BaseModel):
     id: str
@@ -14,7 +16,7 @@ class ThreatAlert(BaseModel):
     timestamp: str
 
 class DefenderAgent:
-    def __init__(self, config_path: str = "cybersec-lab-integration/config.yaml"):
+    def __init__(self, config_path: str = "cybersec_lab_integration/config.yaml"):
         with open(config_path) as f:
             self.config = yaml.safe_load(f)
         self.logger = logging.getLogger("DefenderAgent")
@@ -36,14 +38,16 @@ class ThreatDetector:
         # Initialize LLM client based on provider
         # TODO: Implement actual LLM initialization
 
-    def analyze(self, alert: dict) -> dict:
+    def analyze(self, alert) -> dict:
+        # Convert Pydantic model to dict if needed
+        a = alert.model_dump() if hasattr(alert, 'model_dump') else alert
         prompt = f"""
         Analyze this cybersecurity threat:
-        - Source: {alert['source']}
-        - Severity: {alert['severity']}
-        - Description: {alert['description']}
-        - Affected: {alert['affected_hosts']}
-        - MITRE: {alert.get('mitre_technique', 'N/A')}
+        - Source: {a['source']}
+        - Severity: {a['severity']}
+        - Description: {a['description']}
+        - Affected: {a['affected_hosts']}
+        - MITRE: {a.get('mitre_technique', 'N/A')}
 
         Provide:
         1. Confidence score (0-1)
@@ -54,10 +58,11 @@ class ThreatDetector:
         # Call LLM (implement based on chosen provider)
         # For now, return mock analysis
         return {
-            "threat_id": alert["id"],
-            "severity": alert["severity"],
+            "threat_id": a["id"],
+            "severity": a["severity"],
             "confidence": 0.92,
             "recommended_action": "contain",
+            "iocs": a.get("affected_hosts", []),
             "additional_iocs": ["process:powershell.exe", "network:external-ip-12345"],
             "impact": "Potential data exfiltration if not contained within 5 minutes"
         }

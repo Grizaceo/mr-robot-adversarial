@@ -23,3 +23,5 @@ temp/
 secrets.yaml
 credentials.json
 logs/audit_trail.db
+logs/*.db-shm
+logs/*.db-wal

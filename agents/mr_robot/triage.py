@@ -3,14 +3,15 @@
 MR. ROBOT — Autonomous Triage Agent for FIND EVIL! Hackathon
 
 Takes a candidate file + scanner findings + optional context → produces
-a structured triage report using Ollama Cloud (default) or OpenRouter (fallback).
+a structured triage report using NVIDIA NIM (default) with Ollama Cloud
+and OpenRouter fallbacks.
 
 Designed for the cybersecurity-lab pipeline: skill_scanner → ioc_scanner → MR. Robot.
 
 Usage:
-    python -m agents.mr_robot.triage <candidate_path> [--findings <path>] [--provider ollama-cloud|openrouter]
-    python -m agents.mr_robot.triage --health
-    python -m agents.mr_robot.triage --json <candidate_path>   # machine-readable output
+    python agents/mr_robot/triage.py <candidate_path> [--findings <path>] [--provider nvidia-nim|ollama-cloud|openrouter]
+    python agents/mr_robot/triage.py --health
+    python agents/mr_robot/triage.py --json <candidate_path>   # machine-readable output
 """
 
 import os
