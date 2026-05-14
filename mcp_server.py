@@ -36,6 +36,17 @@ from execution_logger import get_logger
 audit = get_logger("logs/audit_trail.db")
 
 
+def _verdict_to_severity(verdict: str) -> str:
+    """Map verdict string to severity level."""
+    mapping = {
+        "MALICIOUS": "critical",
+        "SUSPICIOUS": "high",
+        "BENIGN": "none",
+        "ERROR": "none",
+    }
+    return mapping.get(verdict, "none")
+
+
 def _log_tool(tool_name: str, args: dict, result: str, start_time: float):
     """Log a tool execution to the audit trail."""
     import json as _json
@@ -76,8 +87,9 @@ class ScanResult(BaseModel):
     file: str
     timestamp: str
     scanners: dict[str, Any]
-    summary: dict[str, Any] = Field(description="Counts: total_findings, critical, high, medium, low, overall_verdict")
+    summary: dict[str, Any] = Field(description="Counts: total_findings, critical, high, medium, low")
     overall_verdict: str = Field(description="MALICIOUS | SUSPICIOUS | BENIGN | ERROR")
+    severity: str = Field(default="none", description="critical | high | medium | low | none")
 
 
 class TriageResult(BaseModel):
@@ -258,6 +270,7 @@ def scan_file(filepath: str) -> str:
         scanners=results,
         summary=summary,
         overall_verdict=verdict,
+        severity=_verdict_to_severity(verdict),
     )
 
     elapsed = time.perf_counter() - start
@@ -273,7 +286,7 @@ def triage_artifact(filepath: str, scenario_id: str = "") -> str:
     """
     Run MR. Robot triage on a file with full scanner context.
 
-    First runs all scanners, then sends findings to MR. Robot (Ollama Cloud)
+    First runs all scanners, then sends findings to MR. Robot (NVIDIA NIM)
     for AI-powered triage with MITRE ATT&CK mapping.
 
     Args:

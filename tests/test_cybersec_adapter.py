@@ -1,7 +1,7 @@
 """Tests for CybersecLabAdapter."""
 
 import pytest
-from cybersec-lab-integration.adapter import CybersecLabAdapter
+from cybersec_lab_integration.adapter import CybersecLabAdapter
 
 def test_adapter_initialization():
     config = {"lab_path": "/home/gris/.hermes/workspace/cybersecurity-lab"}

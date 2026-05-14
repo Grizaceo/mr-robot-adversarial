@@ -4,8 +4,13 @@ from pathlib import Path
 from typing import List, Dict
 import json
 import logging
-from watchdog.events import FileSystemEventHandler
-from watchdog.observers import Observer
+
+try:
+    from watchdog.events import FileSystemEventHandler
+    from watchdog.observers import Observer
+    WATCHDOG_AVAILABLE = True
+except ImportError:
+    WATCHDOG_AVAILABLE = False
 
 class CybersecLabAdapter:
     def __init__(self, config: dict):
@@ -17,6 +22,9 @@ class CybersecLabAdapter:
 
     def start_monitoring(self, callback):
         """Watch for new YARA/Sigma alerts in real-time."""
+        if not WATCHDOG_AVAILABLE:
+            logging.warning("watchdog not installed — real-time monitoring disabled")
+            return
         self.observer = Observer()
         handler = AlertHandler(callback)
         self.observer.schedule(handler, str(self.reports_dir), recursive=False)
@@ -45,10 +53,11 @@ class CybersecLabAdapter:
         with open(log_file, "a") as f:
             f.write(json.dumps(response) + "\n")
 
-class AlertHandler(FileSystemEventHandler):
-    def __init__(self, callback):
-        self.callback = callback
+if WATCHDOG_AVAILABLE:
+    class AlertHandler(FileSystemEventHandler):
+        def __init__(self, callback):
+            self.callback = callback
 
-    def on_created(self, event):
-        if event.src_path.endswith("active_alerts.json"):
-            self.callback()
+        def on_created(self, event):
+            if str(event.src_path).endswith("active_alerts.json"):
+                self.callback()
