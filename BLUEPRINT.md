@@ -1,96 +1,91 @@
 # BLUEPRINT — FIND EVIL! Hackathon Submission
 
-## 🎯 Goal
+## Goal
 
-Build a working AI agent system that autonomously defends against cyber threats, integrating with the existing `cybersecurity-lab` to demonstrate real-world impact.
+Build a working AI agent system that autonomously defends against cyber threats,
+integrating with the existing `cybersecurity-lab` to demonstrate real-world impact.
 
-## 📋 Submission Requirements
+## Status: IN PROGRESS
 
-- ✅ Public GitHub repository (this repo)
-- ✅ 3-minute demo video showing agent in action
-- ✅ Text description (this blueprint + README)
-- ✅ Architecture diagram (in `docs/architecture.md`)
-- ✅ Working code that can be installed and run
+**Deadline:** June 15, 2026 (31 days remaining)
 
-## 🏗️ System Design
+## What We Built
+
+### Core Pipeline
+```
+File → Scanners → MR. Robot Triage → Falsifier Review → Final Report
+                                    ↓ (if FALSIFIED)
+                              Self-Correction Loop (max 3 iterations)
+```
 
 ### Components
 
-1. **DefenderAgent** (main entry point)
-   - Receives threat alerts from cybersecurity-lab
-   - Decides response strategy using LLM reasoning
-   - Coordinates sub-agents
+1. **MCP Server** (`mcp_server.py`, 483 lines)
+   - 5 tools: scan_file, triage_artifact, falsify_triage, get_baseline, health
+   - stdio transport (MCP protocol)
+   - Integrated audit trail logging
 
-2. **ThreatDetector**
-   - Ingests: YARA matches, Sigma alerts, system logs
-   - Classifies threat severity (Critical/High/Medium/Low)
-   - Provides context: affected systems, IoCs, MITRE mapping
+2. **MR. Robot Triage Agent** (`agents/mr_robot/triage.py`, 538 lines)
+   - AI-powered triage with MITRE ATT&CK mapping
+   - Provider: NVIDIA NIM (mistralai/mistral-nemotron) + 2 fallbacks
+   - Structured JSON output: verdict, confidence, severity, findings, actions
+   - Scanner correlation (skill, ioc, yara, secrets)
 
-3. **ResponseOrchestrator**
-   - Executes actions: isolate host, block IP, deploy countermeasures
-   - Updates cybersecurity-lab scenarios dynamically
-   - Generates audit trail
+3. **TriageFalsifier** (`triage_falsifier.py`, 312 lines)
+   - Adversarial reviewer — challenges MR. Robot's findings
+   - Self-correction loop with confidence threshold (0.7)
+   - Max 3 iterations per file
 
-4. **CybersecLabAdapter**
-   - Reads `cybersecurity-lab/reports/` for real-time telemetry
-   - Writes actions to `cybersecurity-lab/logs/agent_actions.log`
-   - Triggers scenario re-evaluation
+4. **Execution Logger** (`execution_logger.py`, 247 lines)
+   - SQLite WAL audit trail (SANS requirement #8)
+   - 12 fields: tool_name, input, output, duration, verdict, severity, confidence
+   - Query interface + JSON export
 
-### Data Flow
+5. **Scanner Suite** (from cybersecurity-lab)
+   - skill_scanner: 32+ YARA-like rules + AST + prompt injection
+   - ioc_scanner: 12 URLs, 6 domains, 10 heuristic patterns
+   - scan_yara: davi_malware_rules.yar (22KB, custom rules)
+   - secrets_detector: hardcoded credentials, API keys
 
-```
-[CybersecLab] → (file/SSE) → [DefenderAgent] → [ThreatDetector] → [ResponseOrchestrator] → [CybersecLab]
-```
+## Test Results
 
-### Tech Stack
+### E2E Test (5 scenarios)
+| File | Expected | Predicted | Confidence | Iterations |
+|------|----------|-----------|------------|------------|
+| bind_shell.py | MALICIOUS | MALICIOUS | 0.95 | 1 |
+| reverse_shell.sh | MALICIOUS | MALICIOUS | 0.95 | 1 |
+| mr_robot_npm_worm.js | MALICIOUS | MALICIOUS | 0.95 | 2 |
+| safe_app.py | BENIGN | BENIGN | 0.99 | 1 |
+| mr_robot_yaml_rce.yaml | MALICIOUS | MALICIOUS | 0.95 | 1 |
 
-- Python 3.11+
-- Any LLM (local or API) — DeepSeek, Claude, Gemini, etc.
-- Existing cybersecurity-lab (no modification to core)
-- Optional: MCP tools for external threat intel
+**Result: 5/5 correct (100%)**
 
-## 🎬 Demo Scenarios (3-min video)
+### Accuracy Report
+- Running on full test-corpus (21 files: 14 malicious, 7 benign)
+- See `docs/accuracy_report.md` for full results
 
-1. **Malware Detection & Auto-Response** (60s)
-   - YARA rule matches malicious file
-   - DefenderAgent classifies, orchestrates quarantine
-   - Shows updated scoreboard
+## Submission Requirements Checklist
 
-2. **APT Simulation** (60s)
-   - Multi-stage attack chain detected via Sigma rules
-   - Agent correlates events, blocks attacker IP
-   - Generates incident report
+| # | Requirement | Status | Notes |
+|---|------------|--------|-------|
+| 1 | Public GitHub repo | ⚠️ | Local only, needs to be pushed |
+| 2 | Demo video (3 min) | ❌ | Not started |
+| 3 | Text description | ⚠️ | BLUEPRINT + README exist, need polish |
+| 4 | Architecture diagram | ✅ | `docs/architecture.md` updated |
+| 5 | Working code | ✅ | All components functional |
+| 6 | Dataset documentation | ⚠️ | Test-corpus documented, scenarios pending |
+| 7 | Try-it-out instructions | ❌ | Not started |
+| 8 | Agent execution logs | ✅ | Audit trail functional |
 
-3. **Zero-Day Adaptation** (60s)
-   - New threat pattern not in rules
-   - Agent uses LLM to hypothesize, creates temporary detection
-   - Human-in-the-loop approval simulated
+## Next Steps
 
-## 📊 Judging Criteria Alignment
-
-- **Relevance:** Directly addresses "build the defender" challenge
-- **Technical Execution:** Clean modular Python, leverages existing lab
-- **Innovation:** Autonomous response loop + human-AI collaboration
-- **Impact:** Reduces MTTR (Mean Time To Respond) from hours to seconds
-
-## ⚙️ Implementation Notes
-
-- Use existing `cybersecurity-lab` as ground truth — don't mock
-- Show real logs, real YARA rules, real scenarios
-- Keep agent logic separate from lab core (adapter pattern)
-- Demo must run in < 5 minutes end-to-end
-
-## 📝 Deliverables Checklist
-
-- [ ] Public GitHub repo with MIT license
-- [ ] `README.md` with setup instructions
-- [ ] `docs/architecture.md` with diagram
-- [ ] `docs/submission_requirements.md` (this file)
-- [ ] Demo video (3 min max) uploaded to YouTube/Vimeo
-- [ ] Working `docker-compose.yml` for easy testing
-- [ ] `tests/` with at least 2 integration tests
-
----
-
-**Status:** Blueprint complete — ready for implementation agent  
-**Estimated effort:** 2-3 days focused development
+1. ✅ ~~MR. Robot Triage Agent~~
+2. ✅ ~~MCP Server~~
+3. ✅ ~~Execution Logger~~
+4. ✅ ~~TriageFalsifier + Self-Correction~~
+5. 🔄 Accuracy Report (running)
+6. ⬜ SIFT Workstation + Protocol SIFT
+7. ⬜ Demo video
+8. ⬜ Try-it-out instructions
+9. ⬜ Push to public GitHub
+10. ⬜ Submit before June 15
