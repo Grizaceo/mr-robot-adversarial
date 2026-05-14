@@ -1,0 +1,25 @@
+{
+  "scenario_id": "yara_evasion_001",
+  "name": "YARA Rule Evasion & Adaptation",
+  "duration": "60s",
+  "steps": [
+    {
+      "action": "trigger_fp",
+      "params": {
+        "false_positive_file": "innocent.exe"
+      }
+    },
+    {
+      "action": "agent_adjusts_rule",
+      "params": {
+        "adjustment": "whitelist_known_good"
+      }
+    },
+    {
+      "action": "verify_fp_reduced",
+      "params": {
+        "metric": "false_positive_rate < 5%"
+      }
+    }
+  ]
+}
