@@ -55,8 +55,8 @@ for label, files in [("MALICIOUS", malicious_files), ("BENIGN", benign_files)]:
         try:
             report = run_self_correction_loop(
                 str(f),
-                confidence_threshold=0.7,
-                max_iterations=2,  # Reduced for speed
+                confidence_threshold=0.99,  # High threshold = skip correction on clear verdicts
+                max_iterations=1,
             )
 
             verdict = report.get("verdict", "ERROR")
