@@ -70,11 +70,11 @@ File → Scanners → MR. Robot Triage → Falsifier Review → Final Report
 |---|------------|--------|-------|
 | 1 | Public GitHub repo | ⚠️ | Local only, needs to be pushed |
 | 2 | Demo video (3 min) | ❌ | Not started |
-| 3 | Text description | ⚠️ | BLUEPRINT + README exist, need polish |
+| 3 | Text description | ✅ | BLUEPRINT + README + architecture updated |
 | 4 | Architecture diagram | ✅ | `docs/architecture.md` updated |
 | 5 | Working code | ✅ | All components functional |
-| 6 | Dataset documentation | ⚠️ | Test-corpus documented, scenarios pending |
-| 7 | Try-it-out instructions | ❌ | Not started |
+| 6 | Dataset documentation | ✅ | `docs/accuracy_report.md` + `docs/e2e_test_results.md` |
+| 7 | Try-it-out instructions | ✅ | `docs/try_it_out.md` created |
 | 8 | Agent execution logs | ✅ | Audit trail functional |
 
 ## Next Steps
