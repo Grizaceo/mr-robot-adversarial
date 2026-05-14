@@ -4,14 +4,14 @@ Accuracy Report — FIND EVIL! Hackathon (Final)
 
 Uses cached results from previous runs + completes missing files.
 """
-import json, sys, time
+import json, os, sys, time
 from pathlib import Path
 from datetime import datetime, timezone
 
 sys.path.insert(0, '.')
 from agents.mr_robot.triage import triage
 
-CYBERSEC_LAB = Path("/home/gris/.hermes/workspace/cybersecurity-lab")
+CYBERSEC_LAB = Path(os.getenv("CYBERSEC_LAB", str(Path.home() / ".hermes" / "workspace" / "cybersecurity-lab")))
 
 # Ground truth
 test_files = []
