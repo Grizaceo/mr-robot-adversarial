@@ -64,7 +64,7 @@ def _log_tool(tool_name: str, args: dict, result: str, start_time: float):
 
 # ── Configuration ─────────────────────────────────────────────────────────────
 
-CYBERSEC_LAB = Path(os.getenv("CYBERSEC_LAB", "/home/gris/.hermes/workspace/cybersecurity-lab"))
+CYBERSEC_LAB = Path(os.getenv("CYBERSEC_LAB", str(Path.home() / ".hermes" / "workspace" / "cybersecurity-lab")))
 SCANNERS_DIR = CYBERSEC_LAB / "scanners"
 MR_ROBOT = Path(__file__).parent / "agents" / "mr_robot" / "triage.py"
 LOG_DIR = Path("logs")

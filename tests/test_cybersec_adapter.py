@@ -1,10 +1,11 @@
 """Tests for CybersecLabAdapter."""
 
 import pytest
+from pathlib import Path
 from cybersec_lab_integration.adapter import CybersecLabAdapter
 
 def test_adapter_initialization():
-    config = {"lab_path": "/home/gris/.hermes/workspace/cybersecurity-lab"}
+    config = {"lab_path": str(Path.home() / ".hermes" / "workspace" / "cybersecurity-lab")}
     adapter = CybersecLabAdapter(config)
     assert adapter.lab_path.exists()
 

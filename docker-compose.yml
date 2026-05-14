@@ -5,7 +5,7 @@ services:
     build: .
     volumes:
       - ./cybersec-lab-integration/config.yaml:/app/config.yaml
-      - /home/gris/.hermes/workspace/cybersecurity-lab:/lab:ro
+      - ${CYBERSEC_LAB_PATH:-/home/gris/.hermes/workspace/cybersecurity-lab}:/lab:ro
     environment:
       - CYBERSEC_LAB_PATH=/lab
       - LLM_PROVIDER=${LLM_PROVIDER:-local}
