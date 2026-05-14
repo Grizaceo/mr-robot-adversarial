@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  find-evil-agent:
+    build: .
+    volumes:
+      - ./cybersec-lab-integration/config.yaml:/app/config.yaml
+      - /home/gris/.hermes/workspace/cybersecurity-lab:/lab:ro
+    environment:
+      - CYBERSEC_LAB_PATH=/lab
+      - LLM_PROVIDER=${LLM_PROVIDER:-local}
+      - LLM_MODEL=${LLM_MODEL:-deepseek-coder}
+    ports:
+      - "5274:5274"  # API endpoint
+    restart: unless-stopped

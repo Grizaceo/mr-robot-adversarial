@@ -1,0 +1,11 @@
+requests>=2.31.0
+pydantic>=2.0.0
+pyyaml>=6.0
+aiohttp>=3.9.0
+watchdog>=3.0.0
+# LLM client of choice (uncomment what you use)
+# openai>=1.0.0
+# anthropic>=0.20.0
+# google-generativeai>=0.5.0
+# together>=1.2.0
+# huggingface-hub>=0.20.0

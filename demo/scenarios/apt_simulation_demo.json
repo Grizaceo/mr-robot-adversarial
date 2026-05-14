@@ -1,0 +1,27 @@
+{
+  "scenario_id": "apt_chain_001",
+  "name": "APT Chain Correlation & Response",
+  "duration": "60s",
+  "steps": [
+    {
+      "action": "inject_sigma_alert",
+      "params": {
+        "technique": "T1055 - Process Injection",
+        "host": "workstation-01"
+      }
+    },
+    {
+      "action": "agent_correlates_events",
+      "params": {
+        "correlation_window": "5 minutes",
+        "expected_chain_length": 3
+      }
+    },
+    {
+      "action": "response_block_c2",
+      "params": {
+        "target_ip": "203.0.113.45"
+      }
+    }
+  ]
+}

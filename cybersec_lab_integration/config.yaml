@@ -1,0 +1,15 @@
+lab_path: /home/gris/.hermes/workspace/cybersecurity-lab
+
+llm:
+  provider: deepseek  # or anthropic, google, together
+  model: deepseek-coder
+  api_key: ${LLM_API_KEY}  # use env var
+
+agent:
+  log_level: INFO
+  response_timeout: 10
+
+features:
+  enable_llm_reasoning: true
+  auto_contain: true
+  human_in_the_loop: false
