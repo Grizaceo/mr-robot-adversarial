@@ -26,6 +26,15 @@ from typing import Optional
 # ── Provider Configuration ────────────────────────────────────────────────────
 
 PROVIDERS = {
+    "nvidia-nim": {
+        "base": "https://integrate.api.nvidia.com/v1",
+        "model": os.getenv("NVIDIA_MODEL", "mistralai/mistral-nemotron"),
+        "env_key": "NVIDIA_API_KEY",
+        "fallback_models": [
+            "meta/llama-4-maverick-17b-128e-instruct",
+            "meta/llama-3.3-70b-instruct",
+        ],
+    },
     "ollama-cloud": {
         "base": "https://ollama.com/v1",
         "model": os.getenv("OLLAMA_MODEL", "kimi-k2.5"),
@@ -53,7 +62,7 @@ PROVIDERS = {
     },
 }
 
-DEFAULT_PROVIDER = os.getenv("MR_ROBOT_PROVIDER", "ollama-cloud")
+DEFAULT_PROVIDER = os.getenv("MR_ROBOT_PROVIDER", "nvidia-nim")
 
 # ── System Prompt ─────────────────────────────────────────────────────────────
 
@@ -93,11 +102,63 @@ OUTPUT FORMAT: Always respond with a JSON object (no markdown wrapping):
 # ── LLM Client ────────────────────────────────────────────────────────────────
 
 def _get_api_key(provider: str) -> str | None:
-    """Get API key from environment."""
+    """Get API key from environment or ~/.hermes/.env."""
     info = PROVIDERS.get(provider)
     if not info:
         return None
-    return os.environ.get(info["env_key"])
+
+    # 1. Check environment first
+    key = os.environ.get(info["env_key"])
+    if key:
+        return key
+
+    # 2. Fall back to ~/.hermes/.env (where keys are persisted)
+    env_path = Path.home() / ".hermes" / ".env"
+    if env_path.exists():
+        for line in env_path.read_text().splitlines():
+            if line.strip().startswith(f"{info['env_key']}="):
+                return line.strip().split("=", 1)[1].strip().strip('"').strip("'")
+
+    return None
+
+
+def _call_nvidia_nim(prompt: str, model: str = None, system: str = "") -> str | None:
+    """Call NVIDIA NIM API via direct HTTP."""
+    model = model or PROVIDERS["nvidia-nim"]["model"]
+    key = _get_api_key("nvidia-nim")
+    if not key:
+        return None
+
+    import urllib.request
+    messages = []
+    if system:
+        messages.append({"role": "system", "content": system})
+    messages.append({"role": "user", "content": prompt})
+
+    body = json.dumps({
+        "model": model,
+        "messages": messages,
+        "temperature": 0.3,
+        "max_tokens": 4096,
+    }).encode()
+
+    req = urllib.request.Request(
+        "https://integrate.api.nvidia.com/v1/chat/completions",
+        data=body,
+        headers={
+            "Authorization": f"Bearer {key}",
+            "Content-Type": "application/json",
+        },
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=120) as resp:
+            data = json.loads(resp.read())
+            return data["choices"][0]["message"]["content"]
+    except Exception as e:
+        print(f"  [WARN] NVIDIA NIM failed: {e}", file=sys.stderr)
+
+    return None
 
 
 def _call_ollama_cloud(prompt: str, model: str = None, system: str = "") -> str | None:
@@ -222,6 +283,8 @@ def _call_llm(provider: str, prompt: str, system: str = "") -> tuple[str, str]:
                 resp = _call_ollama_cloud(prompt, model=model, system=system)
             elif provider == "openrouter":
                 resp = _call_openrouter(prompt, model=model, system=system)
+            elif provider == "nvidia-nim":
+                resp = _call_nvidia_nim(prompt, model=model, system=system)
             else:
                 raise RuntimeError(f"Unknown provider: {provider}")
 
