@@ -54,5 +54,5 @@ For questions about the lab, check `~/.hermes/workspace/cybersecurity-lab/README
 ---
 
 **Blueprint version:** 0.2.0-blueprint  
-**Prepared by:** DAVI (modelar skill)  
+**Prepared by:** Cristóbal (vía modelar skill)  
 **Date:** 2026-05-14
