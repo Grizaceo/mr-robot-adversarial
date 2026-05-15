@@ -1,0 +1,93 @@
+1
+00:00:00,000 --> 00:00:08,000
+MR. Robot Adversarial — SANS FIND EVIL! 2026
+Autonomous AI cyber-defense pipeline.
+
+2
+00:00:08,000 --> 00:00:16,000
+The problem: AI adversaries breach in under 8 minutes.
+
+3
+00:00:16,000 --> 00:00:25,000
+Our pipeline: scan → triage → adversarial review → verdict, in ~30 seconds.
+
+4
+00:00:25,000 --> 00:00:38,000
+Three trust layers, two model families, one rule-based judge.
+
+5
+00:00:38,000 --> 00:00:50,000
+Scanners are deterministic. The auditor is a different model family
+than the triage agent — agreement actually carries information.
+
+6
+00:00:50,000 --> 00:01:05,000
+Health check — providers, scanners, audit DB all online.
+
+7
+00:01:05,000 --> 00:01:15,000
+Sample 1: a Python bind shell. Expected verdict: MALICIOUS.
+
+8
+00:01:15,000 --> 00:01:35,000
+Step 1: deterministic scanners (skill, IOC, YARA, secrets) light up.
+Step 2: MR. Robot (Nemotron) runs a 5-phase triage.
+
+9
+00:01:35,000 --> 00:01:55,000
+Step 3: Falsifier (DeepSeek) audits the triage.
+ΔA = 1.0 — propagator and auditor are different families.
+
+10
+00:01:55,000 --> 00:02:05,000
+Verdict: MALICIOUS. Audit trail records every step.
+
+11
+00:02:05,000 --> 00:02:15,000
+Sample 2: a Django view with parameterized ORM. Expected: BENIGN.
+
+12
+00:02:15,000 --> 00:02:30,000
+The Falsifier is framework-aware: it knows Django auto-escapes
+and that .filter() parameterizes — no SQL injection vector.
+
+13
+00:02:30,000 --> 00:02:45,000
+Verdict: BENIGN. Without the Falsifier this is a likely false alarm.
+
+14
+00:02:45,000 --> 00:02:55,000
+Sample 3: an obfuscated npm worm. Triage uncertain on the first pass.
+
+15
+00:02:55,000 --> 00:03:20,000
+Falsifier challenges the verdict → MR. Robot re-runs with the counter-argument.
+
+16
+00:03:20,000 --> 00:03:40,000
+Max 2 iterations — beyond that, same-family re-runs amplify error
+rather than reduce it (Shehata & Li 2026).
+
+17
+00:03:40,000 --> 00:03:55,000
+Verdict on the worm: MALICIOUS after 2 iterations.
+
+18
+00:03:55,000 --> 00:04:15,000
+Accuracy on 118 ground-truth samples (99 malicious + 19 benign):
+Recall 100%, Precision 97.1%, F1 0.985, FPR 15.8%.
+
+19
+00:04:15,000 --> 00:04:25,000
+Three false positives are listed in the report — we surface them,
+we don't suppress them.
+
+20
+00:04:25,000 --> 00:04:40,000
+Audit trail (SANS requirement #8): every tool call logged
+to SQLite WAL with verdict, confidence, ΔA, and kinship-lock flag.
+
+21
+00:04:40,000 --> 00:05:00,000
+github.com/Grizaceo/mr-robot-adversarial — MIT license.
+Try-it-out guide: docs/try_it_out.md
