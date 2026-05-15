@@ -1,4 +1,4 @@
-# BLUEPRINT — FIND EVIL! Hackathon Submission
+# BLUEPRINT — MR. Robot Adversarial
 
 ## Goal
 

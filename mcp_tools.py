@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-MCP Tools — Shared functions for FIND EVIL! MCP Server
+MCP Tools — Shared functions for MR. Robot MCP Server
 
 Extracted from mcp_server.py to reduce duplication between tools.
 """

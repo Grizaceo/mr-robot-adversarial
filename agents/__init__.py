@@ -1,1 +1,1 @@
-"""FIND EVIL! agents package."""
+"""MR. Robot Adversarial agents package."""

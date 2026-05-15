@@ -1,10 +1,10 @@
-# Architecture Document — FIND EVIL! Submission
+# Architecture Document — MR. Robot Adversarial
 
 ## System Overview
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│                     FIND EVIL! Agent System                        │
+│                     MR. Robot Adversarial                        │
 ├─────────────────────────────────────────────────────────────────────┤
 │                                                                     │
 │  ┌──────────────────────────────────────────────────────────────┐  │

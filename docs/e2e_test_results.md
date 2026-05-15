@@ -1,4 +1,4 @@
-# FIND EVIL! — E2E Test Results (Day 4)
+# MR. Robot Adversarial — E2E Test Results (Day 4)
 
 **Date:** 2026-05-14
 **Provider:** NVIDIA NIM (mistralai/mistral-nemotron)

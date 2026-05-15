@@ -9,7 +9,7 @@ m = data["metrics"]
 cm = data["confusion_matrix"]
 
 print("=" * 60)
-print("ACCURACY REPORT — FIND EVIL! Hackathon")
+print("ACCURACY REPORT — MR. Robot Adversarial")
 print("=" * 60)
 print(f"Provider: {data['provider']}")
 print(f"Pipeline: {data['pipeline']}")

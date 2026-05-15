@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-MR. ROBOT — Autonomous Triage Agent for FIND EVIL! Hackathon
+MR. ROBOT — Autonomous Triage Agent for MR. Robot Adversarial
 
 Takes a candidate file + scanner findings + optional context → produces
 a structured triage report using NVIDIA NIM (default) with Ollama Cloud
@@ -49,8 +49,8 @@ PROVIDERS = {
         "model": os.getenv("OPENROUTER_MODEL", "openai/gpt-oss-120b:free"),
         "env_key": "OPENROUTER_API_KEY",
         "extra_headers": {
-            "HTTP-Referer": "https://github.com/davi/find-evil-hackathon",
-            "X-Title": "MR. Robot — FIND EVIL!",
+            "HTTP-Referer": "https://github.com/davi/mr-robot-adversarial",
+            "X-Title": "MR. Robot — Adversarial",
         },
         "fallback_models": [
             "nvidia/nemotron-3-super-120b-a12b:free",

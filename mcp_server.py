@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-MCP Server — FIND EVIL! Hackathon
+MCP Server — MR. Robot Adversarial
 
 Exposes cybersecurity-lab scanners + MR. Robot triage as MCP tools
 using the Model Context Protocol (stdio transport).
@@ -75,7 +75,7 @@ class HealthResult(BaseModel):
 
 # ── MCP Server ────────────────────────────────────────────────────────────────
 
-mcp = FastMCP(name="find-evil-mcp")
+mcp = FastMCP(name="mr-robot-mcp")
 
 
 @mcp.tool()
@@ -201,5 +201,5 @@ def health() -> str:
 
 
 if __name__ == "__main__":
-    logger.info("Starting FIND EVIL! MCP Server (stdio)")
+    logger.info("Starting MR. Robot MCP Server (stdio)")
     mcp.run(transport="stdio")

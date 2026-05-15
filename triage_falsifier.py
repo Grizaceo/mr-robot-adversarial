@@ -99,7 +99,7 @@ class TriageFalsifier:
             "",
             "## Candidate File Code",
             "```",
-            candidate_code[:6000],
+            candidate_code[:12000],
             "```",
             "",
         ]

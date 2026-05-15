@@ -1,0 +1,37 @@
+# Git
+.git
+.gitignore
+
+# Python cache
+__pycache__
+*.pyc
+*.pyo
+.pytest_cache
+.ruff_cache
+
+# Virtual environments
+.venv
+venv
+env
+
+# IDE
+.vscode
+.idea
+
+# Docker
+.dockerignore
+
+# Test artifacts
+.coverage
+htmlcov
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Legacy code (not needed at runtime)
+legacy/
+
+# Demo output (created at runtime)
+demo_output/

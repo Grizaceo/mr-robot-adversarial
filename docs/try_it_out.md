@@ -1,4 +1,4 @@
-# Try It Out — FIND EVIL! Hackathon
+# Try It Out — MR. Robot Adversarial
 
 ## Prerequisites
 
@@ -82,7 +82,7 @@ python mcp_server.py
 # Add to ~/.claude/settings.json:
 # {
 #   "mcpServers": {
-#     "find-evil": {
+#     "mr-robot-adversarial": {
 #       "command": "python",
 #       "args": ["mcp_server.py"]
 #     }

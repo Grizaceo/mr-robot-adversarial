@@ -11,9 +11,15 @@ venv/
 .vscode/
 *.log
 .DS_Store
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+.ruff_cache/
 
 # Hackathon specific
 demo/videos/
+demo_output/
 temp/
 *.mp4
 *.avi

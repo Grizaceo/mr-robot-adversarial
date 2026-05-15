@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Execution Logger — FIND EVIL! Hackathon (Requirement #8: Agent Execution Logs)
+Execution Logger — MR. Robot Adversarial (Requirement #8: Agent Execution Logs)
 
 Adapted from KISS Discovery Engine's FastTracker (SQLite WAL mode).
 Logs every MCP tool invocation with full input/output for audit trail.

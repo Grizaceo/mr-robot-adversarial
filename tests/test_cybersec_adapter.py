@@ -1,10 +1,18 @@
 """Tests for CybersecLabAdapter."""
 
+import os
 from pathlib import Path
 from cybersec_lab_integration.adapter import CybersecLabAdapter
 
+def _lab_path():
+    """Resolve lab path: $CYBERSEC_LAB in container, ~/.hermes/... on host."""
+    env = os.environ.get("CYBERSEC_LAB")
+    if env:
+        return env
+    return str(Path.home() / ".hermes" / "workspace" / "cybersecurity-lab")
+
 def test_adapter_initialization():
-    config = {"lab_path": str(Path.home() / ".hermes" / "workspace" / "cybersecurity-lab")}
+    config = {"lab_path": _lab_path()}
     adapter = CybersecLabAdapter(config)
     assert adapter.lab_path.exists()
 

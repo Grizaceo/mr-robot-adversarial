@@ -1,3 +1,6 @@
 mcp==1.27.0
 pydantic==2.12.4
 PyYAML==6.0.3
+yara-python==4.5.*
+requests>=2.32.0
+cryptography>=42.0.0

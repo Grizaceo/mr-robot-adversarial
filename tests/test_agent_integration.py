@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Smoke tests for the active FIND EVIL! core pipeline."""
+"""Smoke tests for the active MR. Robot Adversarial core pipeline."""
 
 from mcp_server import mcp
 from mcp_tools import aggregate_scanner_results, verdict_to_severity

@@ -1,14 +1,50 @@
-version: '3.8'
-
 services:
-  mr-robot-adversarial:
+  # ── MCP Server (default) ─────────────────────────────────────────────
+  mr-robot-server:
     build: .
+    image: mr-robot-adversarial:latest
+    # Not a long-running service — stdio tools exit after each call.
+    # Use profiles to avoid auto-starting with bare `docker compose up`.
+    profiles: ["server"]
     volumes:
       - ./cybersec_lab_integration/config.yaml:/app/config.yaml:ro
-      - ${CYBERSEC_LAB_PATH:-./cybersecurity-lab}:/lab:ro
+      - ${CYBERSEC_LAB_PATH:-/home/gris/.hermes/workspace/cybersecurity-lab}:/lab:ro
     environment:
       - CYBERSEC_LAB=/lab
       - LLM_PROVIDER=${LLM_PROVIDER:-nvidia-nim}
       - LLM_MODEL=${LLM_MODEL:-mistralai/mistral-nemotron}
+      - NVIDIA_API_KEY=${NVIDIA_API_KEY:-}
+    command: ["python", "mcp_server.py"]
+
+  # ── Demo runner ──────────────────────────────────────────────────────
+  mr-robot-demo:
+    build: .
+    image: mr-robot-adversarial:latest
+    profiles: ["demo"]
+    volumes:
+      - ./cybersec_lab_integration/config.yaml:/app/config.yaml:ro
+      - ${CYBERSEC_LAB_PATH:-/home/gris/.hermes/workspace/cybersecurity-lab}:/lab:ro
+      - ./demo_output:/app/logs
+    environment:
+      - CYBERSEC_LAB=/lab
+      - LLM_PROVIDER=${LLM_PROVIDER:-nvidia-nim}
+      - LLM_MODEL=${LLM_MODEL:-mistralai/mistral-nemotron}
+      - NVIDIA_API_KEY=${NVIDIA_API_KEY:-}
     command: ["bash", "demo/run_demo.sh"]
-    restart: "no"
+
+  # ── Interactive shell (debugging) ────────────────────────────────────
+  mr-robot-shell:
+    build: .
+    image: mr-robot-adversarial:latest
+    profiles: ["debug"]
+    volumes:
+      - ./cybersec_lab_integration/config.yaml:/app/config.yaml:ro
+      - ${CYBERSEC_LAB_PATH:-/home/gris/.hermes/workspace/cybersecurity-lab}:/lab:ro
+    environment:
+      - CYBERSEC_LAB=/lab
+      - LLM_PROVIDER=${LLM_PROVIDER:-nvidia-nim}
+      - LLM_MODEL=${LLM_MODEL:-mistralai/mistral-nemotron}
+      - NVIDIA_API_KEY=${NVIDIA_API_KEY:-}
+    stdin_open: true
+    tty: true
+    command: ["bash"]

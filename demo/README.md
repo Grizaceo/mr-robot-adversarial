@@ -1,4 +1,4 @@
-# Demo Scenarios for FIND EVIL! Submission
+# Demo Scenarios for MR. Robot Adversarial
 
 This directory contains the shooting script and scenario definitions for the 3-minute demo video.
 

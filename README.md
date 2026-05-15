@@ -1,6 +1,6 @@
-# FIND EVIL! — Autonomous AI Cyber Defense Agent
+# MR. Robot Adversarial — Autonomous AI Cyber Defense Agent
 
-> **SANS Institute Hackathon 2026** — AI threats strike in minutes. Can your defense keep up?
+> **SANS Institute FIND EVIL! Hackathon 2026** — AI threats strike in minutes. Can your defense keep up?
 
 An autonomous AI agent system that detects, analyzes, and responds to cybersecurity
 threats in real-time — combining static analysis scanners with LLM-powered triage
@@ -12,7 +12,7 @@ An adversary AI can go from initial access to full domain control in **under 8 m
 (CrowdStrike: fastest breakout time 7 min). Meanwhile, human analysts are still
 searching for CLI flags during an active incident.
 
-**FIND EVIL!** closes that gap: automated scanning → AI triage → adversarial review
+**MR. Robot Adversarial** closes that gap: automated scanning → AI triage → adversarial review
 → self-correction, all in under 30 seconds per file.
 
 ## Architecture
@@ -181,8 +181,37 @@ python accuracy_report.py
 ```
 
 ### Docker
+
 ```bash
-docker-compose up
+# Build the image (includes yara-python + all scanners)
+docker build -t mr-robot-adversarial:latest .
+
+# Create a persistent container
+docker run -d --name mr-robot-adversarial \
+  -v ~/.hermes/workspace/cybersecurity-lab:/lab:ro \
+  -e CYBERSEC_LAB=/lab \
+  -e NVIDIA_API_KEY=nvapi-... \
+  mr-robot-adversarial:latest \
+  tail -f /dev/null
+
+# Run the demo (all 3 test cases: malware, worm, benign)
+docker exec mr-robot-adversarial bash demo/run_demo.sh
+
+# Scan a single file with YARA
+docker exec mr-robot-adversarial python /lab/scanners/scan_yara.py /lab/test-corpus/malicious/bind_shell.py
+
+# Full triage with self-correction
+docker exec mr-robot-adversarial python -c "
+from triage_falsifier import run_self_correction_loop
+import json
+report = run_self_correction_loop('/lab/test-corpus/malicious/bind_shell.py')
+print(json.dumps(report, indent=2, default=str))
+"
+
+# Or use docker compose with profiles:
+#   demo:   docker compose --profile demo run --rm mr-robot-demo
+#   debug:  docker compose --profile debug run --rm mr-robot-shell
+#   server: docker compose --profile server run --rm mr-robot-server
 ```
 
 ## Project Structure

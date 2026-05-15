@@ -1,4 +1,4 @@
-# Submission Requirements — FIND EVIL! Hackathon
+# Submission Requirements — MR. Robot Adversarial — FIND EVIL! Hackathon
 
 ## 📦 Required Artifacts
 
