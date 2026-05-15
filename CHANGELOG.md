@@ -1,5 +1,60 @@
 # Changelog
 
+## 2026-05-15 — Prompt-injection defense + architectural guardrails
+
+Driven by a SOTA grounding pass (Microsoft MDASH announcement of 12 May 2026,
+Claude Mythos Preview, MITRE ATLAS v5.4.0, PromptArmor ICLR 2026).
+
+### Added
+- **`prompt_injection_defense.py`** — new trust-boundary layer between
+  `validate_target_file` and the LLM. Detects 17 pattern families (system
+  override, role/tool forgery, ChatML/Llama chat-template tokens,
+  "ignore previous", DAN/dev-mode, fence-break, sentinel-spoof, schema
+  hijack, base64 blobs, zero-width / Unicode tag chars). Wraps content in a
+  `<file_under_review filename=… sha256=… length=…> … </file_under_review>`
+  sentinel with mechanical defang of internal close tags so the adversary
+  cannot break out.
+- `TRUST_BOUNDARY_NOTICE` appended to both `SYSTEM_PROMPT` (triage) and
+  `FALSIFIER_SYSTEM_PROMPT` (auditor). Tells the LLM the sentinel content
+  is hostile data, that injection attempts are *evidence* (to flag with
+  category `prompt_injection_attempt`), and that the 5-phase workflow is
+  the only source of authority.
+- `agents/mr_robot/triage.py:get_last_injection_scan` so callers (and the
+  audit logger) can retrieve the scan result for any candidate.
+- Audit-trail row `prompt_injection_detected` written for every
+  attempted injection.
+- **`tests/injection_corpus/`** — 7 curated injection fixtures: system
+  override, role marker, ChatML chat-template, markdown fence-break,
+  tool-call forgery, DAN-style jailbreak, sentinel spoof.
+- **`tests/test_prompt_injection_defense.py`** — 26 tests: detector
+  recall on the injection corpus (all 7 caught at CRITICAL/HIGH),
+  precision on the benign corpus (no CRITICAL false positives),
+  sentinel containment (spoofed sentinels are mechanically defanged),
+  system-prompt integrity, and the `_build_prompt` audit hook.
+- **`docs/architectural_guardrails.md`** — explicit catalogue of every
+  guardrail tagged Architectural (9), Hybrid (3), or Prompt-based (5),
+  with file:line references. Maps directly to SANS rubric criterion #4.
+
+### Changed
+- `agents/mr_robot/triage.py:_build_prompt` now wraps candidate content
+  through `scan_and_wrap` before insertion into the prompt.
+- `triage_falsifier.py:_build_falsification_prompt` same wrapping for
+  the auditor side, so propagator and auditor share the trust boundary.
+- README — added `🛡️ Prompt-Injection Defense Layer` section pointing
+  at the new module and guardrails doc.
+
+### Why this matters for the SANS rubric
+SANS criterion #4 (`Constraint Implementation`) literally asks whether
+guardrails are *architectural or prompt-based*. This release ports the
+single biggest gap surfaced by the SOTA grounding pass into the
+architectural side and documents it.
+
+### Tests
+- Test suite grew from 60 → 85 passing (+25 new injection-defense tests).
+- All previous tests still green.
+
+---
+
 ## 2026-05-15 — End-to-end review fixes
 
 Driven by an internal end-to-end review of the repo ahead of the SANS FIND

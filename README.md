@@ -123,6 +123,24 @@ Every tool call is logged with full context:
 - SQLite WAL mode for concurrent writes
 - JSON export for SANS submission (Requirement #8)
 
+### 🛡️ Prompt-Injection Defense Layer
+Every byte that crosses the trust boundary "candidate file → triage LLM" goes
+through [`prompt_injection_defense.py`](prompt_injection_defense.py):
+
+- Detects 17 pattern families (override markers, role/tool forgery, chat-template
+  tokens, jailbreak templates, fence-break attempts, sentinel-spoof attempts,
+  schema hijack, zero-width / Unicode tag chars).
+- Wraps content in a `<file_under_review filename=... sha256=... length=...>` sentinel; internal occurrences are mechanically defanged so the adversary cannot close the boundary early.
+- Appends a `TRUST BOUNDARY` notice to both the triage and falsifier system
+  prompts so the LLM treats wrapped content as hostile data, not authoritative input.
+- Logs every detected attempt to the audit trail as a `prompt_injection_detected`
+  row.
+- Designed against the threat model in MITRE ATLAS v5.4.0 (Feb 2026, agentic
+  techniques) and the Unit42 npm/Claude-Code-triage incident pattern.
+
+See [`docs/architectural_guardrails.md`](docs/architectural_guardrails.md) for
+the full architectural-vs-prompt-based guardrail catalogue.
+
 ### 🔧 MCP Server (5 tools)
 | Tool | Description |
 |------|-------------|
