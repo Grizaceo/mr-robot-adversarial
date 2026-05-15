@@ -303,4 +303,4 @@ MIT
 
 ---
 
-*Built by DAVI + Cristóbal for the SANS FIND EVIL! Hackathon 2026*
+*Built by Cristóbal for the SANS FIND EVIL! Hackathon 2026*
