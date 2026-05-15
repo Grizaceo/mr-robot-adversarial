@@ -200,6 +200,47 @@ def health() -> str:
     return result
 
 
+@mcp.tool()
+def orchestrate_complete(filepath: str, scenario_id: str = "") -> str:
+    """Run the full heterogeneous orchestration pipeline (scanners -> triage -> falsifier -> synthesizer).
+
+    This is the main entry point for FIND EVIL! hackathon submissions.
+    Executes the complete pipeline with heterogeneity mandate (Shehata & Li 2026):
+    1. Scanner suite (deterministic, τ=0)
+    2. MR. Robot triage (Nemotron propagator) with 5-phase review
+    3. Falsifier (DeepSeek, ΔA≈1) for adversarial review
+    4. Rule-based synthesizer (τ=0) for final verdict
+    """
+    start = time.perf_counter()
+    logger.info(f"orchestrate_complete: {filepath}")
+
+    ok, payload = validate_target_file(filepath)
+    if not ok:
+        return json.dumps(payload)
+
+    filepath = payload["resolved_path"]
+
+    try:
+        from triage_orchestrator import orchestrate
+        report = orchestrate(
+            filepath,
+            falsifier_provider="deepseek",
+            max_iterations=2,
+        )
+        result = json.dumps(report, indent=2, default=str)
+        log_tool("orchestrate_complete", {"filepath": filepath, "scenario_id": scenario_id}, result, start)
+        return result
+    except Exception as e:
+        error_report = {
+            "final_verdict": "ERROR",
+            "rationale": f"Orchestration failed: {e}",
+            "_meta": {"duration_seconds": round(time.perf_counter() - start, 2)},
+        }
+        result = json.dumps(error_report, indent=2)
+        log_tool("orchestrate_complete", {"filepath": filepath}, result, start)
+        return result
+
+
 if __name__ == "__main__":
     logger.info("Starting MR. Robot MCP Server (stdio)")
     mcp.run(transport="stdio")

@@ -51,7 +51,8 @@ def run():
 
 def test_falsifier_initializes_with_default_provider():
     f = TriageFalsifier()
-    assert f.provider in ("nvidia-nim", "ollama-cloud", "openrouter")
+    # Default is deepseek for heterogeneity (ΔA≈1 vs Nemotron propagator)
+    assert f.provider in ("nvidia-nim", "ollama-cloud", "openrouter", "deepseek")
 
 
 def test_falsifier_initializes_with_explicit_provider():
