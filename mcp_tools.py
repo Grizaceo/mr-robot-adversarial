@@ -26,12 +26,63 @@ MR_ROBOT = Path(__file__).parent / "agents" / "mr_robot" / "triage.py"
 LOG_DIR = Path("logs")
 LOG_DIR.mkdir(exist_ok=True)
 audit = get_logger("logs/audit_trail.db")
+MAX_INPUT_BYTES = int(os.getenv("MR_ROBOT_MAX_INPUT_BYTES", str(5 * 1024 * 1024)))
+
+
+def _allowed_roots() -> list[Path]:
+    raw = os.getenv("MR_ROBOT_ALLOWED_ROOTS")
+    if raw:
+        return [Path(p).expanduser().resolve() for p in raw.split(os.pathsep) if p.strip()]
+    return [Path(__file__).parent.resolve(), CYBERSEC_LAB.resolve()]
+
+
+def validate_target_file(filepath: str) -> tuple[bool, dict]:
+    target = Path(filepath).expanduser()
+    try:
+        resolved = target.resolve(strict=False)
+    except Exception as e:
+        return False, {"error": "invalid_path", "detail": str(e), "filepath": filepath}
+
+    if not target.exists():
+        return False, {"error": "file_not_found", "filepath": filepath}
+    if target.is_symlink():
+        return False, {"error": "symlink_not_allowed", "filepath": filepath}
+    if not target.is_file():
+        return False, {"error": "not_a_file", "filepath": filepath}
+    if not os.access(target, os.R_OK):
+        return False, {"error": "file_not_readable", "filepath": filepath}
+
+    allowed_roots = _allowed_roots()
+    if not any(root == resolved or root in resolved.parents for root in allowed_roots):
+        return False, {
+            "error": "path_outside_allowed_roots",
+            "filepath": filepath,
+            "resolved_path": str(resolved),
+            "allowed_roots": [str(p) for p in allowed_roots],
+        }
+
+    size = target.stat().st_size
+    if size > MAX_INPUT_BYTES:
+        return False, {
+            "error": "file_too_large",
+            "filepath": filepath,
+            "resolved_path": str(resolved),
+            "size_bytes": size,
+            "max_bytes": MAX_INPUT_BYTES,
+        }
+
+    return True, {"resolved_path": str(resolved), "size_bytes": size}
 
 
 # ── Scanner Wrapper ──────────────────────────────────────────────────────────
 
 def run_all_scanners(filepath: str, timeout: int = 30) -> dict[str, dict]:
     """Run all 4 scanners on a file. Returns {scanner_name: result}."""
+    ok, payload = validate_target_file(filepath)
+    if not ok:
+        return {"validation": payload}
+
+    filepath = payload["resolved_path"]
     return {
         "skill_scanner": _run_scanner("skill_scanner", [filepath], timeout),
         "ioc_scanner": _run_scanner("ioc_scanner", [filepath], timeout),
