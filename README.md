@@ -187,14 +187,13 @@ docker-compose up
 
 ## Project Structure
 
+Note: the original pre-MCP skeleton prototypes were archived under `legacy/agents/` after the repo standardized on the active MR. Robot + MCP + Falsifier pipeline.
+
 ```
 find-evil-hackathon/
 ├── agents/
-│   ├── mr_robot/
-│   │   └── triage.py          # MR. Robot Triage Agent (538 lines)
-│   ├── defender_agent.py      # Main orchestrator (skeleton)
-│   ├── threat_detector.py     # Threat detection (skeleton)
-│   └── response_orchestrator.py # Response actions (skeleton)
+│   └── mr_robot/
+│       └── triage.py          # MR. Robot Triage Agent
 ├── cybersec_lab_integration/
 │   ├── adapter.py             # Bridge to cybersecurity-lab
 │   └── config.yaml            # Lab configuration
@@ -205,12 +204,15 @@ find-evil-hackathon/
 │   ├── sift_integration.md    # SIFT integration status
 │   ├── submission_requirements.md # SANS requirements
 │   └── try_it_out.md          # Step-by-step guide
-├── mcp_server.py              # MCP Server with 5 tools (483 lines)
-├── triage_falsifier.py        # Falsifier + self-correction (312 lines)
-├── execution_logger.py        # Audit trail logger (247 lines)
-├── accuracy_report.py         # Accuracy report generator
+├── legacy/
+│   └── agents/                # Archived pre-MCP skeleton prototypes
+├── mcp_server.py              # MCP Server with 5 tools
+├── mcp_tools.py               # Shared scanner/triage helpers
+├── triage_falsifier.py        # Falsifier + self-correction
+├── execution_logger.py        # Audit trail logger
+├── accuracy_report.py         # Accuracy report viewer
 ├── demo/                      # Demo scenarios and scripts
-├── tests/                     # Unit tests (4/4 passing)
+├── tests/                     # Active smoke/unit tests
 ├── BLUEPRINT.md               # Project blueprint
 ├── Dockerfile                 # Container definition
 ├── docker-compose.yml         # Docker orchestration
