@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-15T18:16:19Z",
+  "generated_at": "2026-05-15T20:04:23Z",
   "pipeline": "MR. Robot Adversarial v1.0",
   "scanners": [
     "skill_scanner",
@@ -7,17 +7,17 @@
     "yara",
     "secrets_detector"
   ],
-  "duration_seconds": 27.85,
+  "duration_seconds": 30.57,
   "metrics": {
-    "accuracy": 0.9746,
-    "precision": 0.9706,
+    "accuracy": 1.0,
+    "precision": 1.0,
     "recall": 1.0,
-    "f1": 0.9851,
-    "fpr": 0.1579,
+    "f1": 1.0,
+    "fpr": 0.0,
     "confusion_matrix": {
       "TP": 99,
-      "FP": 3,
-      "TN": 16,
+      "FP": 0,
+      "TN": 19,
       "FN": 0
     },
     "total": 118
@@ -76,8 +76,8 @@
     },
     "skill_scanner": {
       "expected": 85,
-      "actually_flagged": 84,
-      "detection_rate": 0.9882
+      "actually_flagged": 83,
+      "detection_rate": 0.9765
     },
     "suricata": {
       "expected": 6,
@@ -560,7 +560,7 @@
       "pred": "MALICIOUS",
       "outcome": "TP",
       "severity": "critical",
-      "findings": 14,
+      "findings": 12,
       "detectors_flagged": [
         "ioc_scanner",
         "yara"
@@ -681,7 +681,7 @@
       "pred": "MALICIOUS",
       "outcome": "TP",
       "severity": "critical",
-      "findings": 29,
+      "findings": 26,
       "detectors_flagged": [
         "skill_scanner",
         "ioc_scanner",
@@ -696,7 +696,7 @@
       "pred": "MALICIOUS",
       "outcome": "TP",
       "severity": "critical",
-      "findings": 7,
+      "findings": 6,
       "detectors_flagged": [
         "ioc_scanner",
         "yara"
@@ -723,7 +723,7 @@
       "pred": "MALICIOUS",
       "outcome": "TP",
       "severity": "high",
-      "findings": 8,
+      "findings": 4,
       "detectors_flagged": [
         "skill_scanner",
         "ioc_scanner"
@@ -736,9 +736,8 @@
       "pred": "MALICIOUS",
       "outcome": "TP",
       "severity": "critical",
-      "findings": 13,
+      "findings": 11,
       "detectors_flagged": [
-        "skill_scanner",
         "yara"
       ]
     },
@@ -861,7 +860,7 @@
       "pred": "MALICIOUS",
       "outcome": "TP",
       "severity": "high",
-      "findings": 166,
+      "findings": 165,
       "detectors_flagged": [
         "skill_scanner",
         "ioc_scanner",
@@ -889,7 +888,7 @@
       "pred": "MALICIOUS",
       "outcome": "TP",
       "severity": "high",
-      "findings": 21,
+      "findings": 14,
       "detectors_flagged": [
         "skill_scanner",
         "ioc_scanner",
@@ -903,7 +902,7 @@
       "pred": "MALICIOUS",
       "outcome": "TP",
       "severity": "high",
-      "findings": 29,
+      "findings": 20,
       "detectors_flagged": [
         "skill_scanner",
         "ioc_scanner",
@@ -985,7 +984,7 @@
       "pred": "MALICIOUS",
       "outcome": "TP",
       "severity": "critical",
-      "findings": 11,
+      "findings": 10,
       "detectors_flagged": [
         "skill_scanner",
         "ioc_scanner",
@@ -999,7 +998,7 @@
       "pred": "MALICIOUS",
       "outcome": "TP",
       "severity": "high",
-      "findings": 28,
+      "findings": 27,
       "detectors_flagged": [
         "skill_scanner",
         "ioc_scanner",
@@ -1013,7 +1012,7 @@
       "pred": "MALICIOUS",
       "outcome": "TP",
       "severity": "high",
-      "findings": 9,
+      "findings": 7,
       "detectors_flagged": [
         "skill_scanner",
         "ioc_scanner",
@@ -1070,7 +1069,7 @@
       "pred": "MALICIOUS",
       "outcome": "TP",
       "severity": "high",
-      "findings": 8,
+      "findings": 6,
       "detectors_flagged": [
         "skill_scanner",
         "ioc_scanner",
@@ -1098,7 +1097,7 @@
       "pred": "MALICIOUS",
       "outcome": "TP",
       "severity": "high",
-      "findings": 30,
+      "findings": 24,
       "detectors_flagged": [
         "skill_scanner",
         "ioc_scanner",
@@ -1209,7 +1208,7 @@
       "pred": "MALICIOUS",
       "outcome": "TP",
       "severity": "medium",
-      "findings": 9,
+      "findings": 8,
       "detectors_flagged": [
         "skill_scanner",
         "ioc_scanner",
@@ -1252,7 +1251,7 @@
       "pred": "MALICIOUS",
       "outcome": "TP",
       "severity": "high",
-      "findings": 18,
+      "findings": 17,
       "detectors_flagged": [
         "skill_scanner",
         "ioc_scanner",
@@ -1266,7 +1265,7 @@
       "pred": "MALICIOUS",
       "outcome": "TP",
       "severity": "high",
-      "findings": 14,
+      "findings": 13,
       "detectors_flagged": [
         "skill_scanner",
         "ioc_scanner",
@@ -1294,7 +1293,7 @@
       "pred": "MALICIOUS",
       "outcome": "TP",
       "severity": "high",
-      "findings": 19,
+      "findings": 16,
       "detectors_flagged": [
         "skill_scanner",
         "ioc_scanner",
@@ -1308,7 +1307,7 @@
       "pred": "MALICIOUS",
       "outcome": "TP",
       "severity": "high",
-      "findings": 18,
+      "findings": 17,
       "detectors_flagged": [
         "skill_scanner",
         "ioc_scanner",
@@ -1364,7 +1363,7 @@
       "pred": "MALICIOUS",
       "outcome": "TP",
       "severity": "high",
-      "findings": 23,
+      "findings": 18,
       "detectors_flagged": [
         "skill_scanner",
         "ioc_scanner",
@@ -1392,7 +1391,7 @@
       "pred": "MALICIOUS",
       "outcome": "TP",
       "severity": "high",
-      "findings": 17,
+      "findings": 13,
       "detectors_flagged": [
         "skill_scanner",
         "ioc_scanner",
@@ -1435,7 +1434,7 @@
       "pred": "MALICIOUS",
       "outcome": "TP",
       "severity": "high",
-      "findings": 15,
+      "findings": 11,
       "detectors_flagged": [
         "skill_scanner",
         "ioc_scanner",
@@ -1532,7 +1531,7 @@
       "pred": "MALICIOUS",
       "outcome": "TP",
       "severity": "high",
-      "findings": 17,
+      "findings": 12,
       "detectors_flagged": [
         "skill_scanner",
         "ioc_scanner",
@@ -1546,7 +1545,7 @@
       "pred": "MALICIOUS",
       "outcome": "TP",
       "severity": "critical",
-      "findings": 14,
+      "findings": 12,
       "detectors_flagged": [
         "skill_scanner",
         "ioc_scanner",
@@ -1560,7 +1559,7 @@
       "pred": "MALICIOUS",
       "outcome": "TP",
       "severity": "critical",
-      "findings": 27,
+      "findings": 24,
       "detectors_flagged": [
         "skill_scanner",
         "ioc_scanner",
@@ -1588,7 +1587,7 @@
       "pred": "MALICIOUS",
       "outcome": "TP",
       "severity": "medium",
-      "findings": 14,
+      "findings": 12,
       "detectors_flagged": [
         "skill_scanner",
         "ioc_scanner",
@@ -1602,7 +1601,7 @@
       "pred": "MALICIOUS",
       "outcome": "TP",
       "severity": "high",
-      "findings": 30,
+      "findings": 28,
       "detectors_flagged": [
         "skill_scanner",
         "ioc_scanner",
@@ -1674,7 +1673,7 @@
       "pred": "MALICIOUS",
       "outcome": "TP",
       "severity": "high",
-      "findings": 11,
+      "findings": 10,
       "detectors_flagged": [
         "skill_scanner",
         "ioc_scanner",
@@ -1689,7 +1688,7 @@
       "pred": "MALICIOUS",
       "outcome": "TP",
       "severity": "high",
-      "findings": 16,
+      "findings": 15,
       "detectors_flagged": [
         "skill_scanner",
         "ioc_scanner",
@@ -1731,7 +1730,7 @@
       "pred": "MALICIOUS",
       "outcome": "TP",
       "severity": "critical",
-      "findings": 11,
+      "findings": 9,
       "detectors_flagged": [
         "skill_scanner",
         "ioc_scanner"
@@ -1801,7 +1800,7 @@
       "pred": "MALICIOUS",
       "outcome": "TP",
       "severity": "high",
-      "findings": 9,
+      "findings": 7,
       "detectors_flagged": [
         "skill_scanner",
         "ioc_scanner",
@@ -1914,13 +1913,11 @@
       "scenario": "benign-k8s_deployment",
       "file": "/home/gris/.hermes/workspace/repos/find-evil-hackathon/benign_corpus/k8s_deployment.yaml",
       "gt": "BENIGN",
-      "pred": "MALICIOUS",
-      "outcome": "FP",
+      "pred": "BENIGN",
+      "outcome": "TN",
       "severity": "none",
-      "findings": 2,
-      "detectors_flagged": [
-        "ioc_scanner"
-      ]
+      "findings": 0,
+      "detectors_flagged": []
     },
     {
       "scenario": "benign-markdown_renderer",
@@ -1936,13 +1933,11 @@
       "scenario": "benign-parameterized_sql",
       "file": "/home/gris/.hermes/workspace/repos/find-evil-hackathon/benign_corpus/parameterized_sql.py",
       "gt": "BENIGN",
-      "pred": "MALICIOUS",
-      "outcome": "FP",
+      "pred": "BENIGN",
+      "outcome": "TN",
       "severity": "none",
-      "findings": 1,
-      "detectors_flagged": [
-        "skill_scanner"
-      ]
+      "findings": 0,
+      "detectors_flagged": []
     },
     {
       "scenario": "benign-react_search_box",
@@ -2028,13 +2023,11 @@
       "scenario": "benign-safe_server",
       "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/benign/safe_server.js",
       "gt": "BENIGN",
-      "pred": "MALICIOUS",
-      "outcome": "FP",
+      "pred": "BENIGN",
+      "outcome": "TN",
       "severity": "none",
-      "findings": 2,
-      "detectors_flagged": [
-        "skill_scanner"
-      ]
+      "findings": 0,
+      "detectors_flagged": []
     },
     {
       "scenario": "benign-safe_setup",
