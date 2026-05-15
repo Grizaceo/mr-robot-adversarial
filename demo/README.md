@@ -1,48 +1,59 @@
-# Demo Scenarios for MR. Robot Adversarial
+# Demo Assets for MR. Robot Adversarial
 
-This directory contains the shooting script and scenario definitions for the 3-minute demo video.
+This directory contains everything you need to (a) showcase the pipeline
+locally and (b) record the SANS submission video.
 
-## 🎬 Shooting Script
+## Video assets (≤5 min, terminal-only with captions)
 
-### Scene 1: Malware Detection & Auto-Response (0:30–1:30)
-- Setup: A malicious executable drops in the lab's test corpus
-- YARA rule `malware_baby.exe` triggers
-- DefenderAgent receives alert, ThreatDetector analyzes
-- ResponseOrchestrator isolates the host (file quarantine)
-- Result: Scoreboard updates, threat contained
+| File | Purpose |
+|---|---|
+| [`video_script.md`](video_script.md) | Scene-by-scene guion in English: 10 scenes, 5:00 total, with exact commands and on-screen captions |
+| [`video_preflight.md`](video_preflight.md) | Preflight checklist + OBS Studio scene setup + post-production minimum viable edit |
+| [`video_captions.srt`](video_captions.srt) | Subtitle track in SRT format — drop into DaVinci Resolve / Kdenlive / Premiere |
+| [`run_video_demo.sh`](run_video_demo.sh) | Paced shell driver: clears screen and pauses between scenes so OBS captures consistent timing |
 
-**Show:** YARA match log → Agent processing → Quarantine action → Scoreboard
-
-### Scene 2: APT Simulation (1:30–2:30)
-- Setup: Multi-stage attack chain (recon → exploit → C2)
-- Sigma rules detect lateral movement
-- ThreatDetector correlates multiple alerts into single incident
-- ResponseOrchestrator blocks attacker IP at firewall
-- Result: Attack chain broken, alert sent to human
-
-**Show:** Sigma alerts correlation → IP block → Timeline view
-
-### Scene 3: Zero-Day Adaptation (2:30–2:50)
-- Setup: Novel attack pattern not covered by existing rules
-- System anomaly detection triggers generic alert
-- DefenderAgent uses LLM to hypothesize threat vector
-- Creates temporary detection rule (human-in-the-loop approval simulated)
-- Result: New threat caught before widespread impact
-
-**Show:** LLM reasoning traces → Proposed rule → Approved & deployed → Detection confirmed
-
-## 📹 Recording Tips
-
-- Use `asciinema` or `SimpleScreenRecorder` for terminal
-- Show real terminal, not slides
-- Narrate with voiceover (or subtitles)
-- Keep each scene under 40 seconds
-- Total duration: 2:45–3:00
-
-## 🚀 Run the Full Demo
+### Quickstart for the recording
 
 ```bash
-./demo/run_demo.sh
+export CYBERSEC_LAB=~/.hermes/workspace/cybersecurity-lab
+export NVIDIA_API_KEY=nvapi-...
+export OPENROUTER_API_KEY=sk-or-...
+
+# Dry-run with no API calls to validate pacing
+SKIP_PROVIDERS=1 bash demo/run_video_demo.sh
+
+# Real run during OBS recording (hit ENTER between scenes)
+bash demo/run_video_demo.sh
 ```
 
-This script executes all three scenarios sequentially and prints timestamps for editing.
+See [`video_preflight.md`](video_preflight.md) for the full setup checklist
+(terminal font/size, OBS encoder, hotkeys, common pitfalls).
+
+## Local demo (no recording, no API keys)
+
+| File | Purpose |
+|---|---|
+| [`run_demo.sh`](run_demo.sh) | Full pipeline on three samples (malware, worm, benign control), needs API keys |
+| [`run_demo_local.sh`](run_demo_local.sh) | Scanner-only demo, no LLM calls |
+| [`scenarios/`](scenarios/) | Scenario YAML/JSON fixtures used by the local demos |
+
+```bash
+# No API keys needed — pure deterministic scanners
+CYBERSEC_LAB=~/.hermes/workspace/cybersecurity-lab \
+  bash demo/run_demo_local.sh
+```
+
+## What the video shows
+
+1. Title card
+2. Problem statement (8-minute breach time)
+3. Architecture (three trust layers, two model families, rule-based judge)
+4. Health check
+5. Malicious sample — Python bind shell → MALICIOUS
+6. Benign sample — Django view with parameterized ORM → BENIGN (no FP)
+7. Self-correction loop — npm worm where the Falsifier triggers a re-run
+8. Accuracy report on 118 ground-truth samples (real precision, real FPR)
+9. Audit trail query (SANS requirement #8)
+10. Closing card
+
+Total: 5:00 with ~10-15s of slack budget.

@@ -344,7 +344,7 @@ mr-robot-adversarial/
 | # | Requirement | Status | Location |
 |---|------------|--------|----------|
 | 1 | Public GitHub repository (MIT/Apache 2.0) | ✅ | github.com/Grizaceo/mr-robot-adversarial |
-| 2 | Demo video (≤5 min, terminal + audio) | ⬜ Pending | Record after development |
+| 2 | Demo video (≤5 min, terminal + captions) | 🎬 Scripted | Guion + paced runner + SRT in [`demo/`](demo/) — see [`demo/video_script.md`](demo/video_script.md) |
 | 3 | Architecture diagram | ✅ | `docs/architecture.md` |
 | 4 | Written project description (Devpost) | ✅ | README + `docs/try_it_out.md` |
 | 5 | Dataset documentation | ✅ | `docs/dataset.md` |
