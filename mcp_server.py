@@ -26,8 +26,15 @@ from mcp.server.fastmcp import FastMCP
 from pydantic import BaseModel
 
 from mcp_tools import (
-    CYBERSEC_LAB, SCANNERS_DIR, run_all_scanners, run_triage_agent, run_falsifier_loop,
-    log_tool, verdict_to_severity, aggregate_scanner_results,
+    CYBERSEC_LAB,
+    SCANNERS_DIR,
+    aggregate_scanner_results,
+    log_tool,
+    run_all_scanners,
+    run_falsifier_loop,
+    run_triage_agent,
+    validate_target_file,
+    verdict_to_severity,
 )
 
 logging.basicConfig(level=logging.INFO,
@@ -77,9 +84,11 @@ def scan_file(filepath: str) -> str:
     start = time.perf_counter()
     logger.info(f"scan_file: {filepath}")
 
-    if not Path(filepath).exists():
-        return json.dumps({"error": f"File not found: {filepath}"})
+    ok, payload = validate_target_file(filepath)
+    if not ok:
+        return json.dumps(payload)
 
+    filepath = payload["resolved_path"]
     results = run_all_scanners(filepath)
     summary = aggregate_scanner_results(results)
     verdict = summary["overall_verdict"]
@@ -103,9 +112,11 @@ def triage_artifact(filepath: str, scenario_id: str = "") -> str:
     start = time.perf_counter()
     logger.info(f"triage_artifact: {filepath}")
 
-    if not Path(filepath).exists():
-        return json.dumps({"error": f"File not found: {filepath}"})
+    ok, payload = validate_target_file(filepath)
+    if not ok:
+        return json.dumps(payload)
 
+    filepath = payload["resolved_path"]
     scanner_results = run_all_scanners(filepath)
     triage_data = run_triage_agent(filepath, scanner_results)
 
@@ -132,9 +143,11 @@ def falsify_triage(filepath: str, scenario_id: str = "") -> str:
     start = time.perf_counter()
     logger.info(f"falsify_triage: {filepath}")
 
-    if not Path(filepath).exists():
-        return json.dumps({"error": f"File not found: {filepath}"})
+    ok, payload = validate_target_file(filepath)
+    if not ok:
+        return json.dumps(payload)
 
+    filepath = payload["resolved_path"]
     scanner_results = run_all_scanners(filepath)
     final_report = run_falsifier_loop(filepath, scanner_results)
 
