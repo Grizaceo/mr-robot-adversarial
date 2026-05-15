@@ -63,6 +63,9 @@ PROVIDERS = {
 }
 
 DEFAULT_PROVIDER = os.getenv("MR_ROBOT_PROVIDER", "nvidia-nim")
+FALLBACK_PROVIDER_ORDER = ["nvidia-nim", "ollama-cloud", "openrouter"]
+MAX_TRIAGE_FILE_BYTES = int(os.getenv("MR_ROBOT_MAX_TRIAGE_FILE_BYTES", str(50 * 1024)))
+LLM_TIMEOUT_SECONDS = int(os.getenv("MR_ROBOT_LLM_TIMEOUT_SECONDS", "30"))
 
 # ── System Prompt ─────────────────────────────────────────────────────────────
 
@@ -152,7 +155,7 @@ def _call_nvidia_nim(prompt: str, model: str = None, system: str = "") -> str | 
         method="POST",
     )
     try:
-        with urllib.request.urlopen(req, timeout=120) as resp:
+        with urllib.request.urlopen(req, timeout=LLM_TIMEOUT_SECONDS) as resp:
             data = json.loads(resp.read())
             return data["choices"][0]["message"]["content"]
     except Exception as e:
@@ -170,7 +173,7 @@ def _call_ollama_cloud(prompt: str, model: str = None, system: str = "") -> str 
     try:
         result = subprocess.run(
             ["oracle", "prompt", full_prompt, "--raw"],
-            capture_output=True, text=True, timeout=120
+            capture_output=True, text=True, timeout=LLM_TIMEOUT_SECONDS
         )
         if result.returncode == 0 and result.stdout.strip():
             return result.stdout.strip()
@@ -181,7 +184,7 @@ def _call_ollama_cloud(prompt: str, model: str = None, system: str = "") -> str 
     try:
         result = subprocess.run(
             ["oracle", "prompt", full_prompt, "--model", model, "--raw"],
-            capture_output=True, text=True, timeout=120
+            capture_output=True, text=True, timeout=LLM_TIMEOUT_SECONDS
         )
         if result.returncode == 0 and result.stdout.strip():
             return result.stdout.strip()
@@ -216,7 +219,7 @@ def _call_ollama_cloud(prompt: str, model: str = None, system: str = "") -> str 
         method="POST",
     )
     try:
-        with urllib.request.urlopen(req, timeout=180) as resp:
+        with urllib.request.urlopen(req, timeout=LLM_TIMEOUT_SECONDS) as resp:
             data = json.loads(resp.read())
             return data["choices"][0]["message"]["content"]
     except Exception as e:
@@ -259,7 +262,7 @@ def _call_openrouter(prompt: str, model: str = None, system: str = "") -> str | 
         method="POST",
     )
     try:
-        with urllib.request.urlopen(req, timeout=120) as resp:
+        with urllib.request.urlopen(req, timeout=LLM_TIMEOUT_SECONDS) as resp:
             data = json.loads(resp.read())
             return data["choices"][0]["message"]["content"]
     except Exception as e:
@@ -270,8 +273,8 @@ def _call_openrouter(prompt: str, model: str = None, system: str = "") -> str | 
 
 def _call_llm(provider: str, prompt: str, system: str = "") -> tuple[str, str]:
     """
-    Call LLM with automatic fallback. Returns (response, model_used).
-    Raises RuntimeError if all models exhausted.
+    Call LLM with automatic fallback within a provider. Returns (response, model_used).
+    Raises RuntimeError if all models for that provider are exhausted.
     """
     info = PROVIDERS[provider]
     models = [info["model"]] + list(info.get("fallback_models", []))
@@ -295,6 +298,11 @@ def _call_llm(provider: str, prompt: str, system: str = "") -> tuple[str, str]:
             continue
 
     raise RuntimeError(f"All {provider} models exhausted")
+
+
+def _provider_chain(preferred: str | None) -> list[str]:
+    preferred = preferred or DEFAULT_PROVIDER
+    return [preferred] + [p for p in FALLBACK_PROVIDER_ORDER if p != preferred]
 
 
 # ── Triage Logic ──────────────────────────────────────────────────────────────
@@ -376,9 +384,9 @@ def _parse_json_response(raw: str) -> dict:
 
 def triage(
     candidate_path: str,
-    findings: dict = None,
-    context: dict = None,
-    provider: str = None,
+    findings: dict | None = None,
+    context: dict | None = None,
+    provider: str | None = None,
     json_output: bool = False,
 ) -> dict:
     """
@@ -388,7 +396,7 @@ def triage(
         candidate_path: Path to the file to triage
         findings: Dict of {scanner_name: result} from automated scanners
         context: Optional additional context (scenario name, source, etc.)
-        provider: LLM provider (default: ollama-cloud)
+        provider: Preferred LLM provider (falls back across providers if needed)
         json_output: If True, return raw dict; if False, return formatted string
 
     Returns:
@@ -396,21 +404,72 @@ def triage(
     """
     provider = provider or DEFAULT_PROVIDER
     start_time = time.perf_counter()
+    candidate = Path(candidate_path)
 
-    prompt = _build_prompt(candidate_path, findings, context)
-
-    try:
-        raw_response, model_used = _call_llm(provider, prompt, system=SYSTEM_PROMPT)
-    except RuntimeError as e:
+    if not candidate.exists():
         error_report = {
             "verdict": "ERROR",
             "confidence": 0.0,
             "severity": "none",
-            "summary": f"Triage failed: {e}",
+            "summary": f"Candidate file not found: {candidate_path}",
+            "findings": [],
+            "false_positive_likelihood": 1.0,
+            "recommended_actions": ["manual_review"],
+            "scanner_correlation": "N/A — candidate missing",
+        }
+        return error_report if json_output else json.dumps(error_report, indent=2)
+
+    size_bytes = candidate.stat().st_size
+    if size_bytes > MAX_TRIAGE_FILE_BYTES:
+        large_report = {
+            "verdict": "INCONCLUSIVE",
+            "confidence": 0.0,
+            "severity": "none",
+            "summary": f"Candidate file is too large for direct triage ({size_bytes} bytes > {MAX_TRIAGE_FILE_BYTES} bytes).",
+            "findings": [],
+            "false_positive_likelihood": 0.5,
+            "recommended_actions": ["manual_review"],
+            "scanner_correlation": "LLM skipped — file too large for reliable direct prompt inclusion",
+            "_meta": {
+                "agent": "MR. Robot",
+                "version": "1.0.0",
+                "provider": None,
+                "model": None,
+                "candidate": str(candidate_path),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "duration_seconds": round(time.perf_counter() - start_time, 2),
+                "scanners_used": list(findings.keys()) if findings else [],
+                "size_bytes": size_bytes,
+            },
+        }
+        return large_report if json_output else json.dumps(large_report, indent=2)
+
+    prompt = _build_prompt(candidate_path, findings, context)
+
+    raw_response = None
+    model_used = None
+    provider_used = None
+    last_error = None
+    for candidate_provider in _provider_chain(provider):
+        try:
+            raw_response, model_used = _call_llm(candidate_provider, prompt, system=SYSTEM_PROMPT)
+            provider_used = candidate_provider
+            break
+        except RuntimeError as e:
+            last_error = e
+            print(f"  [WARN] provider {candidate_provider} exhausted: {e}", file=sys.stderr)
+            continue
+
+    if raw_response is None:
+        error_report = {
+            "verdict": "ERROR",
+            "confidence": 0.0,
+            "severity": "none",
+            "summary": f"Triage failed: {last_error}",
             "findings": [],
             "false_positive_likelihood": 1.0,
             "recommended_actions": ["retry", "manual_review"],
-            "scanner_correlation": "N/A — LLM unavailable",
+            "scanner_correlation": "N/A — all LLM providers unavailable",
         }
         if json_output:
             return error_report
@@ -423,12 +482,13 @@ def triage(
     report["_meta"] = {
         "agent": "MR. Robot",
         "version": "1.0.0",
-        "provider": provider,
+        "provider": provider_used,
         "model": model_used,
         "candidate": str(candidate_path),
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "duration_seconds": round(elapsed, 2),
         "scanners_used": list(findings.keys()) if findings else [],
+        "size_bytes": size_bytes,
     }
 
     if json_output:
