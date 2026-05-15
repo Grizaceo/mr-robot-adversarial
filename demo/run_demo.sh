@@ -1,33 +1,33 @@
 #!/bin/bash
-# Demo runner for FIND EVIL! submission
-# Executes the three scenarios in sequence for video recording
+set -euo pipefail
 
-set -e
+LAB_ROOT="${CYBERSEC_LAB_PATH:-${CYBERSEC_LAB:-./cybersecurity-lab}}"
 
-echo "=== FIND EVIL! DEMO SEQUENCE ==="
-echo "Total estimated time: 3 minutes"
-echo ""
+run_case() {
+  local label="$1"
+  local target="$2"
+  echo "============================================================"
+  echo "$label"
+  echo "FILE: $target"
+  echo "------------------------------------------------------------"
+  python - <<'PY' "$target"
+import json
+import sys
+from triage_falsifier import run_self_correction_loop
 
-# Scene 1: Malware detection
-echo "[0:00] Scene 1: Malware Detection & Auto-Response"
-echo "-------------------------------------------------"
-python agents/defender_agent.py --scenario malware_detection
-sleep 5
+path = sys.argv[1]
+report = run_self_correction_loop(path, confidence_threshold=0.7, max_iterations=1)
+print(json.dumps(report, indent=2, default=str))
+PY
+  echo
+}
 
-# Scene 2: APT simulation
-echo "[1:30] Scene 2: APT Simulation & Correlation"
-echo "-------------------------------------------------"
-python agents/defender_agent.py --scenario apt_chain
-sleep 5
+echo "=== MR. ROBOT ADVERSARIAL DEMO ==="
+echo "Lab root: $LAB_ROOT"
+echo
 
-# Scene 3: Zero-day adaptation
-echo "[2:30] Scene 3: Zero-Day Adaptation"
-echo "-------------------------------------------------"
-python agents/defender_agent.py --scenario zero_day
-sleep 5
+run_case "[1/3] Malware Detection" "$LAB_ROOT/test-corpus/malicious/bind_shell.py"
+run_case "[2/3] Worm / Adversarial JS" "$LAB_ROOT/test-corpus/malicious/mr_robot_npm_worm.js"
+run_case "[3/3] Benign Control" "$LAB_ROOT/test-corpus/benign/safe_app.py"
 
-echo ""
 echo "=== DEMO COMPLETE ==="
-echo "Total scenes: 3"
-echo "Total time: ~3 minutes"
-echo "Ready for video recording!"

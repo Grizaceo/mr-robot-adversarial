@@ -1,15 +1,14 @@
 version: '3.8'
 
 services:
-  find-evil-agent:
+  mr-robot-adversarial:
     build: .
     volumes:
-      - ./cybersec-lab-integration/config.yaml:/app/config.yaml
+      - ./cybersec_lab_integration/config.yaml:/app/config.yaml:ro
       - ${CYBERSEC_LAB_PATH:-./cybersecurity-lab}:/lab:ro
     environment:
-      - CYBERSEC_LAB_PATH=/lab
-      - LLM_PROVIDER=${LLM_PROVIDER:-local}
-      - LLM_MODEL=${LLM_MODEL:-deepseek-coder}
-    ports:
-      - "5274:5274"  # API endpoint
-    restart: unless-stopped
+      - CYBERSEC_LAB=/lab
+      - LLM_PROVIDER=${LLM_PROVIDER:-nvidia-nim}
+      - LLM_MODEL=${LLM_MODEL:-mistralai/mistral-nemotron}
+    command: ["bash", "demo/run_demo.sh"]
+    restart: "no"
