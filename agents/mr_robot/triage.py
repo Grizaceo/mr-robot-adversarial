@@ -664,6 +664,22 @@ def triage(
     elapsed = time.perf_counter() - start_time
     report = _parse_json_response(raw_response)
 
+    # MITRE ATT&CK grounding — verify every proposed technique ID.
+    if report.get("findings"):
+        try:
+            from threat_intel_grounding import ground_findings  # noqa: PLC0415
+            ground_findings(report["findings"])
+        except Exception:
+            pass  # Grounding is best-effort; never block triage output.
+
+    # Proof-stage annotation — static confirmation of evidence presence.
+    if report.get("findings"):
+        try:
+            from proof_stage import annotate_findings  # noqa: PLC0415
+            annotate_findings(report["findings"], candidate_path)
+        except Exception:
+            pass  # Proof stage is best-effort; never block triage output.
+
     # Prompt-injection scan diagnostics (populated by _build_prompt).
     injection_scan = _LAST_INJECTION_SCAN.get(str(candidate_path))
 

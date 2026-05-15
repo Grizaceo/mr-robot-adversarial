@@ -135,6 +135,29 @@ def _check_heterogeneity(propagator_model: str, auditor_model: str) -> dict:
     }
 
 
+def _proof_summary(triage_report: dict) -> dict:
+    """
+    Summarise proof_status annotations from triage findings.
+    Returns counts and a flag indicating whether all findings are REFUTED.
+    """
+    findings = triage_report.get("findings") or []
+    counts: dict[str, int] = {"CONFIRMED": 0, "INFERRED": 0, "REFUTED": 0, "unknown": 0}
+    for f in findings:
+        status = f.get("proof_status") or "unknown"
+        counts[status] = counts.get(status, 0) + 1
+    non_refuted = counts["CONFIRMED"] + counts["INFERRED"] + counts["unknown"]
+    all_refuted = len(findings) > 0 and non_refuted == 0
+    grounded = sum(1 for f in findings if f.get("mitre_grounded") is True)
+    return {
+        "confirmed": counts["CONFIRMED"],
+        "inferred": counts["INFERRED"],
+        "refuted": counts["REFUTED"],
+        "all_refuted": all_refuted,
+        "mitre_grounded_count": grounded,
+        "total": len(findings),
+    }
+
+
 def _compute_synthesizer_verdict(
     triage_report: dict,
     falsifier_result: Optional[dict],
@@ -160,10 +183,30 @@ def _compute_synthesizer_verdict(
                     scanner_flagged = True
                     break
 
+    # Proof-stage summary — used to qualify rationale.
+    proof = _proof_summary(triage_report)
+
+    # Override: if ALL LLM findings were REFUTED by static analysis and
+    # scanners also found nothing → downgrade to BENIGN (evidence absent).
+    if proof["all_refuted"] and not scanner_flagged and verdict == "MALICIOUS":
+        final = "INCONCLUSIVE"
+        rationale = (
+            "All triage findings REFUTED by proof stage (evidence strings absent from file) "
+            "and no scanner corroboration — manual review recommended"
+        )
+        return {
+            "final_verdict": final,
+            "rationale": rationale,
+            "proof_summary": proof,
+            "heterogeneity_check": heterogeneity,
+        }
+
     # Rule: scanner + triage agree on MALICIOUS → accept
     if verdict == "MALICIOUS" and confidence >= 0.85 and scanner_flagged:
         final = "MALICIOUS"
         rationale = "Scanner-triage consensus: both flag malicious indicators at high confidence"
+        if proof["confirmed"] > 0:
+            rationale += f" ({proof['confirmed']} finding(s) CONFIRMED by proof stage)"
 
     # Rule: scanner + triage agree on BENIGN → accept
     elif verdict == "BENIGN" and confidence >= 0.85 and not scanner_flagged:
@@ -202,6 +245,7 @@ def _compute_synthesizer_verdict(
     return {
         "final_verdict": final,
         "rationale": rationale,
+        "proof_summary": proof,
         "heterogeneity_check": heterogeneity,
     }
 
