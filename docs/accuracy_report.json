@@ -1,189 +1,1842 @@
 {
-  "generated_at": "2026-05-14T21:17:09.164635+00:00",
-  "provider": "nvidia-nim/mistralai/mistral-nemotron",
-  "pipeline": "scan_file \u2192 triage_artifact",
-  "note": "Some files skipped due to LLM timeouts on large inputs",
+  "generated_at": "2026-05-15T12:36:21Z",
+  "pipeline": "MR. Robot Adversarial v1.0",
+  "scanners": [
+    "skill_scanner",
+    "ioc_scanner",
+    "yara",
+    "secrets_detector"
+  ],
+  "duration_seconds": 21.02,
   "metrics": {
-    "accuracy": 0.9048,
-    "precision": 0.9286,
-    "recall": 0.9286,
-    "f1": 0.9286,
-    "fpr": 0.1429
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "fpr": 0,
+    "confusion_matrix": {
+      "TP": 99,
+      "FP": 0,
+      "TN": 0,
+      "FN": 0
+    },
+    "total": 99
   },
-  "confusion_matrix": {
-    "TP": 13,
-    "FP": 1,
-    "TN": 6,
-    "FN": 1
+  "per_severity": {
+    "critical": {
+      "total": 33,
+      "detected": 33,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "high": {
+      "total": 59,
+      "detected": 59,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "medium": {
+      "total": 7,
+      "detected": 7,
+      "missed": 0,
+      "recall": 1.0
+    }
+  },
+  "per_detector": {
+    "behavioral_monitor": {
+      "expected": 1,
+      "actually_flagged": 0,
+      "detection_rate": 0.0
+    },
+    "drift": {
+      "expected": 73,
+      "actually_flagged": 0,
+      "detection_rate": 0.0
+    },
+    "ioc_scanner": {
+      "expected": 76,
+      "actually_flagged": 73,
+      "detection_rate": 0.9605
+    },
+    "secrets_detector": {
+      "expected": 11,
+      "actually_flagged": 10,
+      "detection_rate": 0.9091
+    },
+    "sigma": {
+      "expected": 24,
+      "actually_flagged": 0,
+      "detection_rate": 0.0
+    },
+    "skill_scanner": {
+      "expected": 85,
+      "actually_flagged": 84,
+      "detection_rate": 0.9882
+    },
+    "suricata": {
+      "expected": 6,
+      "actually_flagged": 0,
+      "detection_rate": 0.0
+    },
+    "yara": {
+      "expected": 89,
+      "actually_flagged": 87,
+      "detection_rate": 0.9775
+    }
+  },
+  "per_tag": {
+    "adversarial": {
+      "total": 18,
+      "detected": 18,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "llm-generated": {
+      "total": 18,
+      "detected": 18,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "supply-chain": {
+      "total": 11,
+      "detected": 11,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "agentic-ai": {
+      "total": 9,
+      "detected": 9,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "atlas-2026": {
+      "total": 9,
+      "detected": 9,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "kubernetes": {
+      "total": 4,
+      "detected": 4,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "ai-security": {
+      "total": 3,
+      "detected": 3,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "ai-ml": {
+      "total": 3,
+      "detected": 3,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "cloud": {
+      "total": 3,
+      "detected": 3,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "container": {
+      "total": 3,
+      "detected": 3,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "wasm": {
+      "total": 2,
+      "detected": 2,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "npm": {
+      "total": 2,
+      "detected": 2,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "credential-theft": {
+      "total": 2,
+      "detected": 2,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "dragos-2026": {
+      "total": 2,
+      "detected": 2,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "mcp": {
+      "total": 2,
+      "detected": 2,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "autonomous-agents": {
+      "total": 1,
+      "detected": 1,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "rlhf-bypass": {
+      "total": 1,
+      "detected": 1,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "model-security": {
+      "total": 1,
+      "detected": 1,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "zero-trust": {
+      "total": 1,
+      "detected": 1,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "privilege-escalation": {
+      "total": 1,
+      "detected": 1,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "container-escape": {
+      "total": 1,
+      "detected": 1,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "container-security": {
+      "total": 1,
+      "detected": 1,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "keyvault": {
+      "total": 1,
+      "detected": 1,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "ai-accelerated": {
+      "total": 1,
+      "detected": 1,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "account-takeover": {
+      "total": 1,
+      "detected": 1,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "vercel-pattern-2026": {
+      "total": 1,
+      "detected": 1,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "ai-platform-breach": {
+      "total": 1,
+      "detected": 1,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "ai-discovered": {
+      "total": 1,
+      "detected": 1,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "zero-day": {
+      "total": 1,
+      "detected": 1,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "autonomous-exploit": {
+      "total": 1,
+      "detected": 1,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "gtig-2026": {
+      "total": 1,
+      "detected": 1,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "state-actor": {
+      "total": 1,
+      "detected": 1,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "vulnerability-discovery": {
+      "total": 1,
+      "detected": 1,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "in-the-wild": {
+      "total": 1,
+      "detected": 1,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "llm-as-attacker": {
+      "total": 1,
+      "detected": 1,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "claude-code": {
+      "total": 1,
+      "detected": 1,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "exploitation-framework": {
+      "total": 1,
+      "detected": 1,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "mexico-campaign": {
+      "total": 1,
+      "detected": 1,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "gambit-2026": {
+      "total": 1,
+      "detected": 1,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "ai-orchestration": {
+      "total": 1,
+      "detected": 1,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "rag": {
+      "total": 1,
+      "detected": 1,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "pth": {
+      "total": 1,
+      "detected": 1,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "litellm-class": {
+      "total": 1,
+      "detected": 1,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "memory": {
+      "total": 1,
+      "detected": 1,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "owasp-llm-02": {
+      "total": 1,
+      "detected": 1,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "tool-use": {
+      "total": 1,
+      "detected": 1,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "ot": {
+      "total": 1,
+      "detected": 1,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "ics": {
+      "total": 1,
+      "detected": 1,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "scada": {
+      "total": 1,
+      "detected": 1,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "gateway": {
+      "total": 1,
+      "detected": 1,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "vnode": {
+      "total": 1,
+      "detected": 1,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "password-spraying": {
+      "total": 1,
+      "detected": 1,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "it-ot-pivot": {
+      "total": 1,
+      "detected": 1,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "ai-driven": {
+      "total": 1,
+      "detected": 1,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "claude-code-campaign": {
+      "total": 1,
+      "detected": 1,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "trust-dialog": {
+      "total": 1,
+      "detected": 1,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "trustfall-class": {
+      "total": 1,
+      "detected": 1,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "worm": {
+      "total": 1,
+      "detected": 1,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "dead-mans-switch": {
+      "total": 1,
+      "detected": 1,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "shyhaldane-2026": {
+      "total": 1,
+      "detected": 1,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "github-token-theft": {
+      "total": 1,
+      "detected": 1,
+      "missed": 0,
+      "recall": 1.0
+    },
+    "autonomous-payload": {
+      "total": 1,
+      "detected": 1,
+      "missed": 0,
+      "recall": 1.0
+    }
   },
   "results": [
     {
-      "file": "bind_shell.py",
+      "scenario": "adversarial-ai-agent-command-injection",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/malicious_plugin_config.yaml",
       "gt": "MALICIOUS",
       "pred": "MALICIOUS",
-      "conf": 0.95,
       "outcome": "TP",
-      "time": 9.2
+      "severity": "high",
+      "findings": 11,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
     },
     {
-      "file": "credentials.env",
+      "scenario": "adversarial-ai-agent-manipulation",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/agent_policy_yaml.yaml",
       "gt": "MALICIOUS",
       "pred": "MALICIOUS",
-      "conf": 0.95,
       "outcome": "TP",
-      "time": 9.8
+      "severity": "critical",
+      "findings": 11,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
     },
     {
-      "file": "env_exfil.js",
+      "scenario": "adversarial-ai-model-backdoor",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/compromised_model_weights.h5",
       "gt": "MALICIOUS",
       "pred": "MALICIOUS",
-      "conf": 0.95,
       "outcome": "TP",
-      "time": 9.7
+      "severity": "high",
+      "findings": 10,
+      "detectors_flagged": [
+        "ioc_scanner",
+        "yara"
+      ]
     },
     {
-      "file": "eval_payload.js",
+      "scenario": "adversarial-backdoored-pypi-dependency",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/setup.py",
       "gt": "MALICIOUS",
       "pred": "MALICIOUS",
-      "conf": 0.95,
       "outcome": "TP",
-      "time": 11.3
+      "severity": "critical",
+      "findings": 8,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
     },
     {
-      "file": "k8s_daemonset.yml",
+      "scenario": "adversarial-cloud-metadata-hijack",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/credential_hijack.sh",
       "gt": "MALICIOUS",
       "pred": "MALICIOUS",
-      "conf": 0.95,
       "outcome": "TP",
-      "time": 11.5
+      "severity": "high",
+      "findings": 8,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
     },
     {
-      "file": "malicious_setup.py",
+      "scenario": "adversarial-k8s-ambient-persist",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/namespace_admission_controller.go",
       "gt": "MALICIOUS",
       "pred": "MALICIOUS",
-      "conf": 0.95,
       "outcome": "TP",
-      "time": 13.9
+      "severity": "high",
+      "findings": 5,
+      "detectors_flagged": [
+        "ioc_scanner",
+        "yara"
+      ]
     },
     {
-      "file": "mr_robot_ai_account_takeover.py",
+      "scenario": "adversarial-k8s-sysctl-container-escape",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/k8s-deployment.yaml",
       "gt": "MALICIOUS",
       "pred": "MALICIOUS",
-      "conf": 0.95,
       "outcome": "TP",
-      "time": 16.3
+      "severity": "critical",
+      "findings": 14,
+      "detectors_flagged": [
+        "ioc_scanner",
+        "yara"
+      ]
     },
     {
-      "file": "mr_robot_ai_zero_day.py",
+      "scenario": "adversarial-k8s-volume-escape",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/malicious-statefulset.yaml",
       "gt": "MALICIOUS",
       "pred": "MALICIOUS",
-      "conf": 0.9,
       "outcome": "TP",
-      "time": 69.5
+      "severity": "critical",
+      "findings": 9,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara",
+        "secrets_detector"
+      ]
     },
     {
-      "file": "mr_robot_npm_worm.js",
+      "scenario": "adversarial-kubernetes-metadata-dns-tunnel",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/k8s-dns-exfil.sh",
       "gt": "MALICIOUS",
       "pred": "MALICIOUS",
-      "conf": 0.95,
       "outcome": "TP",
-      "time": 132.7
+      "severity": "high",
+      "findings": 1,
+      "detectors_flagged": [
+        "skill_scanner"
+      ]
     },
     {
-      "file": "package-lock.json",
-      "gt": "MALICIOUS",
-      "pred": "SUSPICIOUS",
-      "conf": 0.6,
-      "outcome": "FN",
-      "time": 131.0
-    },
-    {
-      "file": "prompt_override.txt",
+      "scenario": "adversarial-kubernetes-snake-in-the-pod",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/deployment.yaml",
       "gt": "MALICIOUS",
       "pred": "MALICIOUS",
-      "conf": 0.95,
       "outcome": "TP",
-      "time": 13.2
+      "severity": "critical",
+      "findings": 6,
+      "detectors_flagged": [
+        "skill_scanner",
+        "yara"
+      ]
     },
     {
-      "file": "remote_pipe.sh",
+      "scenario": "adversarial-pypi-ai-agent-hijack",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/datacleaner.py",
       "gt": "MALICIOUS",
       "pred": "MALICIOUS",
-      "conf": 1.0,
       "outcome": "TP",
-      "time": 15.9
+      "severity": "critical",
+      "findings": 7,
+      "detectors_flagged": [
+        "skill_scanner",
+        "yara"
+      ]
     },
     {
-      "file": "reverse_shell.sh",
+      "scenario": "adversarial-pypi-ai-backdoor",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/torchcompute-1.0.0/setup.py",
       "gt": "MALICIOUS",
       "pred": "MALICIOUS",
-      "conf": 1.0,
       "outcome": "TP",
-      "time": 13.8
+      "severity": "critical",
+      "findings": 9,
+      "detectors_flagged": [
+        "ioc_scanner",
+        "yara"
+      ]
     },
     {
-      "file": "secrets.py",
+      "scenario": "adversarial-pypi-dependency-confusion",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/malicious_package_init.py",
       "gt": "MALICIOUS",
       "pred": "MALICIOUS",
-      "conf": 0.9,
       "outcome": "TP",
-      "time": 12.4
+      "severity": "critical",
+      "findings": 12,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
     },
     {
-      "file": "safe_Dockerfile",
-      "gt": "BENIGN",
-      "pred": "BENIGN",
-      "conf": 1.0,
-      "outcome": "TN",
-      "time": 21.7
+      "scenario": "adversarial-pypi-stego-exfil",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/setup.py",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "critical",
+      "findings": 8,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
     },
     {
-      "file": "safe_app.py",
-      "gt": "BENIGN",
-      "pred": "BENIGN",
-      "conf": 1.0,
-      "outcome": "TN",
-      "time": 24.6
+      "scenario": "adversarial-wasm-supply-chain-persistence",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/analytics-engine-wasm/pkg/data_processor_bg.wasm",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "critical",
+      "findings": 9,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
     },
     {
-      "file": "safe_ci.yml",
-      "gt": "BENIGN",
-      "pred": "BENIGN",
-      "conf": 1.0,
-      "outcome": "TN",
-      "time": 25.6
+      "scenario": "adversarial_azure_keyvault_chaining",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/auth_helper.py",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "critical",
+      "findings": 29,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara",
+        "secrets_detector"
+      ]
     },
     {
-      "file": "safe_deploy.sh",
-      "gt": "BENIGN",
-      "pred": "BENIGN",
-      "conf": 1.0,
-      "outcome": "TN",
-      "time": 31.2
+      "scenario": "adversarial_k8s_pod_injection_tiller",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/tiller-hook.yaml",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "critical",
+      "findings": 7,
+      "detectors_flagged": [
+        "ioc_scanner",
+        "yara"
+      ]
     },
     {
-      "file": "safe_package.json",
-      "gt": "BENIGN",
-      "pred": "BENIGN",
-      "conf": 1.0,
-      "outcome": "TN",
-      "time": 13.2
+      "scenario": "adversarial_npm_wasm_dll",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/package.json",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "high",
+      "findings": 8,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
     },
     {
-      "file": "safe_server.js",
-      "gt": "BENIGN",
-      "pred": "INCONCLUSIVE",
-      "conf": 0.0,
-      "outcome": "FP",
-      "time": 15.4
+      "scenario": "ai-accelerated-account-takeover",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_ai_account_takeover.py",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "high",
+      "findings": 8,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner"
+      ]
     },
     {
-      "file": "safe_setup.py",
-      "gt": "BENIGN",
-      "pred": "BENIGN",
-      "conf": 1.0,
-      "outcome": "TN",
-      "time": 42.6
+      "scenario": "ai-discovered-zero-day-exploit",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_ai_zero_day.py",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "critical",
+      "findings": 13,
+      "detectors_flagged": [
+        "skill_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "ai-driven-attack-orchestration",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_ai_orchestrator.log",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "critical",
+      "findings": 1236,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "ansible-ssh-backdoor",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_ansible_backdoor.yml",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "high",
+      "findings": 23,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara",
+        "secrets_detector"
+      ]
+    },
+    {
+      "scenario": "atlas-agent-credential-theft",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_agent_creds.py",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "critical",
+      "findings": 21,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara",
+        "secrets_detector"
+      ]
+    },
+    {
+      "scenario": "atlas-jailbreak-rag-corpus",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_rag_jailbreak.md",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "high",
+      "findings": 155,
+      "detectors_flagged": [
+        "skill_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "atlas-llm-supply-chain-pth",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_litellm_init.pth",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "critical",
+      "findings": 82,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "atlas-mcp-tool-hijack",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_mcp_response.json",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "critical",
+      "findings": 104,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "atlas-memory-poisoning",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_poisoned_memory.json",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "high",
+      "findings": 137,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "atlas-model-output-handling-leak",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_unsafe_executor.py",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "critical",
+      "findings": 145,
+      "detectors_flagged": [
+        "skill_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "atlas-prompt-injection-rag",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_rag_doc_with_injection.md",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "high",
+      "findings": 166,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "atlas-tool-output-exfil",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_tool_output.txt",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "high",
+      "findings": 90,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "aws-lambda-env-exfil",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_lambda_handler.py",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "high",
+      "findings": 21,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "azure-function-exfil",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_azure_function.py",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "high",
+      "findings": 29,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "bash-reverse-shell",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_reverse_shell.sh",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "critical",
+      "findings": 16,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "behavioral-exfil",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/attack.py",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "high",
+      "findings": 2,
+      "detectors_flagged": [
+        "skill_scanner"
+      ]
+    },
+    {
+      "scenario": "ci-secret-theft-makefile",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/Makefile",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "high",
+      "findings": 12,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "circleci-secret-exfil",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_circleci_config.yml",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "high",
+      "findings": 16,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "cors-credential-theft",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_cors_theft.js",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "high",
+      "findings": 26,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "crypto-wallet-drain",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_crypto_drain.py",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "critical",
+      "findings": 11,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "dependency-confusion",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_dep_confusion_package.json",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "high",
+      "findings": 28,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "dns-tunnel-exfil",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_dns_exfil.py",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "high",
+      "findings": 9,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "docker-entrypoint-backdoor",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/Dockerfile",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "high",
+      "findings": 28,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara",
+        "secrets_detector"
+      ]
+    },
+    {
+      "scenario": "docker-socket-escape",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_docker_escape.py",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "critical",
+      "findings": 9,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "env-credentials-dump",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_credentials.env",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "high",
+      "findings": 15,
+      "detectors_flagged": [
+        "skill_scanner",
+        "yara",
+        "secrets_detector"
+      ]
+    },
+    {
+      "scenario": "env-exfil-classic",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_env_exfil_classic.js",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "high",
+      "findings": 8,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "flask-ssti-rce",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_flask_ssti.py",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "high",
+      "findings": 11,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "gcp-function-exfil",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_gcp_function.py",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "high",
+      "findings": 30,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "gha-oidc-token-theft",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_gha_oidc.yml",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "high",
+      "findings": 9,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "git-hook-injection",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_git_hook.sh",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "high",
+      "findings": 8,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "github-actions-c2-exfil",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_gha_c2.yml",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "high",
+      "findings": 17,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "github-actions-inject",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_github_actions.yml",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "high",
+      "findings": 9,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "golang-reverse-shell",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_revshell.go",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "critical",
+      "findings": 17,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "gradle-build-exfil",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_build.gradle",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "high",
+      "findings": 17,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara",
+        "secrets_detector"
+      ]
+    },
+    {
+      "scenario": "indirect-injection-md",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/data.md",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "high",
+      "findings": 2,
+      "detectors_flagged": [
+        "skill_scanner"
+      ]
+    },
+    {
+      "scenario": "ioc-family-gap",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_ioc_family_gap.js",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "medium",
+      "findings": 9,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "jenkins-pipeline-exfil",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/Jenkinsfile",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "high",
+      "findings": 14,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "jwt-secret-hardcoded",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_flask_jwt.py",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "high",
+      "findings": 17,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara",
+        "secrets_detector"
+      ]
+    },
+    {
+      "scenario": "kubernetes-hostpath-exfil",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_k8s_daemonset.yml",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "high",
+      "findings": 18,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "kubernetes-secret-exfil",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_k8s_exfil.py",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "high",
+      "findings": 14,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "malicious-chrome-ext",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_chrome_background.js",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "high",
+      "findings": 24,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "malicious-github-app",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_github_app.py",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "high",
+      "findings": 19,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "malicious-helm-chart",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_helm_deployment.yaml",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "high",
+      "findings": 18,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "malicious-iac-terraform",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_malicious_iac.tf",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "high",
+      "findings": 10,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "malicious-setup-py",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_setup.py",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "critical",
+      "findings": 17,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "malicious-terraform-provider",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_tf_provider.go",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "high",
+      "findings": 11,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "malicious-vscode-ext",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_vscode_extension.js",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "high",
+      "findings": 23,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "node-prototype-pollution",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_express_pollute.js",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "medium",
+      "findings": 22,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "nodejs-shadow-exfil",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_nodejs_shadow_exfil.js",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "high",
+      "findings": 17,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "npm-cron-backdoor",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_package.json",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "high",
+      "findings": 19,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara",
+        "secrets_detector"
+      ]
+    },
+    {
+      "scenario": "npm-lifecycle-exfil",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_npm_preinstall.sh",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "high",
+      "findings": 18,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "npm-obfuscated-hex",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_obfuscated_index.js",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "high",
+      "findings": 15,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "npm-token-exposure",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_npmrc.npmrc",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "high",
+      "findings": 8,
+      "detectors_flagged": [
+        "skill_scanner",
+        "yara",
+        "secrets_detector"
+      ]
+    },
+    {
+      "scenario": "obfuscated-base64",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_obfuscated_base64.js",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "medium",
+      "findings": 7,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "ot-gateway-pivot",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_ot_gateway_pivot.log",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "critical",
+      "findings": 754,
+      "detectors_flagged": [
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "php-webshell-disguised",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_upload_handler.php",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "critical",
+      "findings": 9,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "postinstall-hook",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_postinstall_hook_package.json",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "critical",
+      "findings": 12,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "prompt-injection-skill",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_prompt_inject.md",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "high",
+      "findings": 329,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "pypi-phonehome-import",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_pypi_phonehome.py",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "high",
+      "findings": 17,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "python-bind-shell",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_bind_shell.py",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "critical",
+      "findings": 14,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "python-ctypes-shellcode",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_ctypes_shellcode.py",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "critical",
+      "findings": 27,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "python-pickle-rce",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_pickle_rce.py",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "critical",
+      "findings": 10,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "python-subprocess-shell",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_subprocess_exfil.py",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "medium",
+      "findings": 14,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "redis-slaveof-attack",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_redis_slaveof.py",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "high",
+      "findings": 30,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "ruby-gem-backdoor",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_backdoor.gemspec",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "high",
+      "findings": 13,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara",
+        "secrets_detector"
+      ]
+    },
+    {
+      "scenario": "rust-build-script-exfil",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_build.rs",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "high",
+      "findings": 12,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "secrets-hardcoded",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_hardcoded_secret.js",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "high",
+      "findings": 7,
+      "detectors_flagged": [
+        "skill_scanner",
+        "yara",
+        "secrets_detector"
+      ]
+    },
+    {
+      "scenario": "sql-injection-skill",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_sql_inject.py",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "high",
+      "findings": 13,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara",
+        "secrets_detector"
+      ]
+    },
+    {
+      "scenario": "ssh-key-theft",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_ssh_theft.py",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "high",
+      "findings": 11,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara",
+        "secrets_detector"
+      ]
+    },
+    {
+      "scenario": "ssrf-cloud-metadata",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_ssrf_metadata.py",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "high",
+      "findings": 16,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "supply-chain-git-dep",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_supply_chain_package.json",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "critical",
+      "findings": 10,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "supply-chain-mcp-trust-dialog",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_mcp_trust_dialog.json",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "critical",
+      "findings": 142,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "supply-chain-npm-worm-deadmans-switch",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_npm_worm.js",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "critical",
+      "findings": 11,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner"
+      ]
+    },
+    {
+      "scenario": "suspicious-package-name",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_typosquat_package.json",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "medium",
+      "findings": 6,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "terraform-ec2-reverse-shell",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_tf_ec2_revshell.tf",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "critical",
+      "findings": 28,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "terraform-state-exfil",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_tf_state_exfil.tf",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "high",
+      "findings": 16,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara",
+        "secrets_detector"
+      ]
+    },
+    {
+      "scenario": "typosquatting-npm",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/package.json",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "high",
+      "findings": 8,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "websocket-c2-beacon",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_ws_c2.js",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "high",
+      "findings": 9,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "xml-xxe-injection",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_xxe_payload.xml",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "medium",
+      "findings": 558,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "xss-skill-output",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_xss_skill.py",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "medium",
+      "findings": 13,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
+    },
+    {
+      "scenario": "yaml-deserialization-rce",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/malicious/mr_robot_yaml_rce.yaml",
+      "gt": "MALICIOUS",
+      "pred": "MALICIOUS",
+      "outcome": "TP",
+      "severity": "high",
+      "findings": 21,
+      "detectors_flagged": [
+        "skill_scanner",
+        "ioc_scanner",
+        "yara"
+      ]
     }
   ]
 }

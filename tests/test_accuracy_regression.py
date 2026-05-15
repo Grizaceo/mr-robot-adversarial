@@ -29,7 +29,7 @@ def report():
 
 def test_report_has_metrics(report):
     assert "metrics" in report
-    assert "confusion_matrix" in report
+    assert "confusion_matrix" in report["metrics"]
     assert report["results"], "results list must not be empty"
 
 
@@ -54,6 +54,6 @@ def test_fpr_below_ceiling(report):
 
 
 def test_confusion_matrix_consistent(report):
-    cm = report["confusion_matrix"]
+    cm = report["metrics"]["confusion_matrix"]
     total = cm["TP"] + cm["FP"] + cm["TN"] + cm["FN"]
     assert total == len(report["results"]), "confusion matrix totals must equal result count"

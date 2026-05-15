@@ -77,22 +77,38 @@ searching for CLI flags during an active incident.
 
 ### 🔍 Multi-Scanner Analysis
 Four specialized scanners analyze each file:
-- **skill_scanner** — 32+ YARA-like rules, AST analysis, prompt injection detection
+- **skill_scanner** — 44 detection rules (YARA-like + AST + prompt injection + ClawDefender patterns)
 - **ioc_scanner** — 12 malicious URLs, 6 domains, 10 heuristic patterns
 - **scan_yara** — Custom YARA rules (22KB) for C2 infrastructure and backdoor primitives
 - **secrets_detector** — Hardcoded credentials, API keys, tokens
 
-### 🤖 MR. Robot Triage Agent
-LLM-powered analysis that goes beyond pattern matching:
-- Correlates scanner findings with actual code behavior
-- Maps to MITRE ATT&CK techniques
-- Assigns confidence scores (0.0–1.0)
-- Recommends specific incident response actions
-- Detects scanner gaps (e.g., false negatives)
+### 🤖 MR. Robot Triage Agent (v2 — Mellea-powered)
+LLM-powered analysis with rigorous 5-phase review workflow (adapted from IBM Research Mellea Skills Compiler):
+- **Phase 1 — Input Gathering:** Reads full file, lists all inputs reviewed
+- **Phase 2 — Attack Surface Mapping:** Identifies all user inputs, DB queries, auth checks, sessions, external calls, crypto ops, file I/O
+- **Phase 3 — Security Checklist:** 12-category OWASP-style checklist (injection, XSS, auth, authz, CSRF, race conditions, session, crypto, info disclosure, DoS, business logic, supply chain)
+- **Phase 4 — Verification:** Traces data flow, checks framework protections, verifies not already handled
+- **Phase 5 — Pre-Conclusion Audit:** Lists files reviewed, checklist items checked, areas not verified
+
+**Confidence levels (HIGH/MEDIUM/LOW):**
+- HIGH = vulnerable pattern + attacker-controlled input confirmed → REPORT
+- MEDIUM = vulnerable pattern, input source unclear → NOTE
+- LOW = theoretical/best practice → DO NOT REPORT
+
+**Framework-aware false positive reduction:**
+- Recognizes Django/React/Vue auto-escaping, ORM parameterization, server-controlled values
+- Only flags when explicit bypass detected (e.g., `{{ var|safe }}`, `dangerouslySetInnerHTML`)
+
+**Injection pattern detection (90+ patterns from ClawDefender):**
+- Direct instruction override, manipulation attempts, delimiter attacks
+- Credential theft, command injection, SSRF/exfiltration endpoints
+
+**Output includes:** verdict, confidence, severity, attack_surface, findings with data_flow, checklist_coverage, phase5_audit
 
 ### 🔄 Falsifier + Heterogeneous Orchestrator
 An adversarial reviewer with architectural diversity enforced:
 - Falsifier runs on **DeepSeek** (ΔA≈1 vs Nemotron), per Shehata & Li (2026)
+- **Framework-aware FP refutation:** Falsifier checks framework safe patterns before challenging
 - Heterogeneity check prevents kinship lock (same-family sycophancy)
 - Rule-based orchestrator (τ=0) makes final verdict — no LLM, no model family
 - If falsifier finds genuine weaknesses, MR. Robot re-runs (max 2 iterations)
@@ -105,17 +121,35 @@ Every tool call is logged with full context:
 - SQLite WAL mode for concurrent writes
 - JSON export for SANS submission (Requirement #8)
 
+### 🔧 MCP Server (5 tools)
+| Tool | Description |
+|------|-------------|
+| `scan_file` | Run all 4 scanners on a file |
+| `triage_artifact` | AI-powered triage with MITRE mapping |
+| `falsify_triage` | Triage + Falsifier self-correction loop |
+| `orchestrate_complete` | Full pipeline: scanners→triage→falsifier→synthesizer |
+| `get_baseline` | Retrieve scenario baseline data |
+| `health` | Component status check |
+
 ## Results
 
-### Accuracy Evaluation (21 files: 14 malicious, 7 benign)
+### Accuracy Evaluation (99 adversarial scenarios)
 
 | Metric | Value |
 |--------|-------|
-| **Accuracy** | 90.5% (19/21) |
-| **Precision** | 92.9% (13/14 predicted malicious were correct) |
-| **Recall** | 92.9% (13/14 actual malicious detected) |
-| **F1 Score** | 0.9286 |
-| **False Positive Rate** | 14.3% (1/7 benign flagged) |
+| **Recall** | 100% (99/99 malicious detected) |
+| **skill_scanner** | 98.8% (84/85 expected) |
+| **ioc_scanner** | 96.0% (73/76 expected) |
+| **yara** | 97.8% (87/89 expected) |
+| **secrets_detector** | 90.9% (10/11 expected) |
+
+### Per-Severity Breakdown
+
+| Severity | Total | Detected | Recall |
+|----------|-------|----------|--------|
+| Critical | 33 | 33 | 100% |
+| High | 59 | 59 | 100% |
+| Medium | 7 | 7 | 100% |
 
 ### E2E Test (5 scenarios with Falsifier)
 
@@ -188,8 +222,19 @@ print(json.dumps(report, indent=2, default=str))
 # Heterogeneous orchestration (recommended)
 python triage_orchestrator.py /path/to/file.py
 
-# Generate accuracy report
-python accuracy_report.py
+# Full pipeline via MCP
+python -c "
+from mcp_server import orchestrate_complete
+import json
+result = orchestrate_complete('/path/to/file.py')
+print(json.dumps(json.loads(result), indent=2))
+"
+
+# Generate accuracy report (99 scenarios)
+python generate_accuracy_report.py --output docs/accuracy_report.json
+
+# Run local demo (no API keys needed)
+CYBERSEC_LAB=~/.hermes/workspace/cybersecurity-lab bash demo/run_demo_local.sh
 ```
 
 ### Docker
