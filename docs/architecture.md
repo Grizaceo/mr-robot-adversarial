@@ -1,109 +1,131 @@
-# Architecture Document — MR. Robot Adversarial
+# Architecture Diagram — MR. Robot Adversarial
 
-## System Overview
+## System Architecture
+
+```mermaid
+graph TB
+    subgraph Input["📁 Input"]
+        FILE[Candidate File<br/>Python/JS/YAML/Shell]
+    end
+
+    subgraph Scanners["🔍 Scanner Suite (τ=0, deterministic)"]
+        SS[skill_scanner<br/>44 rules: YARA-like + AST<br/>+ prompt injection<br/>+ ClawDefender patterns]
+        IS[ioc_scanner<br/>12 URLs + 6 domains<br/>+ 10 heuristics]
+        YR[scan_yara<br/>22KB custom rules<br/>C2 + backdoor primitives]
+        SD[secrets_detector<br/>API keys + tokens<br/>+ credentials]
+    end
+
+    subgraph AI["🤖 AI Pipeline (heterogeneous)"]
+        MR[MR. Robot<br/>Nemotron propagator<br/>5-phase review<br/>confidence levels<br/>framework-aware FP reduction]
+        FALS[Falsifier<br/>DeepSeek auditor<br/>ΔA≈1 vs Nemotron<br/>framework-safe-pattern<br/>refutation]
+        SYN[Orchestrator<br/>Rule-based synthesizer<br/>τ=0, non-LLM<br/>deterministic verdict]
+    end
+
+    subgraph Audit["📋 Audit Trail"]
+        LOG[Execution Logger<br/>SQLite WAL mode<br/>12 fields per decision<br/>τ + ΔA metrics]
+        JSONL[audit_trail.jsonl<br/>SANS requirement #8]
+    end
+
+    subgraph Output["📊 Output"]
+        VERDICT[Final Verdict<br/>MALICIOUS/SUSPICIOUS<br/>/BENIGN/INCONCLUSIVE]
+        REPORT[Structured Report<br/>confidence + severity<br/>MITRE ATT&CK mapping<br/>recommended actions]
+    end
+
+    FILE --> Scanners
+    Scanners --> MR
+    MR -->|confidence ≥ 0.90<br/>+ scanner agreement| SYN
+    MR -->|confidence < 0.90<br/>or disagreement| FALS
+    FALS -->|SURVIVED| SYN
+    FALS -->|FALSIFIED<br/>max 2 iterations| MR
+    SYN --> VERDICT
+    SYN --> REPORT
+    MR --> LOG
+    FALS --> LOG
+    LOG --> JSONL
+    VERDICT --> Output
+    REPORT --> Output
+
+    style Input fill:#1a1a2e,stroke:#16213e,color:#e94560
+    style Scanners fill:#0f3460,stroke:#16213e,color:#e94560
+    style AI fill:#533483,stroke:#16213e,color:#e94560
+    style Audit fill:#1a1a2e,stroke:#16213e,color:#e94560
+    style Output fill:#16213e,stroke:#0f3460,color:#e94560
+```
+
+## Trust Boundaries
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│                     MR. Robot Adversarial                        │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│  ┌──────────────────────────────────────────────────────────────┐  │
-│  │                    MCP Server (stdio)                         │  │
-│  │  ┌─────────────┐ ┌──────────────┐ ┌───────────────────────┐ │  │
-│  │  │ scan_file   │ │triage_artifact│ │ falsify_triage        │ │  │
-│  │  │             │ │              │ │ (self-correction loop)│ │  │
-│  │  └──────┬──────┘ └──────┬───────┘ └───────────┬───────────┘ │  │
-│  │         │               │                      │             │  │
-│  │  ┌──────┴───────────────┴──────────────────────┴───────────┐ │  │
-│  │  │              Execution Logger (audit trail)              │ │  │
-│  │  │         SQLite WAL — SANS Requirement #8                │ │  │
-│  │  └─────────────────────────────────────────────────────────┘ │  │
-│  └──────────────────────────────────────────────────────────────┘ │
-│                              │                                      │
-│              ┌───────────────┼───────────────┐                     │
-│              ▼               ▼               ▼                     │
-│  ┌──────────────┐ ┌──────────────┐ ┌──────────────────┐          │
-│  │   MR. Robot  │ │  Falsifier   │ │  Scanner Suite   │          │
-│  │   Triage     │ │  (adversarial│ │  (cybersec-lab)  │          │
-│  │   Agent      │ │   reviewer)  │ │                  │          │
-│  │              │ │              │ │ • skill_scanner  │          │
-│  │  NVIDIA NIM  │ │  NVIDIA NIM  │ │ • ioc_scanner    │          │
-│  │  (primary)   │ │  (same)      │ │ • scan_yara      │          │
-│  │  +2 fallbacks│ │              │ │ • secrets_detect │          │
-│  └──────────────┘ └──────────────┘ └──────────────────┘          │
-│                              │                                      │
-│                              ▼                                      │
-│  ┌──────────────────────────────────────────────────────────────┐  │
-│  │              Cybersecurity Lab Integration                    │  │
-│  │  • Reads: cybersecurity-lab/reports/active_alerts.json       │  │
-│  │  • Scans: cybersecurity-lab/test-corpus/ (21 labeled files)  │  │
-│  │  • Rules: cybersecurity-lab/scanners/davi_malware_rules.yar  │  │
-│  └──────────────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│ TRUST BOUNDARY 1: Input Validation                              │
+│ • validate_target_file() rejects paths outside allowed roots    │
+│ • Binary files flagged (MAL-008)                                │
+│ • File size limit (50KB default)                                │
+├─────────────────────────────────────────────────────────────────┤
+│ TRUST BOUNDARY 2: Scanner Suite (deterministic, τ=0)           │
+│ • No LLM calls — pure regex + AST + YARA                       │
+│ • No network access from scanners                               │
+│ • Read-only file access                                         │
+├─────────────────────────────────────────────────────────────────┤
+│ TRUST BOUNDARY 3: AI Pipeline (heterogeneous)                   │
+│ • MR. Robot (Nemotron) — propagator only                       │
+│ • Falsifier (DeepSeek) — auditor only, ΔA≈1 enforced           │
+│ • Orchestrator (rule-based) — τ=0, no LLM                      │
+│ • Max 2 correction iterations (Shehata & Li 2026)               │
+├─────────────────────────────────────────────────────────────────┤
+│ TRUST BOUNDARY 4: MCP Server (architectural guardrails)         │
+│ • Only safe functions exposed (scan, triage, falsify)           │
+│ • No destructive commands (rm, chmod, exec)                     │
+│ • No network access from MCP tools                              │
+│ • All inputs validated before processing                        │
+└─────────────────────────────────────────────────────────────────┘
 ```
-
-## Component Responsibilities
-
-| Component | Responsibility | Input | Output |
-|-----------|----------------|-------|--------|
-| MCP Server | Tool orchestration, audit logging | Tool calls | JSON responses + audit trail |
-| MR. Robot | AI-powered triage with MITRE mapping | File + scanner findings | Triage report (verdict, confidence, severity) |
-| Falsifier | Adversarial review of triage reports | Triage report + code | FalsificationResult (SURVIVED/FALSIFIED) |
-| Self-Correction | Iterative improvement loop | FalsificationResult | Updated triage with counter-arguments |
-| Scanner Suite | Static analysis (4 scanners) | File path | Findings (IOCs, YARA, secrets, skills) |
-| Execution Logger | Audit trail (SANS req #8) | All tool calls | SQLite WAL database |
 
 ## Data Flow
 
 ```
-File → [Scanners] → Findings → [MR. Robot] → Triage Report
-                                               ↓
-                                         [Falsifier]
-                                               ↓
-                                    FalsificationResult
-                                               ↓
-                                    ┌──────────┴──────────┐
-                                    │ SURVIVED │ FALSIFIED │
-                                    ↓          ↓
-                               Final    Re-run with
-                               Report   counter-argument
-                                         (max 3 iterations)
+File Input
+    │
+    ▼
+┌──────────────────┐
+│ Input Validation │ ← Trust Boundary 1
+│ (path, size,     │
+│  binary check)   │
+└────────┬─────────┘
+         │
+         ▼
+┌──────────────────┐
+│ Scanner Suite    │ ← Trust Boundary 2
+│ (4 scanners,     │
+│  deterministic)  │
+└────────┬─────────┘
+         │
+         ▼
+┌──────────────────┐     ┌──────────────────┐
+│ MR. Robot        │────→│ Falsifier        │ ← Trust Boundary 3
+│ (Nemotron)       │     │ (DeepSeek, ΔA≈1) │
+│ 5-phase review   │←────│ max 2 iterations │
+└────────┬─────────┘     └──────────────────┘
+         │
+         ▼
+┌──────────────────┐
+│ Orchestrator     │ ← Trust Boundary 3
+│ (rule-based, τ=0)│
+└────────┬─────────┘
+         │
+         ▼
+┌──────────────────┐
+│ Final Verdict    │
+│ + Audit Trail    │ ← Trust Boundary 4
+└──────────────────┘
 ```
 
-## LLM Strategy
+## Heterogeneity Mandate (Shehata & Li 2026)
 
-- **Primary:** NVIDIA NIM (mistralai/mistral-nemotron)
-- **Fallback 1:** Ollama Cloud (kimi-k2.5)
-- **Fallback 2:** OpenRouter (gpt-oss-120b:free + 5 more)
-- **API Key:** Read from `~/.hermes/.env`
-- **Temperature:** 0.3 (deterministic triage)
-- **Max tokens:** 4096
+Per arXiv:2604.27274, same-family agent swarms produce kinship lock (τ≈1) → Logic Saturation → 100% error.
 
-## Self-Correction Loop
-
-1. Run scanners → get findings
-2. Run MR. Robot triage → get report (verdict, confidence)
-3. If confidence ≥ 0.7 and verdict is clear → run Falsifier once
-4. If Falsifier FALSIFIES → re-run MR. Robot with counter-argument
-5. Repeat up to 3 iterations
-6. Log all iterations to audit trail
-
-## Evaluation Metrics
-
-| Metric | Target | Current |
-|--------|--------|---------|
-| Accuracy | > 90% | TBD (running) |
-| Precision | > 85% | TBD |
-| Recall | > 90% | TBD |
-| False Positive Rate | < 5% | TBD |
-| F1 Score | > 0.85 | TBD |
-| Avg triage time | < 30s | ~25s |
-| End-to-end (with falsifier) | < 60s | ~30s |
-
-## Deployment
-
-- Python 3.11+, no database required (SQLite for audit)
-- Dependencies: mcp, pydantic, pyyaml, requests
-- Config via `cybersec_lab_integration/config.yaml`
-- Docker support (Dockerfile + docker-compose.yml)
-- Run: `python mcp_server.py` (stdio transport)
+Our enforcement:
+- **Propagator:** NVIDIA Nemotron (mistralai/mistral-nemotron)
+- **Auditor:** DeepSeek (deepseek/deepseek-chat-v3-0324)
+- **Synthesizer:** Rule-based (τ=0, no model family)
+- **ΔA ≈ 1.0** (architecturally different families)
+- **Max 2 iterations** (paper proves >2 with same family makes error worse)

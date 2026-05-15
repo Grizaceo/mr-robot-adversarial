@@ -325,16 +325,16 @@ mr-robot-adversarial/
 
 ## SANS Submission Requirements
 
-| # | Requirement | Status |
-|---|------------|--------|
-| 1 | Public GitHub repository | ✅ |
-| 2 | Demo video (≤3 min) | ⬜ Pending |
-| 3 | Text description | ✅ |
-| 4 | Architecture diagram | ✅ |
-| 5 | Working code | ✅ |
-| 6 | Dataset documentation | ✅ |
-| 7 | Try-it-out instructions | ✅ |
-| 8 | Agent execution logs | ✅ |
+| # | Requirement | Status | Location |
+|---|------------|--------|----------|
+| 1 | Public GitHub repository (MIT/Apache 2.0) | ✅ | github.com/Grizaceo/mr-robot-adversarial |
+| 2 | Demo video (≤5 min, terminal + audio) | ⬜ Pending | Record after development |
+| 3 | Architecture diagram | ✅ | `docs/architecture.md` |
+| 4 | Written project description (Devpost) | ✅ | README + `docs/try_it_out.md` |
+| 5 | Dataset documentation | ✅ | `docs/dataset.md` |
+| 6 | Accuracy report | ✅ | `docs/accuracy_report.json` + `generate_accuracy_report.py` |
+| 7 | Try-it-out instructions | ✅ | `docs/try_it_out.md` |
+| 8 | Agent execution logs | ✅ | `execution_logger.py` (SQLite WAL + JSONL) |
 
 ## Related Work
 
