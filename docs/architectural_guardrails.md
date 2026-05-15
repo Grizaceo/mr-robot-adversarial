@@ -12,7 +12,7 @@ distinction, with the exact file:line that implements it.
 
 | Category | Count | Notes |
 |---|---|---|
-| **Architectural** (cannot be bypassed by clever prompting) | 9 | Implemented in code; LLM has no authority over them |
+| **Architectural** (cannot be bypassed by clever prompting) | 11 | Implemented in code; LLM has no authority over them |
 | **Hybrid** (architectural envelope + prompt directive inside it) | 3 | Both layers must fail for the guardrail to fail |
 | **Prompt-based** (text the model may follow) | 5 | Soft guardrails; assume failure is possible |
 
@@ -96,6 +96,37 @@ and keep the prompt-based layer for *quality of analysis*, not security.
   regardless of LLM behavior. Per Shehata & Li (2026), beyond this
   same-family recursion amplifies rather than reduces error.
 - **Bypass route:** none — enforced by a `for` loop.
+
+### A10 — Proof Stage (static confirmation)
+- **Where:** `proof_stage.annotate_findings` called from
+  `agents/mr_robot/triage.py` after `_parse_json_response`.
+  `triage_orchestrator._proof_summary` uses the results in the synthesizer.
+- **What:** every LLM finding is annotated with
+  `proof_status ∈ {CONFIRMED, INFERRED, REFUTED}` using static analysis:
+  evidence-string presence check + (for Python injection findings)
+  AST data-flow check for user-input sources reaching dangerous sinks.
+  If ALL findings are REFUTED and no scanner corroborates, the synthesizer
+  downgrades the verdict to INCONCLUSIVE regardless of LLM confidence.
+- **Bypass route:** none from the LLM — the check runs over the raw file
+  bytes and AST, not over the LLM output.
+- **Limitation:** static analysis has false negatives (dynamically
+  constructed sinks, obfuscated code). INFERRED is the fallback.
+
+### A11 — Threat-Intel Grounding (MITRE ATT&CK lookup)
+- **Where:** `threat_intel_grounding.ground_findings` called from
+  `agents/mr_robot/triage.py` after `_parse_json_response`.
+  Index at `data/mitre_attack_index.json` (244 KB, 858 techniques,
+  snapshot of MITRE CTI GitHub, refreshable via `--refresh` flag).
+- **What:** every LLM-proposed `mitre_id` is looked up in the local
+  ATT&CK Enterprise index. A second check verifies that the technique
+  description is semantically plausible given the finding description
+  (keyword overlap). Adds `mitre_grounded: bool` and `mitre_name: str`
+  to each finding. A hallucinated technique ID (e.g., `T9999`) gets
+  `mitre_grounded: false` — visible in the audit trail and to the
+  synthesizer.
+- **Bypass route:** none — dictionary lookup, no model call.
+- **Limitation:** index snapshot is static (Jan 2026 era). Run
+  `python threat_intel_grounding.py --refresh` to update.
 
 ---
 
