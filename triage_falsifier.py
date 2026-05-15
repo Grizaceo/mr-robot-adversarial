@@ -77,11 +77,19 @@ OUTPUT FORMAT:
 class TriageFalsifier:
     """
     Adversarial reviewer for MR. Robot triage reports.
-    Uses NVIDIA NIM (same provider as MR. Robot) for reasoning.
+
+    HETEROGENEITY MANDATE (Shehata & Li 2026, arXiv:2604.27274):
+    The falsifier MUST be architecturally different from the triage model
+    to break the kinship lock. Using the same model family (e.g., both
+    Nemotron) produces τ≈1 → sycophantic agreement → Logic Saturation.
+
+    Default provider: 'deepseek' (ΔA≈1 vs Nemotron propagator).
     """
 
     def __init__(self, provider: str = None):
-        self.provider = provider or os.getenv("MR_ROBOT_PROVIDER", "nvidia-nim")
+        # Default to DeepSeek for heterogeneity (ΔA≈1 vs Nemotron, τ low)
+        # Per Shehata & Li (2026): same-family falsifier produces kinship lock
+        self.provider = provider or os.getenv("MR_ROBOT_PROVIDER", "deepseek")
         # Import here to avoid circular deps
         from agents.mr_robot.triage import PROVIDERS, _get_api_key, _call_llm
         self.PROVIDERS = PROVIDERS

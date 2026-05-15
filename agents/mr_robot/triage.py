@@ -50,7 +50,7 @@ PROVIDERS = {
         "env_key": "OPENROUTER_API_KEY",
         "extra_headers": {
             "HTTP-Referer": "https://github.com/davi/mr-robot-adversarial",
-            "X-Title": "MR. Robot — Adversarial",
+            "X-Title": "MR. Robot - Adversarial",
         },
         "fallback_models": [
             "nvidia/nemotron-3-super-120b-a12b:free",
@@ -58,6 +58,22 @@ PROVIDERS = {
             "z-ai/glm-4.5-air:free",
             "openai/gpt-oss-20b:free",
             "meta-llama/llama-3.3-70b-instruct:free",
+        ],
+    },
+    # ── Heterogeneous auditor (Shehata & Li 2026, arXiv:2604.27274)
+    # DeepSeek is architecturally far from Nemotron (ΔA≈1, τ low).
+    # Used as the Falsifier backend to break the kinship lock.
+    "deepseek": {
+        "base": "https://openrouter.ai/api/v1",
+        "model": os.getenv("DEEPSEEK_MODEL", "deepseek/deepseek-chat-v3-0324:free"),
+        "env_key": "OPENROUTER_API_KEY",
+        "extra_headers": {
+            "HTTP-Referer": "https://github.com/davi/mr-robot-adversarial",
+            "X-Title": "MR. Robot - Adversarial (Falsifier)",
+        },
+        "fallback_models": [
+            "deepseek/deepseek-r1:free",
+            "qwen/qwen3-32b:free",
         ],
     },
 }
@@ -247,11 +263,11 @@ def _call_openrouter(prompt: str, model: str = None, system: str = "") -> str | 
         "messages": messages,
         "temperature": 0.3,
         "max_tokens": 4096,
-    }).encode()
+    }).encode("utf-8")
 
     headers = {
         "Authorization": f"Bearer {key}",
-        "Content-Type": "application/json",
+        "Content-Type": "application/json; charset=utf-8",
     }
     headers.update(info.get("extra_headers", {}))
 
@@ -284,7 +300,8 @@ def _call_llm(provider: str, prompt: str, system: str = "") -> tuple[str, str]:
         try:
             if provider == "ollama-cloud":
                 resp = _call_ollama_cloud(prompt, model=model, system=system)
-            elif provider == "openrouter":
+            elif provider in ("openrouter", "deepseek"):
+                # deepseek uses OpenRouter as transport (different model family, same API)
                 resp = _call_openrouter(prompt, model=model, system=system)
             elif provider == "nvidia-nim":
                 resp = _call_nvidia_nim(prompt, model=model, system=system)
