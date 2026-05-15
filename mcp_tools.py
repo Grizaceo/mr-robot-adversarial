@@ -132,7 +132,8 @@ def _run_scanner(scanner_name: str, args: list[str], timeout: int = 30) -> dict:
 # ── Agent Runner ──────────────────────────────────────────────
 
 def run_triage_agent(filepath: str, scanner_results: Optional[dict] = None,
-                     context: Optional[dict] = None, timeout: int = 120) -> dict:
+                     context: Optional[dict] = None, scenario_id: str = "",
+                     timeout: int = 120) -> dict:
     """Run MR. Robot triage agent as a subprocess. Returns triage report dict."""
     repo_root = Path(__file__).parent
 
@@ -141,7 +142,11 @@ def run_triage_agent(filepath: str, scanner_results: Optional[dict] = None,
         findings_file.write_text(json.dumps(scanner_results, default=str))
 
     context_file = None
-    if context:
+    if context or scenario_id:
+        if context is None:
+            context = {}
+        if scenario_id:
+            context["scenario_id"] = scenario_id
         context_file = LOG_DIR / f"context_{int(time.time())}.json"
         context_file.write_text(json.dumps(context))
 
@@ -174,7 +179,8 @@ def run_triage_agent(filepath: str, scanner_results: Optional[dict] = None,
 
 def run_falsifier_loop(filepath: str, scanner_results: dict,
                         confidence_threshold: float = 0.99,
-                        max_iterations: int = 1) -> dict:
+                        max_iterations: int = 1,
+                        scenario_id: str = "") -> dict:
     """Run triage + falsifier self-correction loop. Returns final report."""
     try:
         from triage_falsifier import run_self_correction_loop
@@ -185,7 +191,7 @@ def run_falsifier_loop(filepath: str, scanner_results: dict,
         )
     except Exception as e:
         logger.error(f"Falsifier loop failed: {e}, falling back to triage only")
-        report = run_triage_agent(filepath, scanner_results)
+        report = run_triage_agent(filepath, scanner_results, scenario_id=scenario_id)
         report["_correction"] = {"error": str(e), "iterations": 0}
         return report
 
