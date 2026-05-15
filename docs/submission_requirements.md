@@ -45,7 +45,7 @@ Include in `docs/architecture.md`:
 Provide clear instructions:
 ```bash
 git clone <repo>
-cd find-evil-hackathon
+cd mr-robot-adversarial
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt

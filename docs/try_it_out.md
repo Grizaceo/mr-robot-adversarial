@@ -11,8 +11,8 @@
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/davi/find-evil-hackathon.git
-cd find-evil-hackathon
+git clone https://github.com/Grizaceo/mr-robot-adversarial.git
+cd mr-robot-adversarial
 ```
 
 ### 2. Install dependencies

@@ -138,8 +138,8 @@ Every tool call is logged with full context:
 
 ### Installation
 ```bash
-git clone https://github.com/Grizaceo/find-evil-hackathon.git
-cd find-evil-hackathon
+git clone https://github.com/Grizaceo/mr-robot-adversarial.git
+cd mr-robot-adversarial
 pip install mcp pydantic pyyaml
 ```
 
@@ -190,7 +190,7 @@ docker-compose up
 Note: the original pre-MCP skeleton prototypes were archived under `legacy/agents/` after the repo standardized on the active MR. Robot + MCP + Falsifier pipeline.
 
 ```
-find-evil-hackathon/
+mr-robot-adversarial/
 ├── agents/
 │   └── mr_robot/
 │       └── triage.py          # MR. Robot Triage Agent

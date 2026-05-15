@@ -68,7 +68,7 @@ File → Scanners → MR. Robot Triage → Falsifier Review → Final Report
 
 | # | Requirement | Status | Notes |
 |---|------------|--------|-------|
-| 1 | Repo GitHub público | ✅ | https://github.com/Grizaceo/find-evil-hackathon |
+| 1 | Repo GitHub público | ✅ | https://github.com/Grizaceo/mr-robot-adversarial |
 | 2 | Demo video (3 min) | ❌ | Not started |
 | 3 | Text description | ✅ | BLUEPRINT + README + architecture updated |
 | 4 | Architecture diagram | ✅ | `docs/architecture.md` updated |
