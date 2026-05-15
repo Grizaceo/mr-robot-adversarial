@@ -95,7 +95,12 @@ def _run_scanner(scanner_name: str, args: list[str], timeout: int = 30) -> dict:
     """Run a single scanner CLI and return parsed JSON result."""
     script = SCANNERS_DIR / f"{scanner_name}.py"
     if not script.exists():
-        return {"error": f"Scanner not found: {script}", "findings": []}
+        return {
+                "error": "scanner_not_found",
+                "scanner": scanner_name,
+                "detail": str(script),
+                "findings": [],
+            }
 
     json_out = LOG_DIR / f"scanner_{scanner_name}_{int(time.time())}.json"
     cmd = [sys.executable, str(script)] + args + ["--json", str(json_out)]

@@ -45,8 +45,13 @@ class ExecutionLogger:
         self._init_db()
         logger.info(f"ExecutionLogger initialized: {self.db_path}")
 
+    def connect(self) -> sqlite3.Connection:
+        conn = sqlite3.connect(self.db_path)
+        conn.execute("PRAGMA journal_mode=WAL;")
+        return conn
+
     def _init_db(self):
-        with sqlite3.connect(self.db_path) as conn:
+        with self.connect() as conn:
             conn.execute("PRAGMA journal_mode=WAL;")
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS executions (
@@ -112,7 +117,7 @@ class ExecutionLogger:
             confidence = output_data.get("confidence")
 
         try:
-            with sqlite3.connect(self.db_path) as conn:
+            with self.connect() as conn:
                 cursor = conn.execute(
                     """
                     INSERT INTO executions
