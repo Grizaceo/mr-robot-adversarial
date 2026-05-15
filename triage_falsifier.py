@@ -109,6 +109,9 @@ class TriageFalsifier:
     to break the kinship lock. Using the same model family (e.g., both
     Nemotron) produces τ≈1 → sycophantic agreement → Logic Saturation.
 
+    Reinforced by Du et al. 2023 (arXiv:2305.14325) on multi-agent debate
+    and Sharma et al. 2023 (arXiv:2310.13548) on LLM sycophancy.
+
     Default provider: 'deepseek' (ΔA≈1 vs Nemotron propagator).
     """
 

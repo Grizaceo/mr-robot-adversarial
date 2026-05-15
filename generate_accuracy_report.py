@@ -31,6 +31,14 @@ LAB_ROOT = Path(os.environ.get("CYBERSEC_LAB",
 SCENARIOS_DIR = LAB_ROOT / "scenarios"
 TEST_CORPUS = Path(os.environ.get("TEST_CORPUS_OVERRIDE",
                    str(LAB_ROOT / "test-corpus")))
+REPO_ROOT = Path(__file__).parent.resolve()
+# Benign sources (in priority order). Files listed below are treated as ground-truth BENIGN.
+BENIGN_DIRS = [
+    REPO_ROOT / "benign_corpus",
+    TEST_CORPUS / "benign",
+]
+# Files we never treat as standalone samples (READMEs, schemas, etc.)
+BENIGN_SKIP_NAMES = {"README.md", "_schema.json"}
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -77,6 +85,33 @@ def ensure_test_files(scenarios):
             out_path.write_text(payload)
             mapping[s["name"]] = out_path
     return mapping
+
+
+def load_benign_samples():
+    """Collect benign code samples from configured directories."""
+    samples = []
+    seen = set()
+    for d in BENIGN_DIRS:
+        if not d.exists():
+            continue
+        for path in sorted(d.iterdir()):
+            if not path.is_file():
+                continue
+            if path.name in BENIGN_SKIP_NAMES or path.name.startswith("."):
+                continue
+            # Avoid duplicate filenames coming from different sources.
+            if path.name in seen:
+                continue
+            seen.add(path.name)
+            samples.append({
+                "name": f"benign-{path.stem}",
+                "filename": path.name,
+                "filepath": path,
+                "severity": "none",
+                "tags": ["benign"],
+                "expected_detectors": [],
+            })
+    return samples
 
 
 def run_scanners(filepath):
@@ -130,10 +165,10 @@ def compute_prediction(scanner_results):
 def classify_outcome(gt, pred):
     """
     Classify as TP, FP, TN, FN.
-    All scenarios are malicious, so:
-    - TP = detected (pred=MALICIOUS)
-    - FN = missed (pred=BENIGN)
-    - FP/TN would require benign scenarios (not in current set)
+    - TP: malicious correctly flagged
+    - FN: malicious missed
+    - TN: benign correctly ignored
+    - FP: benign incorrectly flagged
     """
     if gt["label"] == "MALICIOUS" and pred["label"] == "MALICIOUS":
         return "TP"
@@ -250,11 +285,16 @@ def generate_report(output_path=None, verbose=False):
         print("ERROR: No scenarios found. Set CYBERSEC_LAB env var.")
         sys.exit(1)
 
-    print(f"Loaded {len(scenarios)} scenarios")
+    print(f"Loaded {len(scenarios)} malicious scenarios")
     files = ensure_test_files(scenarios)
-    print(f"Test files ready: {len(files)}")
+    print(f"Malicious test files ready: {len(files)}")
+
+    benigns = load_benign_samples()
+    print(f"Loaded {len(benigns)} benign samples from "
+          f"{[str(d) for d in BENIGN_DIRS if d.exists()]}")
 
     results = []
+    total_items = len(scenarios) + len(benigns)
     for i, s in enumerate(scenarios):
         name = s["name"]
         filepath = files.get(name)
@@ -276,7 +316,31 @@ def generate_report(output_path=None, verbose=False):
 
         if verbose:
             icon = "✅" if outcome == "TP" else "❌"
-            print(f"  {icon} [{i+1:3d}/{len(scenarios)}] {name:50s} | {outcome}")
+            print(f"  {icon} [{i+1:3d}/{total_items}] {name:50s} | {outcome}")
+
+    for j, b in enumerate(benigns, start=len(scenarios) + 1):
+        gt = {
+            "label": "BENIGN",
+            "severity": "none",
+            "expected_detectors": [],
+            "attack_techniques": [],
+            "tags": ["benign"],
+        }
+        scanner_results = run_scanners(str(b["filepath"]))
+        pred = compute_prediction(scanner_results)
+        outcome = classify_outcome(gt, pred)
+
+        results.append({
+            "scenario": b["name"],
+            "file": str(b["filepath"]),
+            "ground_truth": gt,
+            "prediction": pred,
+            "outcome": outcome,
+        })
+
+        if verbose:
+            icon = "✅" if outcome == "TN" else "⚠️ "
+            print(f"  {icon} [{j:3d}/{total_items}] {b['name']:50s} | {outcome}")
 
     metrics = compute_metrics([r["outcome"] for r in results])
     per_severity = compute_per_severity(results)
@@ -361,6 +425,14 @@ def generate_report(output_path=None, verbose=False):
         print(f"Missed Scenarios ({len(missed)}):")
         for r in missed:
             print(f"  ❌ {r['scenario']:50s} (expected: {', '.join(r['ground_truth']['expected_detectors'])})")
+        print()
+
+    # False positives on benign samples
+    false_positives = [r for r in results if r["outcome"] == "FP"]
+    if false_positives:
+        print(f"False Positives on Benign Samples ({len(false_positives)}):")
+        for r in false_positives:
+            print(f"  ⚠️  {r['scenario']:50s} (flagged by: {', '.join(r['prediction']['detectors_flagged'])})")
         print()
 
     return report

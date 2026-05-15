@@ -121,7 +121,11 @@ File Input
 
 ## Heterogeneity Mandate (Shehata & Li 2026)
 
-Per arXiv:2604.27274, same-family agent swarms produce kinship lock (τ≈1) → Logic Saturation → 100% error.
+Per [arXiv:2604.27274](https://arxiv.org/abs/2604.27274), same-family agent
+swarms produce kinship lock (τ≈1) → Logic Saturation → 100% error.
+Reinforced by prior multi-agent diversity literature (Du 2023, Liang 2023,
+Wang 2022) and LLM sycophancy research (Sharma 2023). Full references in
+[`docs/heterogeneity_mandate.md`](heterogeneity_mandate.md).
 
 Our enforcement:
 - **Propagator:** NVIDIA Nemotron (mistralai/mistral-nemotron)

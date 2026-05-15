@@ -110,13 +110,39 @@ The orchestrator detects kinship lock at runtime and logs warnings:
            (ΔA≈0, τ high).
 ```
 
-## References
+## Primary Reference
 
-- Paper: https://arxiv.org/abs/2604.27274
-- Shehata & Li (2026). University of Waterloo.
+- **Shehata, D. & Li, M. (2026).** *The Inverse-Wisdom Law: Architectural
+  Tribalism and the Consensus Paradox in Agentic Swarms.* University of
+  Waterloo. [arXiv:2604.27274](https://arxiv.org/abs/2604.27274).
 - 7 theorems proven: Synthesizer Gating, Inverse-Wisdom Law, Sycophantic State
   Transition, Architectural Tribalism Asymmetry, Heterogeneity Mandate,
   Cascade Point, Logic Saturation.
+
+## Supporting Literature
+
+The Heterogeneity Mandate is consistent with — and reinforced by — earlier
+work on multi-agent diversity and LLM sycophancy:
+
+- **Du et al. (2023).** *Improving Factuality and Reasoning in Language
+  Models through Multiagent Debate.* [arXiv:2305.14325](https://arxiv.org/abs/2305.14325).
+  Multi-agent debate improves factuality; gains scale with model diversity.
+- **Wang et al. (2022).** *Self-Consistency Improves Chain of Thought
+  Reasoning in Language Models.* [arXiv:2203.11171](https://arxiv.org/abs/2203.11171).
+  Aggregating diverse reasoning paths beats single-pass decoding.
+- **Liang et al. (2023).** *Encouraging Divergent Thinking in Large Language
+  Models through Multi-Agent Debate.* [arXiv:2305.19118](https://arxiv.org/abs/2305.19118).
+  "Degenerate of thought" (early convergence on shared mistakes) is mitigated
+  by forcing divergence — directly compatible with the kinship-lock framing.
+- **Sharma et al. (2023).** *Towards Understanding Sycophancy in Language
+  Models.* [arXiv:2310.13548](https://arxiv.org/abs/2310.13548). Empirical
+  evidence that same-distribution reviewers tend to confirm rather than
+  challenge — the σ term in the Synthesizer Gating Theorem.
+- Krogh & Vedelsby (1995); Dietterich (2000) — classical ensemble theory:
+  ensemble error decreases with **base learner diversity**, not just count.
+
+Shehata & Li formalize for agentic swarms what this literature establishes
+empirically and statistically for ensembles and multi-agent debate.
 
 ---
 

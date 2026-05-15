@@ -2,10 +2,16 @@
 
 ## Overview
 
-The MR. Robot Adversarial dataset consists of **99 adversarial cybersecurity scenarios** designed to test the detection capabilities of autonomous AI incident response agents.
+The MR. Robot Adversarial dataset consists of **99 adversarial malicious
+scenarios** and **19 benign samples** (12 in this repo's `benign_corpus/` +
+7 in `cybersecurity-lab/test-corpus/benign/`), for a total of **118 ground-truth
+labelled samples** used to measure both recall and false-positive rate.
 
-**Source:** `cybersecurity-lab/scenarios/` (100 JSON files, 1 schema)
-**Format:** JSON with ground truth labels
+**Sources:**
+- Malicious: `cybersecurity-lab/scenarios/` (99 JSON scenarios + payloads)
+- Benign: `benign_corpus/` (this repo) + `cybersecurity-lab/test-corpus/benign/`
+
+**Format:** JSON with ground truth labels (malicious) / raw source files (benign)
 **License:** MIT (same as repository)
 
 ## Dataset Structure
@@ -207,15 +213,32 @@ The dataset covers the following MITRE ATT&CK techniques:
 
 ## Detection Results
 
-### Overall Metrics
+### Overall Metrics (with benign control set)
 
 | Metric | Value |
 |--------|-------|
-| Recall | 100% (99/99) |
-| skill_scanner | 98.8% (84/85 expected) |
-| ioc_scanner | 96.0% (73/76 expected) |
-| yara | 97.8% (87/89 expected) |
-| secrets_detector | 90.9% (10/11 expected) |
+| Accuracy | 97.5% (115/118) |
+| Precision | 97.1% (99/102) |
+| Recall | 100% (99/99 malicious) |
+| F1 | 0.985 |
+| FPR | 15.8% (3/19 benign flagged) |
+| skill_scanner detection rate | 98.8% (84/85 expected) |
+| ioc_scanner detection rate | 96.0% (73/76 expected) |
+| yara detection rate | 97.8% (87/89 expected) |
+| secrets_detector detection rate | 90.9% (10/11 expected) |
+
+Confusion matrix: **TP=99, FP=3, TN=16, FN=0**
+
+### Known False Positives (3)
+
+| File | Flagged by | Notes |
+|---|---|---|
+| `benign_corpus/k8s_deployment.yaml` | ioc_scanner | Pod spec triggers an IOC heuristic — to investigate |
+| `benign_corpus/parameterized_sql.py` | skill_scanner | Parameterized psycopg2 — false positive on bind syntax |
+| `cybersecurity-lab/.../safe_server.js` | skill_scanner | Benign Node server triggers a rule |
+
+These are real precision gaps to address in future iterations rather than
+suppress.
 
 ### Per-Severity Recall
 
@@ -224,6 +247,7 @@ The dataset covers the following MITRE ATT&CK techniques:
 | Critical | 33 | 33 | 100% |
 | High | 59 | 59 | 100% |
 | Medium | 7 | 7 | 100% |
+| Benign (TN rate) | 16 | 19 | 84.2% |
 
 ## Usage
 

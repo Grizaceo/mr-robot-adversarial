@@ -49,7 +49,7 @@ PROVIDERS = {
         "model": os.getenv("OPENROUTER_MODEL", "openai/gpt-oss-120b:free"),
         "env_key": "OPENROUTER_API_KEY",
         "extra_headers": {
-            "HTTP-Referer": "https://github.com/davi/mr-robot-adversarial",
+            "HTTP-Referer": "https://github.com/Grizaceo/mr-robot-adversarial",
             "X-Title": "MR. Robot - Adversarial",
         },
         "fallback_models": [
@@ -68,7 +68,7 @@ PROVIDERS = {
         "model": os.getenv("DEEPSEEK_MODEL", "deepseek/deepseek-chat-v3-0324:free"),
         "env_key": "OPENROUTER_API_KEY",
         "extra_headers": {
-            "HTTP-Referer": "https://github.com/davi/mr-robot-adversarial",
+            "HTTP-Referer": "https://github.com/Grizaceo/mr-robot-adversarial",
             "X-Title": "MR. Robot - Adversarial (Falsifier)",
         },
         "fallback_models": [

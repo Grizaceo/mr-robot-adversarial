@@ -5,9 +5,18 @@
 Build a working AI agent system that autonomously defends against cyber threats,
 integrating with the existing `cybersecurity-lab` to demonstrate real-world impact.
 
-## Status: IN PROGRESS
+## Status: READY FOR SUBMISSION (pending demo video)
 
-**Deadline:** June 15, 2026 (31 days remaining)
+**Deadline:** June 15, 2026 (31 days remaining as of 2026-05-15)
+
+### Last review (2026-05-15)
+End-to-end repo review identified and fixed two credibility gaps:
+1. Accuracy report now includes a **benign control set** (19 samples) so
+   precision/FPR are real numbers, not artifacts of testing only positives.
+2. Heterogeneity Mandate now references both the primary source (Shehata &
+   Li 2026) and supporting prior literature (Du 2023, Wang 2022, Liang 2023,
+   Sharma 2023) so reviewers can triangulate.
+See `CHANGELOG.md` for details.
 
 ## What We Built
 
@@ -60,9 +69,14 @@ File → Scanners → MR. Robot Triage → Falsifier Review → Final Report
 
 **Result: 5/5 correct (100%)**
 
-### Accuracy Report
-- Running on full test-corpus (21 files: 14 malicious, 7 benign)
-- See `docs/accuracy_report.md` for full results
+### Accuracy Report (118 samples — 99 malicious + 19 benign)
+- Accuracy: 97.5%
+- Precision: 97.1%
+- Recall: 100%
+- F1: 0.985
+- FPR: 15.8% (3/19 benign flagged — `k8s_deployment.yaml`,
+  `parameterized_sql.py`, `safe_server.js`)
+- See `docs/accuracy_report.json` for full results
 
 ## Submission Requirements Checklist
 
