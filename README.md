@@ -19,51 +19,59 @@ searching for CLI flags during an active incident.
 
 ```
                     ┌─────────────────────────────────────────┐
-                    │           MCP Server (stdio)             │
-                    │  scan_file │ triage_artifact │ falsify   │
-                    │  get_baseline │ health                     │
+                    │      Triage Orchestrator (τ=0)          │
+                    │   Non-LLM synthesizer — deterministic   │
+                    │   routes, decides, audits               │
                     └──────────────┬──────────────────────────┘
                                    │
               ┌────────────────────┼────────────────────┐
               ▼                    ▼                    ▼
     ┌──────────────────┐ ┌──────────────────┐ ┌──────────────────┐
     │   MR. Robot      │ │  Falsifier       │ │  Scanner Suite   │
-    │   Triage Agent   │ │  (Adversarial    │ │  (cybersec-lab)  │
-    │                  │ │   Reviewer)      │ │                  │
-    │  NVIDIA NIM      │ │  NVIDIA NIM      │ │ • skill_scanner  │
-    │  (primary)       │ │  (same model)    │ │ • ioc_scanner    │
-    │  + 2 fallbacks   │ │                  │ │ • scan_yara      │
-    │                  │ │  Challenges      │ │ • secrets_detect │
-    │  MITRE ATT&CK    │ │  each finding,   │ │                  │
-    │  mapping         │ │  finds false     │ │  100+ scenarios  │
-    │                  │ │  positives       │ │  32+ YARA rules  │
-    └──────────────────┘ └──────────────────┘ └──────────────────┘
-              │                    │
-              └────────┬───────────┘
-                       ▼
-              ┌──────────────────┐
-              │ Self-Correction  │
-              │ Loop             │
-            ┌─┤                  ├─┐
-            │ │ If FALSIFIED:   │ │
-            │ │ re-run triage   │ │
-            │ │ with counter-   │ │
-            │ │ argument        │ │
-            │ │ (max 3 iters)   │ │
-            │ └──────────────────┘ │
-            └──────────────────────┘
-                       │
-                       ▼
-              ┌──────────────────┐
-              │ Execution Logger │
-              │ (Audit Trail)    │
-            ┌─┤                  ├─┐
-            │ │ SQLite WAL       │ │
-            │ │ 12 fields        │ │
-            │ │ SANS req #8      │ │
-            │ └──────────────────┘ │
-            └──────────────────────┘
+    │   (Nemotron)     │ │  (DeepSeek)      │ │  (cybersec-lab)  │
+    │   propagator     │ │  auditor         │ │                  │
+    │                  │ │                  │ │ • skill_scanner  │
+    │  NVIDIA NIM      │ │  OpenRouter      │ │ • ioc_scanner    │
+    │  mistral-nemotron│ │  deepseek-chat   │ │ • scan_yara      │
+    │                  │ │                  │ │ • secrets_detect │
+    │  MITRE ATT&CK    │ │  ΔA≈1 vs triage  │ │                  │
+    │  mapping         │ │  τ low           │ │  12 scanners     │
+    │                  │ │                  │ │  32+ YARA rules  │
+    └────────┬─────────┘ └────────┬─────────┘ └──────────────────┘
+             │                    │
+             │     ┌──────────────┘
+             │     │
+             ▼     ▼
+    ┌──────────────────────────────┐
+    │    Heterogeneity Check       │
+    │    (Shehata & Li 2026)       │
+    │                              │
+    │  If ΔA≈0 (same family):     │
+    │    → kinship lock WARNING    │
+    │    → re-route to DeepSeek    │
+    │                              │
+    │  If ΔA≈1 (heterogeneous):   │
+    │    → trust falsifier result  │
+    │    → max 2 iterations        │
+    └──────────────┬───────────────┘
+                   │
+                   ▼
+    ┌──────────────────────────────┐
+    │     Execution Logger         │
+    │     (Audit Trail)            │
+    │                              │
+    │  • SQLite WAL, 12 fields     │
+    │  • heterogeneity metrics     │
+    │  • τ + ΔA per decision       │
+    │  • SANS requirement #8       │
+    └──────────────────────────────┘
 ```
+
+> **Heterogeneity Mandate:** Per *Shehata & Li (2026), arXiv:2604.27274*, the
+> Falsifier (auditor) must be architecturally different from MR. Robot
+> (propagator). Same-family agents produce τ≈1 → Logic Saturation → 100%
+> error. Using DeepSeek as the falsifier ensures ΔA≈1 and τ low.
+> See [`docs/heterogeneity_mandate.md`](docs/heterogeneity_mandate.md).
 
 ## Key Features
 
@@ -82,12 +90,13 @@ LLM-powered analysis that goes beyond pattern matching:
 - Recommends specific incident response actions
 - Detects scanner gaps (e.g., false negatives)
 
-### 🔄 Falsifier + Self-Correction
-An adversarial reviewer that plays devil's advocate:
-- Challenges each finding: "What if this is a false positive?"
-- Proposes alternative benign explanations
-- If it finds genuine weaknesses, MR. Robot re-runs with the counter-argument
-- Iterates up to 3 times until the triage survives falsification
+### 🔄 Falsifier + Heterogeneous Orchestrator
+An adversarial reviewer with architectural diversity enforced:
+- Falsifier runs on **DeepSeek** (ΔA≈1 vs Nemotron), per Shehata & Li (2026)
+- Heterogeneity check prevents kinship lock (same-family sycophancy)
+- Rule-based orchestrator (τ=0) makes final verdict — no LLM, no model family
+- If falsifier finds genuine weaknesses, MR. Robot re-runs (max 2 iterations)
+- Kinship lock warnings logged to audit trail with τ + ΔA metrics
 
 ### 📋 Execution Logger (Audit Trail)
 Every tool call is logged with full context:
@@ -175,6 +184,9 @@ import json
 report = run_self_correction_loop('/path/to/file.py')
 print(json.dumps(report, indent=2, default=str))
 "
+
+# Heterogeneous orchestration (recommended)
+python triage_orchestrator.py /path/to/file.py
 
 # Generate accuracy report
 python accuracy_report.py
