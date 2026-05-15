@@ -153,7 +153,22 @@ the full architectural-vs-prompt-based guardrail catalogue.
 
 ## Results
 
-### Accuracy Evaluation (99 malicious + 19 benign = 118 samples)
+### Public-benchmark evaluation (CyberSOCEval / Malware Analysis)
+
+Honest sub-baseline result on the Meta + CrowdStrike public benchmark, using
+the same LLM provider stack (`nvidia-nim` / `mistralai/mistral-nemotron`) the
+triage pipeline uses:
+
+| Metric | Value | Paper baseline (full set) |
+|---|---|---|
+| Exact-match accuracy | 10.0% (subset, n=30) | 23–34% (SOTA LLMs, full set) |
+| Mean Jaccard similarity | 0.413 | — |
+
+The full 609-question run is one command away (`--limit 0`). See
+[`docs/cybersoceval_results.md`](docs/cybersoceval_results.md) for honest
+assessment + reproduction instructions.
+
+### Internal accuracy report (99 malicious + 19 benign = 118 samples)
 
 | Metric | Value |
 |--------|-------|

@@ -1,0 +1,617 @@
+{
+  "summary": {
+    "benchmark": "CyberSOCEval / Malware Analysis (subset)",
+    "provider": "nvidia-nim",
+    "questions_total_in_dataset": 609,
+    "questions_evaluated": 30,
+    "exact_match_accuracy": 0.1,
+    "mean_jaccard_similarity": 0.4128,
+    "wall_seconds": 64.5,
+    "per_attack_family": {
+      "ransomware": {
+        "total": 5,
+        "exact": 1,
+        "accuracy": 0.2,
+        "mean_jaccard": 0.3667
+      },
+      "killers": {
+        "total": 8,
+        "exact": 0,
+        "accuracy": 0.0,
+        "mean_jaccard": 0.4208
+      },
+      "infostealers": {
+        "total": 6,
+        "exact": 1,
+        "accuracy": 0.1667,
+        "mean_jaccard": 0.375
+      },
+      "um_unhooking": {
+        "total": 7,
+        "exact": 1,
+        "accuracy": 0.1429,
+        "mean_jaccard": 0.5619
+      },
+      "remcos": {
+        "total": 4,
+        "exact": 0,
+        "accuracy": 0.0,
+        "mean_jaccard": 0.25
+      }
+    },
+    "notes": [
+      "Exact-match: predicted set equals correct set (CyberSOCEval primary metric).",
+      "Jaccard: partial credit for overlapping selections.",
+      "This run is a subset evaluation \u2014 see module docstring for limitations.",
+      "LLM stack: same provider chain as MR. Robot triage; prompt is",
+      "  benchmark-appropriate (MCQ over sandbox JSON), not the 5-phase triage prompt."
+    ]
+  },
+  "results": [
+    {
+      "index": 1,
+      "sha256": "f577d4931c05b204bfb3cb8459f8e0622bd0cb64f20de4eb6ddd7aa166f60d5c",
+      "topic": "Risk Assessment",
+      "difficulty": "medium",
+      "attack": "ransomware",
+      "predicted": [
+        "A",
+        "B",
+        "D",
+        "E"
+      ],
+      "correct": [
+        "A",
+        "F",
+        "G"
+      ],
+      "exact_match": false,
+      "jaccard": 0.1667,
+      "llm_seconds": 2.52
+    },
+    {
+      "index": 2,
+      "sha256": "b4b66aa6f8f2c5f8c7a6df70b5b6dd96356199e6b00066f8d6fb54c868d45026",
+      "topic": "File Operations",
+      "difficulty": "easy",
+      "attack": "ransomware",
+      "predicted": [
+        "A",
+        "C"
+      ],
+      "correct": [
+        "C",
+        "D"
+      ],
+      "exact_match": false,
+      "jaccard": 0.3333,
+      "llm_seconds": 2.03
+    },
+    {
+      "index": 3,
+      "sha256": "7001c67bef47068236ee34ddf0520175ef6213277034cb0af321a393295bfe9b",
+      "topic": "System Interactions",
+      "difficulty": "easy",
+      "attack": "killers",
+      "predicted": [
+        "B",
+        "E",
+        "F"
+      ],
+      "correct": [
+        "A",
+        "B",
+        "C"
+      ],
+      "exact_match": false,
+      "jaccard": 0.2,
+      "llm_seconds": 1.98
+    },
+    {
+      "index": 4,
+      "sha256": "7b5a05478b59b5382b30f75364e994877c1db6fd88625eb95ebf0ee54e5682b9",
+      "topic": "Risk Assessment",
+      "difficulty": "medium",
+      "attack": "infostealers",
+      "predicted": [
+        "C",
+        "G"
+      ],
+      "correct": [
+        "B",
+        "C",
+        "E",
+        "G"
+      ],
+      "exact_match": false,
+      "jaccard": 0.5,
+      "llm_seconds": 2.07
+    },
+    {
+      "index": 5,
+      "sha256": "0ef46f3686f60e1b6801fb27d2cb316597f31b59d79fd77e8685c1999b5f32bc",
+      "topic": "Behavioral Analysis",
+      "difficulty": "easy",
+      "attack": "killers",
+      "predicted": [
+        "B",
+        "C",
+        "E"
+      ],
+      "correct": [
+        "G"
+      ],
+      "exact_match": false,
+      "jaccard": 0.0,
+      "llm_seconds": 2.24
+    },
+    {
+      "index": 6,
+      "sha256": "e7d3181ef643d77bb33fe328d1ea58f512b4f27c8e6ed71935a2e7548f2facc0",
+      "topic": "Evasion Techniques",
+      "difficulty": "easy",
+      "attack": "um_unhooking",
+      "predicted": [
+        "B",
+        "E",
+        "F",
+        "G"
+      ],
+      "correct": [
+        "B",
+        "E",
+        "F",
+        "G"
+      ],
+      "exact_match": true,
+      "jaccard": 1.0,
+      "llm_seconds": 1.89
+    },
+    {
+      "index": 7,
+      "sha256": "934cac5ad03fc72a950ffd7b65ae2eaf9852b7ea1d2562d880a55244f34bd963",
+      "topic": "Behavioral Analysis",
+      "difficulty": "medium",
+      "attack": "infostealers",
+      "predicted": [
+        "A",
+        "B",
+        "C"
+      ],
+      "correct": [
+        "A",
+        "B",
+        "C"
+      ],
+      "exact_match": true,
+      "jaccard": 1.0,
+      "llm_seconds": 2.01
+    },
+    {
+      "index": 8,
+      "sha256": "73a435399cf3116da6987933e5b067dd45d97d034f107085016c0a27869bc45d",
+      "topic": "File Operations",
+      "difficulty": "easy",
+      "attack": "um_unhooking",
+      "predicted": [
+        "C",
+        "F"
+      ],
+      "correct": [
+        "F"
+      ],
+      "exact_match": false,
+      "jaccard": 0.5,
+      "llm_seconds": 2.15
+    },
+    {
+      "index": 9,
+      "sha256": "0ef6035d43e3634119da28fcee41653d5f7b1872f36b4d2c8d6737e2e2cd4e1e",
+      "topic": "Evasion Techniques",
+      "difficulty": "easy",
+      "attack": "killers",
+      "predicted": [
+        "B",
+        "D",
+        "E",
+        "F"
+      ],
+      "correct": [
+        "D",
+        "E",
+        "F"
+      ],
+      "exact_match": false,
+      "jaccard": 0.75,
+      "llm_seconds": 2.49
+    },
+    {
+      "index": 10,
+      "sha256": "0844a7218502246830af66afbb13795b1e35f5dffd756a9ceed8b526e71fe927",
+      "topic": "Privilege Escalation",
+      "difficulty": "easy",
+      "attack": "killers",
+      "predicted": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F"
+      ],
+      "correct": [
+        "C",
+        "E"
+      ],
+      "exact_match": false,
+      "jaccard": 0.3333,
+      "llm_seconds": 2.07
+    },
+    {
+      "index": 11,
+      "sha256": "395b770294b42cc9643bda8493591713f80e56cb3e13e438ea2f62295e8585c5",
+      "topic": "File Operations",
+      "difficulty": "easy",
+      "attack": "remcos",
+      "predicted": [
+        "B",
+        "F"
+      ],
+      "correct": [
+        "A",
+        "D",
+        "E"
+      ],
+      "exact_match": false,
+      "jaccard": 0.0,
+      "llm_seconds": 2.14
+    },
+    {
+      "index": 12,
+      "sha256": "070e719b0b9b5027c8629b058868f8faa6d224cdc4fed3f2e11041ff677aafa1",
+      "topic": "Behavioral Analysis",
+      "difficulty": "easy",
+      "attack": "infostealers",
+      "predicted": [
+        "A",
+        "C",
+        "D",
+        "E"
+      ],
+      "correct": [
+        "A",
+        "D",
+        "E"
+      ],
+      "exact_match": false,
+      "jaccard": 0.75,
+      "llm_seconds": 2.7
+    },
+    {
+      "index": 13,
+      "sha256": "25153247a5bb3a232e051b5fcc7be2bd477a8ddd8e9a50cffd78676ac2d6199d",
+      "topic": "Evasion Techniques",
+      "difficulty": "easy",
+      "attack": "um_unhooking",
+      "predicted": [
+        "B",
+        "D"
+      ],
+      "correct": [
+        "D"
+      ],
+      "exact_match": false,
+      "jaccard": 0.5,
+      "llm_seconds": 2.11
+    },
+    {
+      "index": 14,
+      "sha256": "8e7cf6179094262b5088d5c00566541381676c1ff38525be51857bb21ee97b6c",
+      "topic": "Risk Assessment",
+      "difficulty": "medium",
+      "attack": "infostealers",
+      "predicted": [
+        "A"
+      ],
+      "correct": [
+        "E"
+      ],
+      "exact_match": false,
+      "jaccard": 0.0,
+      "llm_seconds": 2.26
+    },
+    {
+      "index": 15,
+      "sha256": "8ff2524da2305109eda10901710c6db55e5228a2aa43e7318a958810ed569333",
+      "topic": "System Interactions",
+      "difficulty": "easy",
+      "attack": "remcos",
+      "predicted": [
+        "A"
+      ],
+      "correct": [
+        "E"
+      ],
+      "exact_match": false,
+      "jaccard": 0.0,
+      "llm_seconds": 2.0
+    },
+    {
+      "index": 16,
+      "sha256": "fe3954fdf5af164d8acd2db166aca208fc6ebd22d730ef173174a7b8ff70842f",
+      "topic": "Evasion Techniques",
+      "difficulty": "easy",
+      "attack": "infostealers",
+      "predicted": [
+        "B",
+        "D"
+      ],
+      "correct": [
+        "A"
+      ],
+      "exact_match": false,
+      "jaccard": 0.0,
+      "llm_seconds": 2.21
+    },
+    {
+      "index": 17,
+      "sha256": "c5571b0a43bbaee5653d0f9b6fc7f9c960ea665fcb868d75d8890a1a5d0e0de0",
+      "topic": "MITRE ATT&CK Framework Mapping",
+      "difficulty": "easy",
+      "attack": "ransomware",
+      "predicted": [
+        "G"
+      ],
+      "correct": [
+        "G"
+      ],
+      "exact_match": true,
+      "jaccard": 1.0,
+      "llm_seconds": 1.74
+    },
+    {
+      "index": 18,
+      "sha256": "78641cb5a706c6ac8de42c1c1b751805dc54c509fb82eb142db5f0cf5a1c92f9",
+      "topic": "Behavioral Analysis",
+      "difficulty": "medium",
+      "attack": "killers",
+      "predicted": [
+        "A"
+      ],
+      "correct": [
+        "F"
+      ],
+      "exact_match": false,
+      "jaccard": 0.0,
+      "llm_seconds": 1.9
+    },
+    {
+      "index": 19,
+      "sha256": "04477b12cf1bb7c6aa72f3e830af1cd22d8970dbf17b1ec5062a0a1fd3dcd4fc",
+      "topic": "System Interactions",
+      "difficulty": "easy",
+      "attack": "remcos",
+      "predicted": [
+        "A",
+        "C",
+        "D"
+      ],
+      "correct": [
+        "A",
+        "B",
+        "C"
+      ],
+      "exact_match": false,
+      "jaccard": 0.5,
+      "llm_seconds": 2.55
+    },
+    {
+      "index": 20,
+      "sha256": "3facc153ed82a72695ee2718084db91f85e2560407899e1c7f6938fd4ea011e9",
+      "topic": "MITRE ATT&CK Framework Mapping",
+      "difficulty": "medium",
+      "attack": "ransomware",
+      "predicted": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F"
+      ],
+      "correct": [
+        "E",
+        "F"
+      ],
+      "exact_match": false,
+      "jaccard": 0.3333,
+      "llm_seconds": 2.06
+    },
+    {
+      "index": 21,
+      "sha256": "006052bdcfc75e636564cc92e96237e7331a9c147f1775a3f00e681f78956a03",
+      "topic": "MITRE ATT&CK Framework Mapping",
+      "difficulty": "easy",
+      "attack": "remcos",
+      "predicted": [
+        "A",
+        "C"
+      ],
+      "correct": [
+        "A"
+      ],
+      "exact_match": false,
+      "jaccard": 0.5,
+      "llm_seconds": 1.91
+    },
+    {
+      "index": 22,
+      "sha256": "9a301b34be9ebda00f6c1930c4b56a054683b44a2c59d0017a7a4b2bf39c0500",
+      "topic": "MITRE ATT&CK Framework Mapping",
+      "difficulty": "easy",
+      "attack": "infostealers",
+      "predicted": [
+        "A",
+        "B",
+        "E"
+      ],
+      "correct": [
+        "F"
+      ],
+      "exact_match": false,
+      "jaccard": 0.0,
+      "llm_seconds": 1.79
+    },
+    {
+      "index": 23,
+      "sha256": "e7379a48e702c96fa733625cf8535f1a1a9c6704941224a7b5ecb18d8e0fed33",
+      "topic": "Behavioral Analysis",
+      "difficulty": "medium",
+      "attack": "killers",
+      "predicted": [
+        "A",
+        "B",
+        "E"
+      ],
+      "correct": [
+        "A",
+        "B"
+      ],
+      "exact_match": false,
+      "jaccard": 0.6667,
+      "llm_seconds": 2.29
+    },
+    {
+      "index": 24,
+      "sha256": "ed09be6f5ebb23ca1a209e1587584a094399558ff2fd5ca33465cfd226b3b49d",
+      "topic": "Risk Assessment",
+      "difficulty": "easy",
+      "attack": "killers",
+      "predicted": [
+        "A",
+        "B",
+        "C"
+      ],
+      "correct": [
+        "A",
+        "C"
+      ],
+      "exact_match": false,
+      "jaccard": 0.6667,
+      "llm_seconds": 2.24
+    },
+    {
+      "index": 25,
+      "sha256": "25c97105d482ed561e53b782cfeb071336e9ffc9e9966a962bd9ef492e69e035",
+      "topic": "Behavioral Analysis",
+      "difficulty": "easy",
+      "attack": "um_unhooking",
+      "predicted": [
+        "B",
+        "E"
+      ],
+      "correct": [
+        "E"
+      ],
+      "exact_match": false,
+      "jaccard": 0.5,
+      "llm_seconds": 1.65
+    },
+    {
+      "index": 26,
+      "sha256": "888c11e124610c7af11109f3b28f1046c0123daaf6ce5da755d192d2dd1305f9",
+      "topic": "File Operations",
+      "difficulty": "easy",
+      "attack": "um_unhooking",
+      "predicted": [
+        "A",
+        "D",
+        "F"
+      ],
+      "correct": [
+        "A",
+        "B",
+        "D",
+        "E",
+        "F"
+      ],
+      "exact_match": false,
+      "jaccard": 0.6,
+      "llm_seconds": 3.09
+    },
+    {
+      "index": 27,
+      "sha256": "71caf290168c22d29d9d2c3e2702a0b0e7c7f44b5ceee88eb7fab1c6e7058e9f",
+      "topic": "Evasion Techniques",
+      "difficulty": "medium",
+      "attack": "um_unhooking",
+      "predicted": [
+        "D",
+        "E"
+      ],
+      "correct": [
+        "E",
+        "F"
+      ],
+      "exact_match": false,
+      "jaccard": 0.3333,
+      "llm_seconds": 2.27
+    },
+    {
+      "index": 28,
+      "sha256": "94edac68f5356f7bb1ca5db827fc6d4dc183d5bb77e2ee9c8c1a9a402e3fea43",
+      "topic": "Evasion Techniques",
+      "difficulty": "easy",
+      "attack": "ransomware",
+      "predicted": [
+        "B",
+        "D",
+        "E"
+      ],
+      "correct": [
+        "G"
+      ],
+      "exact_match": false,
+      "jaccard": 0.0,
+      "llm_seconds": 2.45
+    },
+    {
+      "index": 29,
+      "sha256": "0844a7218502246830af66afbb13795b1e35f5dffd756a9ceed8b526e71fe927",
+      "topic": "System Interactions",
+      "difficulty": "easy",
+      "attack": "killers",
+      "predicted": [
+        "B",
+        "C",
+        "F"
+      ],
+      "correct": [
+        "B",
+        "C",
+        "E",
+        "F"
+      ],
+      "exact_match": false,
+      "jaccard": 0.75,
+      "llm_seconds": 1.96
+    },
+    {
+      "index": 30,
+      "sha256": "120894e1a20de2fefb24647fa436890ff581a6e33945e1a17664606e16eab5b4",
+      "topic": "Persistence Techniques",
+      "difficulty": "easy",
+      "attack": "um_unhooking",
+      "predicted": [
+        "B",
+        "D"
+      ],
+      "correct": [
+        "B"
+      ],
+      "exact_match": false,
+      "jaccard": 0.5,
+      "llm_seconds": 1.95
+    }
+  ]
+}

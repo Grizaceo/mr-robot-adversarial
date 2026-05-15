@@ -1,5 +1,27 @@
 # Changelog
 
+## 2026-05-15 — Public-benchmark evaluation (CyberSOCEval)
+
+### Added
+- **`evals/cybersoceval_malware.py`** — eval harness that runs the official
+  CyberSOCEval Malware Analysis multiple-choice questions (609 total, joint
+  Meta + CrowdStrike open-source benchmark) through the same LLM provider
+  stack the triage pipeline uses, and reports exact-match accuracy plus
+  Jaccard similarity. Pulls questions from PurpleLlama and sandbox reports
+  from CyberSOCEval_data.
+- **`docs/cybersoceval_results.md`** — honest writeup of the current result
+  (10.0% exact-match, 0.413 Jaccard on a seeded n=30 subset). Below the
+  paper's 23-34% baseline band; the report explains why (overselection on
+  MCQ format) and how to reproduce.
+- **`docs/cybersoceval_results.json`** — per-question outcomes for audit.
+
+### Why
+SANS rubric criterion #2 (`IR Accuracy`) is judged across submissions; a
+self-built corpus is informative but not comparable. A public benchmark
+makes the LLM-choice claim verifiable, even when the number is unflattering.
+
+---
+
 ## 2026-05-15 — Prompt-injection defense + architectural guardrails
 
 Driven by a SOTA grounding pass (Microsoft MDASH announcement of 12 May 2026,
