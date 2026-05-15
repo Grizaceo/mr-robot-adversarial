@@ -23,11 +23,10 @@ from pathlib import Path
 from typing import Any
 
 from mcp.server.fastmcp import FastMCP
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from mcp_tools import (
-    CYBERSEC_LAB, SCANNERS_DIR, LOG_DIR,
-    run_all_scanners, run_triage_agent, run_falsifier_loop,
+    CYBERSEC_LAB, SCANNERS_DIR, run_all_scanners, run_triage_agent, run_falsifier_loop,
     log_tool, verdict_to_severity, aggregate_scanner_results,
 )
 

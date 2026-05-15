@@ -27,7 +27,7 @@ import os
 import logging
 from pathlib import Path
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Optional
 
 logger = logging.getLogger("execution-logger")
 

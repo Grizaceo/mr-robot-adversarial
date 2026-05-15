@@ -6,13 +6,15 @@ Extracted from mcp_server.py to reduce duplication between tools.
 """
 
 import json
+import logging
 import os
+import subprocess
 import sys
 import time
-import logging
-import subprocess
 from pathlib import Path
-from typing import Any, Optional
+from typing import Optional
+
+from execution_logger import get_logger
 
 logger = logging.getLogger("mcp-tools")
 
@@ -23,9 +25,6 @@ SCANNERS_DIR = CYBERSEC_LAB / "scanners"
 MR_ROBOT = Path(__file__).parent / "agents" / "mr_robot" / "triage.py"
 LOG_DIR = Path("logs")
 LOG_DIR.mkdir(exist_ok=True)
-
-# Import audit logger
-from execution_logger import get_logger
 audit = get_logger("logs/audit_trail.db")
 
 
@@ -167,10 +166,14 @@ def aggregate_scanner_results(results: dict[str, dict]) -> dict:
         total += len(findings)
         for f in findings:
             sev = str(f.get("severity", "")).upper()
-            if sev == "CRITICAL": critical += 1
-            elif sev == "HIGH": high += 1
-            elif sev == "MEDIUM": medium += 1
-            else: low += 1
+            if sev == "CRITICAL":
+                critical += 1
+            elif sev == "HIGH":
+                high += 1
+            elif sev == "MEDIUM":
+                medium += 1
+            else:
+                low += 1
     # Also check by_severity from skill_scanner
     if "skill_scanner" in results and "by_severity" in results["skill_scanner"]:
         bs = results["skill_scanner"]["by_severity"]
@@ -179,10 +182,14 @@ def aggregate_scanner_results(results: dict[str, dict]) -> dict:
         medium = max(medium, bs.get("MEDIUM", 0))
         low = max(low, bs.get("INFO", 0))
 
-    if critical > 0: verdict = "MALICIOUS"
-    elif high > 0: verdict = "SUSPICIOUS"
-    elif total > 0: verdict = "SUSPICIOUS"
-    else: verdict = "BENIGN"
+    if critical > 0:
+        verdict = "MALICIOUS"
+    elif high > 0:
+        verdict = "SUSPICIOUS"
+    elif total > 0:
+        verdict = "SUSPICIOUS"
+    else:
+        verdict = "BENIGN"
 
     return {"total_findings": total, "critical": critical, "high": high,
             "medium": medium, "low": low, "overall_verdict": verdict}

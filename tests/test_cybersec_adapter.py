@@ -1,6 +1,5 @@
 """Tests for CybersecLabAdapter."""
 
-import pytest
 from pathlib import Path
 from cybersec_lab_integration.adapter import CybersecLabAdapter
 

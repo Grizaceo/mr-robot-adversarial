@@ -3,9 +3,8 @@
 
 from pydantic import BaseModel
 from typing import List, Optional
-import json, logging
+import logging
 from datetime import datetime
-from pathlib import Path
 
 from agents.threat_detector import ThreatDetector
 from agents.response_orchestrator import ResponseOrchestrator

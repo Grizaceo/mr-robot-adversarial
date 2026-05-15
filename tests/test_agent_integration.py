@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Integration tests for FIND EVIL! agent system."""
 
-import pytest
 from agents.defender_agent import DefenderAgent, ThreatAlert
 
 

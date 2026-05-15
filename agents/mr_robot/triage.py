@@ -22,7 +22,6 @@ import subprocess
 import time
 from pathlib import Path
 from datetime import datetime, timezone
-from typing import Optional
 
 # ── Provider Configuration ────────────────────────────────────────────────────
 
@@ -311,9 +310,9 @@ def _build_prompt(candidate_path: str, findings: dict = None, context: dict = No
         return f"Error reading candidate file: {e}"
 
     lines.append(f"## Candidate File: {candidate_path}")
-    lines.append(f"```")
+    lines.append("```")
     lines.append(code[:8000])  # Cap at 8K chars to avoid context overflow
-    lines.append(f"```")
+    lines.append("```")
     lines.append("")
 
     # Scanner findings
@@ -322,9 +321,9 @@ def _build_prompt(candidate_path: str, findings: dict = None, context: dict = No
         for scanner_name, result in findings.items():
             lines.append(f"\n### {scanner_name}")
             if isinstance(result, dict):
-                lines.append(f"```json")
+                lines.append("```json")
                 lines.append(json.dumps(result, indent=2, default=str)[:2000])
-                lines.append(f"```")
+                lines.append("```")
             else:
                 lines.append(str(result)[:2000])
         lines.append("")
@@ -438,7 +437,7 @@ def triage(
     # Human-readable format
     lines = [
         "=" * 60,
-        f"  MR. ROBOT — TRIAGE REPORT",
+        "  MR. ROBOT — TRIAGE REPORT",
         "=" * 60,
         f"  Candidate:  {candidate_path}",
         f"  Verdict:    {report.get('verdict', 'N/A')} (confidence: {report.get('confidence', 'N/A')})",

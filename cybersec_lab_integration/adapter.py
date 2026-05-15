@@ -4,7 +4,6 @@
 from pathlib import Path
 from typing import List, Dict
 import json
-import logging
 
 
 class CybersecLabAdapter:
