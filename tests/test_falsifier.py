@@ -219,3 +219,24 @@ def test_system_prompt_contains_anti_contrarian_rule():
 
 def test_system_prompt_requires_json_only_output():
     assert "Output ONLY a JSON object" in FALSIFIER_SYSTEM_PROMPT
+
+
+def test_falsifier_prompt_has_framework_safe_patterns():
+    """Verify the falsifier prompt includes framework safe patterns for FP refutation."""
+    assert "FRAMEWORK SAFE PATTERNS" in FALSIFIER_SYSTEM_PROMPT
+    assert "auto-escaped" in FALSIFIER_SYSTEM_PROMPT
+    assert "Django" in FALSIFIER_SYSTEM_PROMPT
+    assert "React" in FALSIFIER_SYSTEM_PROMPT
+
+
+def test_falsifier_prompt_has_confidence_levels():
+    """Verify the falsifier prompt defines confidence levels for challenges."""
+    assert "HIGH" in FALSIFIER_SYSTEM_PROMPT
+    assert "MEDIUM" in FALSIFIER_SYSTEM_PROMPT
+    assert "LOW" in FALSIFIER_SYSTEM_PROMPT
+
+
+def test_falsifier_output_format_has_framework_field():
+    """Verify the falsifier output format includes framework_safe_pattern field."""
+    assert "framework_safe_pattern" in FALSIFIER_SYSTEM_PROMPT
+    assert "confidence" in FALSIFIER_SYSTEM_PROMPT
