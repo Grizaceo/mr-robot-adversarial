@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-15T12:36:21Z",
+  "generated_at": "2026-05-15T18:16:19Z",
   "pipeline": "MR. Robot Adversarial v1.0",
   "scanners": [
     "skill_scanner",
@@ -7,20 +7,20 @@
     "yara",
     "secrets_detector"
   ],
-  "duration_seconds": 21.02,
+  "duration_seconds": 27.85,
   "metrics": {
-    "accuracy": 1.0,
-    "precision": 1.0,
+    "accuracy": 0.9746,
+    "precision": 0.9706,
     "recall": 1.0,
-    "f1": 1.0,
-    "fpr": 0,
+    "f1": 0.9851,
+    "fpr": 0.1579,
     "confusion_matrix": {
       "TP": 99,
-      "FP": 0,
-      "TN": 0,
+      "FP": 3,
+      "TN": 16,
       "FN": 0
     },
-    "total": 99
+    "total": 118
   },
   "per_severity": {
     "critical": {
@@ -40,6 +40,12 @@
       "detected": 7,
       "missed": 0,
       "recall": 1.0
+    },
+    "none": {
+      "total": 19,
+      "detected": 0,
+      "missed": 0,
+      "recall": 0.0
     }
   },
   "per_detector": {
@@ -85,6 +91,12 @@
     }
   },
   "per_tag": {
+    "benign": {
+      "total": 19,
+      "detected": 0,
+      "missed": 0,
+      "recall": 0.0
+    },
     "adversarial": {
       "total": 18,
       "detected": 18,
@@ -1837,6 +1849,202 @@
         "ioc_scanner",
         "yara"
       ]
+    },
+    {
+      "scenario": "benign-csv_aggregator",
+      "file": "/home/gris/.hermes/workspace/repos/find-evil-hackathon/benign_corpus/csv_aggregator.py",
+      "gt": "BENIGN",
+      "pred": "BENIGN",
+      "outcome": "TN",
+      "severity": "none",
+      "findings": 0,
+      "detectors_flagged": []
+    },
+    {
+      "scenario": "benign-django_user_view",
+      "file": "/home/gris/.hermes/workspace/repos/find-evil-hackathon/benign_corpus/django_user_view.py",
+      "gt": "BENIGN",
+      "pred": "BENIGN",
+      "outcome": "TN",
+      "severity": "none",
+      "findings": 0,
+      "detectors_flagged": []
+    },
+    {
+      "scenario": "benign-express_health",
+      "file": "/home/gris/.hermes/workspace/repos/find-evil-hackathon/benign_corpus/express_health.js",
+      "gt": "BENIGN",
+      "pred": "BENIGN",
+      "outcome": "TN",
+      "severity": "none",
+      "findings": 0,
+      "detectors_flagged": []
+    },
+    {
+      "scenario": "benign-fastapi_orders",
+      "file": "/home/gris/.hermes/workspace/repos/find-evil-hackathon/benign_corpus/fastapi_orders.py",
+      "gt": "BENIGN",
+      "pred": "BENIGN",
+      "outcome": "TN",
+      "severity": "none",
+      "findings": 0,
+      "detectors_flagged": []
+    },
+    {
+      "scenario": "benign-fibonacci",
+      "file": "/home/gris/.hermes/workspace/repos/find-evil-hackathon/benign_corpus/fibonacci.py",
+      "gt": "BENIGN",
+      "pred": "BENIGN",
+      "outcome": "TN",
+      "severity": "none",
+      "findings": 0,
+      "detectors_flagged": []
+    },
+    {
+      "scenario": "benign-github_ci",
+      "file": "/home/gris/.hermes/workspace/repos/find-evil-hackathon/benign_corpus/github_ci.yml",
+      "gt": "BENIGN",
+      "pred": "BENIGN",
+      "outcome": "TN",
+      "severity": "none",
+      "findings": 0,
+      "detectors_flagged": []
+    },
+    {
+      "scenario": "benign-k8s_deployment",
+      "file": "/home/gris/.hermes/workspace/repos/find-evil-hackathon/benign_corpus/k8s_deployment.yaml",
+      "gt": "BENIGN",
+      "pred": "MALICIOUS",
+      "outcome": "FP",
+      "severity": "none",
+      "findings": 2,
+      "detectors_flagged": [
+        "ioc_scanner"
+      ]
+    },
+    {
+      "scenario": "benign-markdown_renderer",
+      "file": "/home/gris/.hermes/workspace/repos/find-evil-hackathon/benign_corpus/markdown_renderer.py",
+      "gt": "BENIGN",
+      "pred": "BENIGN",
+      "outcome": "TN",
+      "severity": "none",
+      "findings": 0,
+      "detectors_flagged": []
+    },
+    {
+      "scenario": "benign-parameterized_sql",
+      "file": "/home/gris/.hermes/workspace/repos/find-evil-hackathon/benign_corpus/parameterized_sql.py",
+      "gt": "BENIGN",
+      "pred": "MALICIOUS",
+      "outcome": "FP",
+      "severity": "none",
+      "findings": 1,
+      "detectors_flagged": [
+        "skill_scanner"
+      ]
+    },
+    {
+      "scenario": "benign-react_search_box",
+      "file": "/home/gris/.hermes/workspace/repos/find-evil-hackathon/benign_corpus/react_search_box.jsx",
+      "gt": "BENIGN",
+      "pred": "BENIGN",
+      "outcome": "TN",
+      "severity": "none",
+      "findings": 0,
+      "detectors_flagged": []
+    },
+    {
+      "scenario": "benign-secure_dockerfile",
+      "file": "/home/gris/.hermes/workspace/repos/find-evil-hackathon/benign_corpus/secure_dockerfile",
+      "gt": "BENIGN",
+      "pred": "BENIGN",
+      "outcome": "TN",
+      "severity": "none",
+      "findings": 0,
+      "detectors_flagged": []
+    },
+    {
+      "scenario": "benign-typescript_dto",
+      "file": "/home/gris/.hermes/workspace/repos/find-evil-hackathon/benign_corpus/typescript_dto.ts",
+      "gt": "BENIGN",
+      "pred": "BENIGN",
+      "outcome": "TN",
+      "severity": "none",
+      "findings": 0,
+      "detectors_flagged": []
+    },
+    {
+      "scenario": "benign-safe_Dockerfile",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/benign/safe_Dockerfile",
+      "gt": "BENIGN",
+      "pred": "BENIGN",
+      "outcome": "TN",
+      "severity": "none",
+      "findings": 0,
+      "detectors_flagged": []
+    },
+    {
+      "scenario": "benign-safe_app",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/benign/safe_app.py",
+      "gt": "BENIGN",
+      "pred": "BENIGN",
+      "outcome": "TN",
+      "severity": "none",
+      "findings": 0,
+      "detectors_flagged": []
+    },
+    {
+      "scenario": "benign-safe_ci",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/benign/safe_ci.yml",
+      "gt": "BENIGN",
+      "pred": "BENIGN",
+      "outcome": "TN",
+      "severity": "none",
+      "findings": 0,
+      "detectors_flagged": []
+    },
+    {
+      "scenario": "benign-safe_deploy",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/benign/safe_deploy.sh",
+      "gt": "BENIGN",
+      "pred": "BENIGN",
+      "outcome": "TN",
+      "severity": "none",
+      "findings": 0,
+      "detectors_flagged": []
+    },
+    {
+      "scenario": "benign-safe_package",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/benign/safe_package.json",
+      "gt": "BENIGN",
+      "pred": "BENIGN",
+      "outcome": "TN",
+      "severity": "none",
+      "findings": 0,
+      "detectors_flagged": []
+    },
+    {
+      "scenario": "benign-safe_server",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/benign/safe_server.js",
+      "gt": "BENIGN",
+      "pred": "MALICIOUS",
+      "outcome": "FP",
+      "severity": "none",
+      "findings": 2,
+      "detectors_flagged": [
+        "skill_scanner"
+      ]
+    },
+    {
+      "scenario": "benign-safe_setup",
+      "file": "/home/gris/.hermes/workspace/cybersecurity-lab/test-corpus/benign/safe_setup.py",
+      "gt": "BENIGN",
+      "pred": "BENIGN",
+      "outcome": "TN",
+      "severity": "none",
+      "findings": 0,
+      "detectors_flagged": []
     }
   ]
 }

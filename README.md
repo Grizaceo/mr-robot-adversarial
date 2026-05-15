@@ -67,11 +67,13 @@ searching for CLI flags during an active incident.
     └──────────────────────────────┘
 ```
 
-> **Heterogeneity Mandate:** Per *Shehata & Li (2026), arXiv:2604.27274*, the
-> Falsifier (auditor) must be architecturally different from MR. Robot
-> (propagator). Same-family agents produce τ≈1 → Logic Saturation → 100%
-> error. Using DeepSeek as the falsifier ensures ΔA≈1 and τ low.
-> See [`docs/heterogeneity_mandate.md`](docs/heterogeneity_mandate.md).
+> **Heterogeneity Mandate:** Per *Shehata & Li (2026),
+> [arXiv:2604.27274](https://arxiv.org/abs/2604.27274)*, the Falsifier
+> (auditor) must be architecturally different from MR. Robot (propagator).
+> Same-family agents produce τ≈1 → Logic Saturation → 100% error. Using
+> DeepSeek as the falsifier ensures ΔA≈1 and τ low. Reinforced by prior
+> work on multi-agent diversity (Du 2023, Liang 2023) and LLM sycophancy
+> (Sharma 2023). See [`docs/heterogeneity_mandate.md`](docs/heterogeneity_mandate.md).
 
 ## Key Features
 
@@ -133,15 +135,28 @@ Every tool call is logged with full context:
 
 ## Results
 
-### Accuracy Evaluation (99 adversarial scenarios)
+### Accuracy Evaluation (99 malicious + 19 benign = 118 samples)
 
 | Metric | Value |
 |--------|-------|
+| **Accuracy** | 97.5% (115/118) |
+| **Precision** | 97.1% (99/102) |
 | **Recall** | 100% (99/99 malicious detected) |
+| **F1** | 0.985 |
+| **FPR** | 15.8% (3/19 benigns flagged) |
 | **skill_scanner** | 98.8% (84/85 expected) |
 | **ioc_scanner** | 96.0% (73/76 expected) |
 | **yara** | 97.8% (87/89 expected) |
 | **secrets_detector** | 90.9% (10/11 expected) |
+
+Confusion matrix: **TP=99, FP=3, TN=16, FN=0**
+
+The benign corpus combines 12 hand-written samples in `benign_corpus/`
+(framework-safe Django/React/FastAPI/SQLAlchemy snippets, hardened Kubernetes
+and Dockerfile manifests, CI configs) with 7 samples from
+`cybersecurity-lab/test-corpus/benign/`. The 3 false positives (`k8s_deployment`,
+`parameterized_sql`, `safe_server`) are real findings to address — see
+[`docs/accuracy_report.json`](docs/accuracy_report.json) for details.
 
 ### Per-Severity Breakdown
 
@@ -150,6 +165,7 @@ Every tool call is logged with full context:
 | Critical | 33 | 33 | 100% |
 | High | 59 | 59 | 100% |
 | Medium | 7 | 7 | 100% |
+| Benign | 19 | 16 TN, 3 FP | — |
 
 ### E2E Test (5 scenarios with Falsifier)
 

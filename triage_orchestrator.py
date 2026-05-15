@@ -15,6 +15,10 @@ THEORY (arXiv:2604.27274):
   μ = σ(1 − B) + τB        (Synthesizer Gating Theorem)
   τ ∝ ω · (1 − ΔA)         (Architectural Tribalism)
 
+  Reinforced by prior multi-agent diversity literature:
+  Du et al. 2023 (arXiv:2305.14325), Wang et al. 2022 (arXiv:2203.11171),
+  Liang et al. 2023 (arXiv:2305.19118), Sharma et al. 2023 (arXiv:2310.13548).
+
 ARCHITECTURE:
   ┌──────────────────────────────────────────────────────────┐
   │ Scanner Suite (YARA / skill / IOC / secrets)             │
@@ -57,10 +61,16 @@ ARCHITECTURE:
   │ → Flags for human review if disagreement persists        │
   └──────────────────────────────────────────────────────────┘
 
-Reference:
+Primary Reference:
   Shehata, D. & Li, M. (2026). "The Inverse-Wisdom Law: Architectural
   Tribalism and the Consensus Paradox in Agentic Swarms."
   arXiv:2604.27274. University of Waterloo.
+
+Supporting Literature:
+  - Du et al. (2023). Multiagent Debate. arXiv:2305.14325.
+  - Wang et al. (2022). Self-Consistency. arXiv:2203.11171.
+  - Liang et al. (2023). Divergent Thinking in Multi-Agent Debate. arXiv:2305.19118.
+  - Sharma et al. (2023). LLM Sycophancy. arXiv:2310.13548.
 
 Usage:
     from triage_orchestrator import orchestrate
