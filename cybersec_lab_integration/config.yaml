@@ -1,4 +1,4 @@
-lab_path: ${CYBERSEC_LAB_PATH:-/home/gris/.hermes/workspace/cybersecurity-lab}
+lab_path: ${CYBERSEC_LAB_PATH:-./cybersecurity-lab}
 
 llm:
   provider: deepseek  # or anthropic, google, together
