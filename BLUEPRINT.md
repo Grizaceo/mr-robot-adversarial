@@ -5,7 +5,7 @@
 Build a working AI agent system that autonomously defends against cyber threats,
 integrating with the existing `cybersecurity-lab` to demonstrate real-world impact.
 
-## Status: READY FOR SUBMISSION (pending demo video)
+## Status: SUBMITTED
 
 **Deadline:** June 15, 2026 (31 days remaining as of 2026-05-15)
 
