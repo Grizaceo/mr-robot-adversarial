@@ -1,7 +1,6 @@
 """Tests for TriageFalsifier — adversarial review of MR. Robot triage reports."""
 
 import json
-from pathlib import Path
 
 import pytest
 from triage_falsifier import TriageFalsifier, FALSIFIER_SYSTEM_PROMPT

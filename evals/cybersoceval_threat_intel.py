@@ -43,12 +43,10 @@ from __future__ import annotations
 import argparse
 import base64
 import json
-import os
 import random
 import sys
 import time
 from pathlib import Path
-from typing import Iterable
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:

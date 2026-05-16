@@ -1,6 +1,5 @@
 """Tests for self-correction loop — Falsifier ↔ MR. Robot iterative refinement."""
 
-import json
 
 import pytest
 import triage_falsifier

@@ -1,5 +1,4 @@
 import json
-from pathlib import Path
 
 from execution_logger import ExecutionLogger
 from mcp_tools import _run_scanner

@@ -16,9 +16,8 @@ Usage:
 
 import json
 import os
-import sys
 import time
-from collections import Counter, defaultdict
+from collections import defaultdict
 from pathlib import Path
 
 import pytest

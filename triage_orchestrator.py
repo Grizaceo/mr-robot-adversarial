@@ -77,7 +77,6 @@ Usage:
     report = orchestrate("/path/to/candidate.py")
 """
 
-import os
 import json
 import time
 import logging
@@ -286,7 +285,7 @@ def orchestrate(
     scanner_start = time.time()
     if scanner_findings is None:
         try:
-            from mcp_tools import run_all_scanners, aggregate_scanner_results
+            from mcp_tools import run_all_scanners
             scanner_findings = run_all_scanners(str(candidate))
         except Exception as e:
             logger.warning(f"Scanner run failed: {e}, continuing without")

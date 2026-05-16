@@ -12,10 +12,8 @@ Verifies:
 - annotate_findings is idempotent (running twice doesn't change results)
 """
 
-import json
 import pytest
 from pathlib import Path
-from unittest.mock import patch
 
 REPO = Path(__file__).resolve().parents[1]
 BENIGN_DIR = REPO / "benign_corpus"
