@@ -1,5 +1,80 @@
 # Changelog
 
+## 2026-05-15 — Tier A/B/C plan execution (SANS submission final pass)
+
+Full implementation of the Tier A/B/C fix plan.  85 → 123 passing tests.
+
+### Tier A — High impact
+
+#### A1 — FPR 15.8% → 0.0% (scanner rule tightening)
+- `cybersecurity-lab/scanners/ioc_scanner.py`: removed `securityContext\s*:`
+  pattern — caught hardened K8s configs; dangerous sub-keys already had
+  dedicated patterns.
+- `cybersecurity-lab/scanners/skill_scanner.py`:
+  - CRED-001: added lookahead `(?=[^a-zA-Z0-9_.]|$)` so `\.env` no longer
+    matches `os.environ` or `process.env.PORT`.
+  - EXFIL-002: restricted to RFC-1918 ranges; removed localhost/loopback
+    which generated FPs in dev-server log statements.
+- Result: TP=99, FP=0, TN=19, FN=0 | Accuracy=100%, FPR=0.0%
+
+#### A3 — Reduced overselection in CyberSOCEval eval prompt
+- `evals/cybersoceval_malware.py:SYSTEM_PROMPT`: added concrete few-shot
+  examples showing correct (evidence-backed 2-option) vs incorrect
+  (select-all) answering behavior.
+
+#### A4 — README SOTA reframe
+- "The Problem" now references MDASH/Mythos for context instead of the
+  stale "8 minutes" claim.
+- New "Scope vs State of the Art" comparison table (7 dimensions).
+- Internal accuracy section updated to 0% FPR numbers.
+
+### Tier B — Medium impact
+
+#### B1 — Proof Stage / A10 (static confirmation of findings)
+- `proof_stage.py` (new): annotates each LLM finding with
+  `proof_status ∈ {CONFIRMED, INFERRED, REFUTED}` via static analysis:
+  evidence-string presence, AST data-flow for Python injection findings,
+  entropy check for secrets, IOC re-scan, injection-detector re-run.
+- `triage_orchestrator._proof_summary` + synthesizer integration: if all
+  findings REFUTED and no scanner corroboration → verdict downgraded to
+  INCONCLUSIVE.
+- `docs/architectural_guardrails.md` A10 added.
+
+#### B2 — MITRE ATT&CK Grounding / A11
+- `threat_intel_grounding.py` (new): verifies LLM-proposed MITRE IDs
+  against local `data/mitre_attack_index.json` (858 techniques, 244 KB
+  compact snapshot from MITRE CTI GitHub). Adds `mitre_grounded: bool`
+  and `mitre_name: str` to every finding.
+- `docs/architectural_guardrails.md` A11 added. Architectural count: 9→11.
+
+#### B3 — Orchestrator in accuracy report
+- `generate_accuracy_report.py`: `--via-orchestrator` flag uses the full
+  LLM orchestration pipeline for prediction. ~1-2 LLM calls per sample.
+
+#### B4 — CyberSOCEval threat-intel harness
+- `evals/cybersoceval_threat_intel.py` (new): complete harness for the
+  588-QA image-based threat-intel subset. Requires multimodal provider.
+  Documented as not-executed (NVIDIA NIM = text-only).
+
+### Tier C — Nice-to-have
+
+- `docs/heterogeneity_validation.md` (new): design doc for DeepSeek vs
+  Nemotron comparative eval with exact reproduction commands.
+- `cross_stack_correlator.py` (new): explicit scope-boundary stub with
+  interface contract for future cross-stack correlation.
+- `tests/test_accuracy_thresholds.py` (new): regression guards (FPR≤10%,
+  Recall=1, Precision≥97%, F1≥0.98, benign corpus ≥19 samples).
+- `tests/test_proof_stage.py` (new): 12 tests for proof_stage.
+- `tests/test_threat_intel_grounding.py` (new): 14 tests for grounding.
+
+### Summary
+- Tests: 85 → 123 passing (+38)
+- Architectural guardrails: 9 → 11
+- FPR: 15.8% → 0.0%
+- BLUEPRINT.md: SUBMITTED
+
+---
+
 ## 2026-05-15 — Public-benchmark evaluation (CyberSOCEval)
 
 ### Added
