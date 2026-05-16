@@ -1,0 +1,27 @@
+{
+  "overall": "partial",
+  "components": {
+    "pytsk3": {
+      "available": true,
+      "version": 68485375,
+      "note": "Sleuthkit Python bindings (disk/volume analysis)"
+    },
+    "volatility3": {
+      "available": true,
+      "note": "Memory forensics framework",
+      "symbol_tables": "MISSING (see docs/sift_integration.md)"
+    },
+    "plaso": {
+      "available": false,
+      "note": "Super-timeline analysis. Not installed \u2014 requires system dependencies.",
+      "install_on_sift_vm": "apt install plaso-tools"
+    },
+    "sleuthkit_cli": {
+      "available": false,
+      "note": "Native CLI tools (fls, mmls, blkcat). Not installed \u2014 requires apt + deps.",
+      "install_on_sift_vm": "apt install sleuthkit"
+    }
+  },
+  "platform": "WSL (Ubuntu 24.04)",
+  "migration_target": "SANS SIFT Workstation VM"
+}

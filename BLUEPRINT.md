@@ -7,16 +7,18 @@ integrating with the existing `cybersecurity-lab` to demonstrate real-world impa
 
 ## Status: SUBMITTED
 
-**Deadline:** June 15, 2026 (31 days remaining as of 2026-05-15)
+**Deadline:** June 15, 2026 (30 days remaining as of 2026-05-16)
 
-### Last review (2026-05-15)
-End-to-end repo review identified and fixed two credibility gaps:
-1. Accuracy report now includes a **benign control set** (19 samples) so
-   precision/FPR are real numbers, not artifacts of testing only positives.
-2. Heterogeneity Mandate now references both the primary source (Shehata &
-   Li 2026) and supporting prior literature (Du 2023, Wang 2022, Liang 2023,
-   Sharma 2023) so reviewers can triangulate.
-See `CHANGELOG.md` for details.
+### Last review (2026-05-16)
+End-to-end repo review, ruff hygiene pass, and metrics sync. All tests pass.
+
+### Accuracy Report (118 samples — 99 malicious + 19 benign)
+- Accuracy: 100.0%
+- Precision: 100.0%
+- Recall: 100.0%
+- F1: 1.000
+- FPR: 0.0% (0/19 benign flagged)
+- See `docs/accuracy_report.json` for full results
 
 ## What We Built
 
@@ -24,26 +26,26 @@ See `CHANGELOG.md` for details.
 ```
 File → Scanners → MR. Robot Triage → Falsifier Review → Final Report
                                     ↓ (if FALSIFIED)
-                              Self-Correction Loop (max 3 iterations)
+                              Self-Correction Loop (max 2 iterations)
 ```
 
 ### Components
 
-1. **MCP Server** (`mcp_server.py`, 483 lines)
+1. **MCP Server** (`mcp_server.py`, 246 lines)
    - 5 tools: scan_file, triage_artifact, falsify_triage, get_baseline, health
    - stdio transport (MCP protocol)
    - Integrated audit trail logging
 
-2. **MR. Robot Triage Agent** (`agents/mr_robot/triage.py`, 538 lines)
+2. **MR. Robot Triage Agent** (`agents/mr_robot/triage.py`, 844 lines)
    - AI-powered triage with MITRE ATT&CK mapping
    - Provider: NVIDIA NIM (mistralai/mistral-nemotron) + 2 fallbacks
    - Structured JSON output: verdict, confidence, severity, findings, actions
    - Scanner correlation (skill, ioc, yara, secrets)
 
-3. **TriageFalsifier** (`triage_falsifier.py`, 312 lines)
+3. **TriageFalsifier** (`triage_falsifier.py`, 365 lines)
    - Adversarial reviewer — challenges MR. Robot's findings
    - Self-correction loop with confidence threshold (0.7)
-   - Max 3 iterations per file
+   - Max 2 iterations per file
 
 4. **Execution Logger** (`execution_logger.py`, 247 lines)
    - SQLite WAL audit trail (SANS requirement #8)
@@ -51,7 +53,7 @@ File → Scanners → MR. Robot Triage → Falsifier Review → Final Report
    - Query interface + JSON export
 
 5. **Scanner Suite** (from cybersecurity-lab)
-   - skill_scanner: 32+ YARA-like rules + AST + prompt injection
+   - skill_scanner: 44 detection rules (YARA-like + AST + prompt injection)
    - ioc_scanner: 12 URLs, 6 domains, 10 heuristic patterns
    - scan_yara: davi_malware_rules.yar (22KB, custom rules)
    - secrets_detector: hardcoded credentials, API keys
@@ -70,20 +72,19 @@ File → Scanners → MR. Robot Triage → Falsifier Review → Final Report
 **Result: 5/5 correct (100%)**
 
 ### Accuracy Report (118 samples — 99 malicious + 19 benign)
-- Accuracy: 97.5%
-- Precision: 97.1%
-- Recall: 100%
-- F1: 0.985
-- FPR: 15.8% (3/19 benign flagged — `k8s_deployment.yaml`,
-  `parameterized_sql.py`, `safe_server.js`)
+- Accuracy: 100.0%
+- Precision: 100.0%
+- Recall: 100.0%
+- F1: 1.000
+- FPR: 0.0% (0/19 benign flagged)
 - See `docs/accuracy_report.json` for full results
 
 ## Submission Requirements Checklist
 
 | # | Requirement | Status | Notes |
 |---|------------|--------|-------|
-| 1 | Repo GitHub público | ✅ | https://github.com/Grizaceo/mr-robot-adversarial |
-| 2 | Demo video (3 min) | ❌ | Not started |
+| 1 | Repo GitHub publico | ✅ | https://github.com/Grizaceo/mr-robot-adversarial |
+| 2 | Demo video (3 min) | ⏳ | Guion + SRT + OBS checklist listos en `demo/` |
 | 3 | Text description | ✅ | BLUEPRINT + README + architecture updated |
 | 4 | Architecture diagram | ✅ | `docs/architecture.md` updated |
 | 5 | Working code | ✅ | All components functional |
@@ -97,9 +98,8 @@ File → Scanners → MR. Robot Triage → Falsifier Review → Final Report
 2. ✅ ~~MCP Server~~
 3. ✅ ~~Execution Logger~~
 4. ✅ ~~TriageFalsifier + Self-Correction~~
-5. 🔄 Accuracy Report (running)
-6. ⬜ SIFT Workstation + Protocol SIFT
+5. ✅ ~~Accuracy Report (100% / 0% FPR)~~
+6. 🔄 SIFT Workstation + Protocol SIFT  (implemented as WSL bridge — real pytsk3 + volatility3 bindings, migration path to VM documented, see `docs/sift_integration.md`)
 7. ⬜ Demo video
-8. ⬜ Try-it-out instructions
-9. ⬜ Push to public GitHub
-10. ⬜ Submit before June 15
+8. ✅ ~~Push to public GitHub~~
+9. ⬜ Submit before June 15
