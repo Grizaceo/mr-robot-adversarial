@@ -1,0 +1,8 @@
+# Ruff settings — MR. Robot Adversarial
+exclude = [
+    "tests/injection_corpus",
+    "__pycache__",
+    ".git",
+    ".pytest_cache",
+    "legacy",
+]

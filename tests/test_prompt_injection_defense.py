@@ -32,6 +32,10 @@ BENIGN_DIR = REPO / "benign_corpus"
 @pytest.mark.parametrize("fixture", sorted(INJ_DIR.glob("*")))
 def test_injection_corpus_is_detected(fixture):
     """Every fixture in tests/injection_corpus/ must trigger the detector."""
+    if fixture.is_dir():
+        pytest.skip("not a file")
+    if not fixture.is_file():
+        pytest.skip("not a file")
     text = fixture.read_text(encoding="utf-8", errors="replace")
     result = scan(text)
     assert result.attempted, (
