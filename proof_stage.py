@@ -185,7 +185,7 @@ def _confirm_prompt_injection_finding(finding: dict[str, Any], candidate_path: P
         content = candidate_path.read_text(encoding="utf-8", errors="ignore")
         from prompt_injection_defense import scan  # noqa: PLC0415
         result = scan(content)
-        if result.max_severity in ("CRITICAL", "HIGH"):
+        if result.max_severity in ("critical", "high", "CRITICAL", "HIGH"):
             return CONFIRMED
         return REFUTED
     except Exception:
