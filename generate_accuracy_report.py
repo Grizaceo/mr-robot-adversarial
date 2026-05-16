@@ -162,6 +162,30 @@ def compute_prediction(scanner_results):
     }
 
 
+def compute_prediction_via_orchestrator(filepath: str, provider: str = "nvidia-nim") -> dict:
+    """
+    Alternative prediction path using the full orchestration pipeline
+    (scanners → triage LLM → falsifier → rule-based synthesizer).
+
+    Budget note: each file requires 1-2 LLM calls.  Only used when
+    --via-orchestrator is passed explicitly.
+    """
+    try:
+        from triage_orchestrator import orchestrate  # noqa: PLC0415
+        report = orchestrate(filepath, falsifier_provider=provider)
+        verdict = report.get("final_verdict") or report.get("synthesizer", {}).get("final_verdict", "ERROR")
+        # Normalise: map SUSPICIOUS → MALICIOUS for confusion-matrix purposes
+        label = "MALICIOUS" if verdict in ("MALICIOUS", "SUSPICIOUS") else "BENIGN"
+        return {
+            "label": label,
+            "orchestrator_verdict": verdict,
+            "rationale": report.get("synthesizer", {}).get("rationale", ""),
+            "via": "orchestrator",
+        }
+    except Exception as e:
+        return {"label": "ERROR", "error": str(e), "via": "orchestrator"}
+
+
 def classify_outcome(gt, pred):
     """
     Classify as TP, FP, TN, FN.
@@ -276,8 +300,14 @@ def compute_per_tag(results):
 
 # ── Main ───────────────────────────────────────────────────────────────────────
 
-def generate_report(output_path=None, verbose=False):
-    """Generate the full accuracy report."""
+def generate_report(output_path=None, verbose=False, via_orchestrator=False, orchestrator_provider="nvidia-nim"):
+    """Generate the full accuracy report.
+
+    Args:
+        via_orchestrator: If True, use the full LLM orchestration pipeline
+                          instead of scanner-only labelling.  Each sample
+                          costs 1-2 LLM calls.
+    """
     start = time.time()
 
     scenarios = load_scenarios()
@@ -286,6 +316,8 @@ def generate_report(output_path=None, verbose=False):
         sys.exit(1)
 
     print(f"Loaded {len(scenarios)} malicious scenarios")
+    if via_orchestrator:
+        print(f"[orchestrator mode] provider={orchestrator_provider} — each sample ~1-2 LLM calls")
     files = ensure_test_files(scenarios)
     print(f"Malicious test files ready: {len(files)}")
 
@@ -302,8 +334,11 @@ def generate_report(output_path=None, verbose=False):
             continue
 
         gt = compute_ground_truth(s)
-        scanner_results = run_scanners(str(filepath))
-        pred = compute_prediction(scanner_results)
+        if via_orchestrator:
+            pred = compute_prediction_via_orchestrator(str(filepath), orchestrator_provider)
+        else:
+            scanner_results = run_scanners(str(filepath))
+            pred = compute_prediction(scanner_results)
         outcome = classify_outcome(gt, pred)
 
         results.append({
@@ -326,8 +361,11 @@ def generate_report(output_path=None, verbose=False):
             "attack_techniques": [],
             "tags": ["benign"],
         }
-        scanner_results = run_scanners(str(b["filepath"]))
-        pred = compute_prediction(scanner_results)
+        if via_orchestrator:
+            pred = compute_prediction_via_orchestrator(str(b["filepath"]), orchestrator_provider)
+        else:
+            scanner_results = run_scanners(str(b["filepath"]))
+            pred = compute_prediction(scanner_results)
         outcome = classify_outcome(gt, pred)
 
         results.append({
@@ -442,5 +480,20 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser(description="Generate Accuracy Report")
     ap.add_argument("--output", "-o", help="Output JSON path", default="docs/accuracy_report.json")
     ap.add_argument("--verbose", "-v", action="store_true", help="Print per-scenario results")
+    ap.add_argument(
+        "--via-orchestrator",
+        action="store_true",
+        help="Use the full LLM orchestration pipeline for prediction (requires API key; ~1-2 LLM calls per sample)",
+    )
+    ap.add_argument(
+        "--orchestrator-provider",
+        default="nvidia-nim",
+        help="LLM provider for orchestrator mode (default: nvidia-nim)",
+    )
     args = ap.parse_args()
-    generate_report(output_path=args.output, verbose=args.verbose)
+    generate_report(
+        output_path=args.output,
+        verbose=args.verbose,
+        via_orchestrator=args.via_orchestrator,
+        orchestrator_provider=args.orchestrator_provider,
+    )
