@@ -206,6 +206,13 @@ def health() -> str:
     components["mr_robot"] = "OK" if (Path(__file__).parent / "agents" / "mr_robot" / "triage.py").exists() else "MISSING"
     components["yara_rules"] = "OK" if (SCANNERS_DIR / "davi_malware_rules.yar").exists() else "MISSING"
 
+    # SIFT forensic toolchain status
+    sift_h = sift_health()
+    sift_components = sift_h.get("components", {})
+    for key, info in sift_components.items():
+        status_label = "OK" if info.get("available") else "MISSING"
+        components[f"sift_{key}"] = status_label
+
     all_ok = all(v == "OK" for v in components.values())
     output = HealthResult(status="healthy" if all_ok else "degraded",
                           components=components,

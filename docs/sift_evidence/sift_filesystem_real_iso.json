@@ -1,0 +1,39 @@
+{
+  "tool": "sleuthkit",
+  "image": "[REDACTED]/iCloudDrive/Dante's Inferno (Europe) (PSP) (PSN).iso",
+  "offset": 0,
+  "volume": {
+    "type": "none",
+    "partitions": []
+  },
+  "files": [
+    {
+      "name": "PSP_GAME",
+      "type": "dir",
+      "size": 2048,
+      "addr": 1,
+      "mtime": 0,
+      "ctime": 0
+    },
+    {
+      "name": "UMD_DATA.BIN",
+      "type": "file",
+      "size": 48,
+      "addr": 2,
+      "mtime": 0,
+      "ctime": 0
+    },
+    {
+      "name": "$OrphanFiles",
+      "type": "file",
+      "size": 0,
+      "addr": 1633,
+      "mtime": 0,
+      "ctime": 0
+    }
+  ],
+  "count": 3,
+  "sha256": "002b8fc0c5c8fbb8698c18b0ba7c40cc3c689ccaeba80190f261cea2abb785a3",
+  "duration_ms": 70345.92,
+  "status": "ok"
+}

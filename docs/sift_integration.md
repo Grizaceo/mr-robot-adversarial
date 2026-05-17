@@ -58,6 +58,20 @@ volatility3 plugins module OK
 
 El MCP server (`mcp_server.py`) registra 5 herramientas SIFT adicionales:
 
+### SIFT Command Equivalence
+
+| MCP Tool | SIFT Native Tool | Command on SANS SIFT VM |
+|----------|------------------|--------------------------|
+| `sift_list_filesystem` | `fls` + `mmls` | `mmls image.raw && fls -r -o 2048 image.raw` |
+| `sift_carve_blocks` | `blkcat` + `blkcalc` | `blkcat -o $OFFSET image.raw $BLOCK` |
+| `sift_memory_pslist` | `volatility3` `windows.pslist` | `vol.py -f dump.raw windows.pslist.PsList` |
+| `sift_memory_strings` | `strings` + `yarascan` | `strings -n 4 dump.raw | head -1000` |
+| `sift_health` | N/A (status meta-tool) | `apt list --installed | grep -E "sleuthkit|plaso|volatility3"` |
+
+Bindings Python elegidos sobre CLI porque no requieren sudo/apt, pero la tabla
+mantiene trazabilidad hacia los comandos que un analista SANS ejecutaría en la
+VM forense.
+
 ### `sift_list_filesystem_tool`
 *Equivalente SIFT:* `fls -r image.raw` + `mmls image.raw`
 
@@ -174,6 +188,30 @@ Input: `fake_disk.img` (2MB de ceros).
 ```
 
 **Entropía como proxy de significado:** un bloque con entropía ~7-8 sugiere datos comprimidos o cifrados (común en malware). Un bloque con entropía ~4-6 sugiere código ejecutable.
+
+---
+
+### 4. Filesystem Listing — ISO Real Image (`docs/sift_evidence/sift_filesystem_real_iso.json`)
+
+Input: ISO de PSP UMD-ROM (~1.8GB, formato ISO9660). pytsk3 parsea filesystem real sin tabla de volúmenes.
+
+```json
+{
+  "tool": "sleuthkit",
+  "image": "[REDACTED]/iCloudDrive/Dante's Inferno (Europe) (PSP) (PSN).iso",
+  "offset": 0,
+  "volume": {"type": "none", "partitions": []},
+  "files": [
+    {"name": "PSP_GAME", "type": "dir", "size": 2048, "addr": 1},
+    {"name": "UMD_DATA.BIN", "type": "file", "size": 48, "addr": 2},
+    {"name": "$OrphanFiles", "type": "file", "size": 0, "addr": 1633}
+  ],
+  "count": 3,
+  "status": "ok"
+}
+```
+
+**Nota de rendimiento:** SHA256 de archivos >1GB en hardware de consumo (WSL, SSD SATA) toma ~70s. En producción, el wrapper calcularía SHA256 solo hasta 100MB, reportando `sha256: "skipped_size>100mb"` para archivos mayores.
 
 ---
 
