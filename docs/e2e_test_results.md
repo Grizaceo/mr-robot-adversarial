@@ -40,5 +40,5 @@
 - [ ] Probar con los 15+ escenarios adversariales del cybersec-lab
 - [ ] Implementar Falsifier agent (portear de AGENTIC_RIEMANN)
 - [ ] Self-correction loop (confidence threshold)
-- [ ] Instalar SIFT Workstation + Protocol SIFT
+- [ ] ~~SIFT Workstation~~ (deferred — out of scope for this submission)
 - [ ] Accuracy report formal (precision/recall/F1)

@@ -172,7 +172,7 @@ def _compute_synthesizer_verdict(
     """
     verdict = triage_report.get("verdict", "INCONCLUSIVE")
     confidence = triage_report.get("confidence", 0.0)
-    severity = triage_report.get("severity", "none")
+    triage_report.get("severity", "none")
     scanner_flagged = False
 
     if scanner_findings:
@@ -344,7 +344,7 @@ def orchestrate(
             falsifier_result = falsifier.falsify(
                 triage_report, str(candidate), scanner_findings
             )
-            falsifier_duration = time.time() - falsifier_start
+            time.time() - falsifier_start
 
             f_status = falsifier_result.get("status", "ERROR")
             f_model = falsifier_result.get("_meta", {}).get("model", "unknown")

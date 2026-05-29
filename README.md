@@ -357,7 +357,7 @@ mr-robot-adversarial/
 │   ├── architecture.md        # Detailed architecture
 │   ├── accuracy_report.json   # Full accuracy results
 │   ├── e2e_test_results.md    # E2E test results
-│   ├── sift_integration.md    # SIFT integration status
+│   ├── sift_integration.md    # SIFT future work / migration path
 │   ├── submission_requirements.md # SANS requirements
 │   └── try_it_out.md          # Step-by-step guide
 ├── legacy/

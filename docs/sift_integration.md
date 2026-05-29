@@ -1,7 +1,11 @@
 # SANS SIFT Integration — MR. Robot Adversarial
 
-> Status: **SIFT-compatible toolchain running on WSL**
-> (Hybrid B + C — real forensic libraries via Python bindings, migration path to full SIFT VM)
+> **Status: DEFERRED — Future Work**
+>
+> This document describes the WSL-based prototype bridge for SIFT forensic
+> tools and the migration path to a full SIFT VM. SIFT integration is
+> **not part of the current submission scope**. The prototype code
+> (`mcp_tools_sift.py`) is included for reference and forward compatibility.
 
 ---
 

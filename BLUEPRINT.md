@@ -99,7 +99,7 @@ File → Scanners → MR. Robot Triage → Falsifier Review → Final Report
 3. ✅ ~~Execution Logger~~
 4. ✅ ~~TriageFalsifier + Self-Correction~~
 5. ✅ ~~Accuracy Report (100% / 0% FPR)~~
-6. 🔄 SIFT Workstation + Protocol SIFT  (implemented as WSL bridge — real pytsk3 + volatility3 bindings, migration path to VM documented, see `docs/sift_integration.md`)
+6. ⬜ SIFT Workstation + Protocol SIFT — **deferred** (out of scope for this submission; WSL bridge prototype and migration path documented in `docs/sift_integration.md` for future work)
 7. ⬜ Demo video
 8. ✅ ~~Push to public GitHub~~
 9. ⬜ Submit before June 15
