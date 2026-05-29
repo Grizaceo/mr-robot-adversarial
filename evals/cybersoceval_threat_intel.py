@@ -150,7 +150,7 @@ def parse_answer(raw: str | None) -> tuple[set[str], str]:
         if isinstance(ans, str):
             ans = [ans]
         letters = {str(a).strip().upper()[:1] for a in ans}
-        return {l for l in letters if l in OPTION_LETTERS}, raw
+        return {letter for letter in letters if letter in OPTION_LETTERS}, raw
     except json.JSONDecodeError:
         seen = set()
         for ch in raw.upper():
