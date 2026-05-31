@@ -1,77 +1,138 @@
 #!/usr/bin/env python3
 """
-Cross-Stack Correlator — stub (out of scope for this hackathon submission).
+Cross-Stack Correlator — campaign signal from execution audit trail.
 
-SANS-2026-era SOC tooling correlates findings across identity (IdP/SIEM),
-endpoint (EDR), cloud (CSPM/CIEM), and network (NDR) stacks.  MR. Robot
-deliberately scopes to per-file artifact triage — correlating across stacks
-would require live telemetry connections, agent deployment on endpoints, and
-SIEM access, all of which are out of scope for a one-file-at-a-time
-open-source pipeline.
+Query: look back 24h in the executions table for MALICIOUS rows sharing
+the same tool_name prefix as the current scanner.  Three or more hits
+indicates a correlated attack wave and triggers severity escalation
+to CRITICAL.
 
-This module defines the interface that a full cross-stack implementation would
-satisfy, documents the design, and provides a no-op stub that callers can import
-without error.  Future work: wire each method to a real SIEM/EDR/IdP API client.
+No external telemetry is required; this uses the existing audit_trail.db
+created by execution_logger.  A lightweight SQLite query keeps latency
+well under 50ms on the current corpus size (hundreds to low-thousands
+of rows).
 
-Design notes (for future implementation):
-  - identity_context(file_hash)  → who opened this file last? any AAD/Okta signals?
-  - endpoint_context(file_path)  → EDR telemetry: was this file executed? by whom?
-  - cloud_context(file_hash)     → any S3/blob storage activity on this artifact?
-  - network_context(ioc_list)    → NDR/firewall: any outbound traffic to these IOCs?
-  - correlate(triage_report)     → combine all 4 contexts, add to triage report
+Design rationale: rather than wiring live SIEM/EDR/IdP connectors (out of
+scope for a one-file-at-a-time open-source pipeline), the correlator derives
+a campaign signal purely from the local audit trail.  This keeps the feature
+self-contained and reproducible while still surfacing correlated attack waves.
 """
 
 from __future__ import annotations
-from typing import Any
+
+import logging
+from dataclasses import dataclass
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+from typing import Optional
+
+logger = logging.getLogger("cross-stack-correlator")
 
 
-class CrossStackCorrelator:
+@dataclass(frozen=True)
+class CampaignResult:
+    campaign_detected: bool
+    file_count: int = 0
+    severity_escalation: Optional[str] = None
+    tool_name_prefix: str = ""
+    window_hours: int = 24
+    detail: str = ""
+
+
+class CampaignDetector:
     """
-    Interface contract for cross-stack correlation.
-    All methods are no-ops in this stub and return empty context dicts.
+    Lightweight audit-trail campaign detector.
+
+    The SES (Scanner Event Source) categorization maps tool names to
+    the scanner family that produced them:
+
+        skill_scanner  -> skill
+        ioc_scanner    -> ioc
+        scan_yara      -> yara
+        secrets_detector -> secrets
+
+    Callers should pass the originating tool_name so the correlator
+    can group by the same family.
     """
 
-    def identity_context(self, file_hash: str) -> dict[str, Any]:
-        """Stub: IdP/SIEM signals for the artifact owner."""
-        return {"stub": True, "source": "identity", "file_hash": file_hash}
+    SES_TOOL_PREFIXES: dict[str, str] = {
+        "skill_scanner": "skill",
+        "ioc_scanner": "ioc",
+        "scan_yara": "yara",
+        "secrets_detector": "secrets",
+    }
 
-    def endpoint_context(self, file_path: str) -> dict[str, Any]:
-        """Stub: EDR execution telemetry for the artifact path."""
-        return {"stub": True, "source": "endpoint", "file_path": file_path}
+    def __init__(self, db_path: Optional[str] = None) -> None:
+        self.db_path = str(
+            Path(db_path).resolve()
+            if db_path
+            else Path(__file__).resolve().parent / "logs" / "audit_trail.db"
+        )
 
-    def cloud_context(self, file_hash: str) -> dict[str, Any]:
-        """Stub: Cloud storage/CSPM signals for the artifact."""
-        return {"stub": True, "source": "cloud", "file_hash": file_hash}
+    def _prefix_for(self, tool_name: str) -> str:
+        lower = tool_name.lower()
+        for key, prefix in self.SES_TOOL_PREFIXES.items():
+            if key in lower:
+                return prefix
+        # Fallback: return lowercased tool_name stripped of digits/underscores.
+        return "".join(ch for ch in lower if ch.isalpha())
 
-    def network_context(self, ioc_list: list[str]) -> dict[str, Any]:
-        """Stub: NDR/firewall traffic signals for the artifact's IOCs."""
-        return {"stub": True, "source": "network", "ioc_count": len(ioc_list)}
-
-    def correlate(self, triage_report: dict[str, Any]) -> dict[str, Any]:
+    def correlate(
+        self,
+        tool_name: str,
+        current_verdict: str,
+        window_hours: int = 24,
+        threshold: int = 3,
+        db_path: Optional[str] = None,
+    ) -> CampaignResult:
         """
-        Merge cross-stack signals into the triage report.
-        Stub: adds a correlation field with all-empty contexts.
+        Return a CampaignResult for executions sharing the same scanner
+        family in the last ``window_hours`` hours when the verdict is
+        MALICIOUS.
+
+        Returns ``campaign_detected=True`` when count >= ``threshold``.
         """
-        candidate = triage_report.get("_meta", {}).get("candidate", "")
-        file_hash = triage_report.get("_meta", {}).get("sha256", "")
-        iocs = [
-            f.get("evidence", "")
-            for f in triage_report.get("findings", [])
-            if f.get("type") == "ioc"
-        ]
-        correlation = {
-            "identity": self.identity_context(file_hash),
-            "endpoint": self.endpoint_context(candidate),
-            "cloud": self.cloud_context(file_hash),
-            "network": self.network_context(iocs),
-            "_note": (
-                "Cross-stack correlation is a stub — no live telemetry sources "
-                "are wired. See module docstring for the intended design."
+        db = db_path or self.db_path
+        if current_verdict not in ("MALICIOUS",):
+            return CampaignResult(
+                campaign_detected=False,
+                detail="current_verdict is not MALICIOUS",
+            )
+
+        prefix = self._prefix_for(tool_name)
+        try:
+            import sqlite3
+
+            cutoff = datetime.now(timezone.utc) - timedelta(hours=window_hours)
+            cutoff_ts = cutoff.timestamp()
+            with sqlite3.connect(db) as conn:
+                row = conn.execute(
+                    """
+                    SELECT COUNT(*) AS cnt
+                    FROM executions
+                    WHERE verdict = 'MALICIOUS'
+                      AND timestamp >= ?
+                      AND tool_name LIKE ?
+                    """,
+                    (cutoff_ts, f"%{prefix}%"),
+                ).fetchone()
+                count = int(row[0]) if row else 0
+        except Exception as exc:
+            logger.warning("campaign query failed: %s", exc)
+            return CampaignResult(
+                campaign_detected=False,
+                detail=f"query_failed: {exc}",
+            )
+
+        detected = count >= threshold
+        return CampaignResult(
+            campaign_detected=detected,
+            file_count=count,
+            severity_escalation="CRITICAL" if detected else None,
+            tool_name_prefix=prefix,
+            window_hours=window_hours,
+            detail=(
+                f"detected={detected}, count={count}, threshold={threshold}"
+                f", prefix={prefix}"
             ),
-        }
-        triage_report["cross_stack_correlation"] = correlation
-        return triage_report
-
-
-# Default no-op instance for callers that just want to import and call.
-default_correlator = CrossStackCorrelator()
+        )

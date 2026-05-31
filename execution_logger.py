@@ -79,6 +79,17 @@ class ExecutionLogger:
             conn.execute("""
                 CREATE INDEX IF NOT EXISTS idx_exec_verdict ON executions(verdict)
             """)
+            # Cross-stack correlator: campaign flag + optional IOC pattern marker.
+            for col, col_type in [
+                ("campaign_detected", "INTEGER DEFAULT 0"),
+                ("ioc_pattern", "TEXT"),
+            ]:
+                try:
+                    conn.execute(
+                        f"ALTER TABLE executions ADD COLUMN {col} {col_type}"
+                    )
+                except sqlite3.OperationalError:
+                    pass  # already exists (portable across SQLite versions)
             conn.commit()
 
     def log(
@@ -89,6 +100,8 @@ class ExecutionLogger:
         duration_ms: float,
         run_id: str = None,
         agent_id: str = "mr_robot",
+        campaign_detected: bool = False,
+        ioc_pattern: Optional[str] = None,
     ) -> int:
         """
         Log a tool execution.
@@ -100,6 +113,8 @@ class ExecutionLogger:
             duration_ms: Execution time in milliseconds
             run_id: Optional run identifier for grouping
             agent_id: Which agent made the call
+            campaign_detected: Cross-stack correlator signal
+            ioc_pattern: Optional IOC pattern name triggering escalation
 
         Returns:
             Row ID of the inserted record
