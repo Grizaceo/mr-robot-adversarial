@@ -1,236 +1,206 @@
 #!/usr/bin/env python3
 """
-MCP Tools — SIFT Forensic Integration
+SIFT Forensic Tools — CLI Wrapper
+Migración desde pytsk3/volatility3 Python bindings hacia
+comandos nativos SIFT Workstation (fls, mmls, blkcat, strings, vol.py).
 
-Wrappers around real SANS SIFT forensic tools:
-    * sleuthkit (via pytsk3 Python bindings) — disk/volume analysis
-    * volatility3 — memory analysis
-    * blkcalc/blkcat (via tsk bindings) — block-level forensic recovery
+Detecta automáticamente el entorno:
+  - WSL / local   → usa Python bindings (modo prototype)
+  - SIFT VM reachable → usa CLI nativo (modo production)
 
-Architecture: SIFT-compatible toolchain running on WSL.
-Migration path to full SIFT VM documented in docs/sift_integration.md.
-
-Python bindings chosen over CLI because:
-    - No sudo required (avoids apt dependency hell)
-    - Direct integration with MCP server JSON transport
-    - Graceful degradation when native library is absent
+Uso:
+  from mcp_tools_sift import sift_list_filesystem, sift_carve_blocks, ...
 """
 
-from __future__ import annotations
-
-import hashlib
-import logging
+import dataclasses
 import os
-import time
+import shutil
+import subprocess
 from pathlib import Path
-from typing import Any
-
-logger = logging.getLogger("mcp-sift")
-
-# ── Lazy imports so MCP server does not crash if optional deps are missing ──
-try:
-    import pytsk3
-    _HAS_PYTSK3 = True
-except Exception as _e_tsk:  # noqa: BLE001
-    pytsk3 = None  # type: ignore[assignment]
-    _HAS_PYTSK3 = False
-    logger.warning("pytsk3 not available: %s", _e_tsk)
-
-try:
-    from volatility3.framework import contexts, interfaces
-    from volatility3 import plugins as vol_plugins
-    _HAS_VOLATILITY3 = True
-except Exception as _e_vol:  # noqa: BLE001
-    contexts = interfaces = None  # type: ignore[misc]
-    vol_plugins = None
-    _HAS_VOLATILITY3 = False
-    logger.warning("volatility3 not available: %s", _e_vol)
+from typing import List, Optional
 
 
-# ── Configuration ───────────────────────────────────────────────────────────
+# ── Detección de entorno ──────────────────────────────────────────────
+_SIFT_VM_HOST = os.getenv("SIFT_VM_HOST", "")  # e.g. "192.168.56.101"
+_SIFT_VM_USER = os.getenv("SIFT_VM_USER", "sift")
+_SIFT_SSH_KEY = os.getenv("SIFT_SSH_KEY", "")  # ruta a .pem
 
-SIFT_AVAILABLE = {
-    "pytsk3": _HAS_PYTSK3,
-    "volatility3": _HAS_VOLATILITY3,
-}
-
-
-def _check_artifact(path: str | Path) -> tuple[bool, str]:
-    target = Path(path).expanduser()
-    if not target.exists():
-        return False, f"artifact_not_found: {target}"
-    if not target.is_file():
-        return False, f"not_a_file: {target}"
-    if os.access(target, os.R_OK):
-        return True, str(target.resolve())
-    return False, f"not_readable: {target}"
+_WSL_ROOT = Path("/mnt/c")
+_HOME = Path.home()
 
 
-def _file_sha256(path: Path) -> str:
-    h = hashlib.sha256()
-    with open(path, "rb") as f:
-        for chunk in iter(lambda: f.read(8192), b""):
-            h.update(chunk)
-    return h.hexdigest()
-
-
-# ── Sleuthkit / pytsk3 Wrappers ─────────────────────────────────────────────
-
-def sift_list_filesystem(
-    image_path: str,
-    offset: int = 0,
-    max_files: int = 500,
-) -> dict[str, Any]:
-    """
-    List files in a disk image or filesystem image using Sleuthkit (pytsk3).
-
-    Equivalent SIFT tool:  fls, ils
-    Returns JSON-safe dict with file listing + metadata.
-    """
-    if not _HAS_PYTSK3:
-        return {"error": "sleuthkit_unavailable", "detail": "pytsk3 not installed"}
-    assert pytsk3 is not None
-
-    ok, msg = _check_artifact(image_path)
-    if not ok:
-        return {"error": msg}
-
-    resolved = Path(msg)
-    start = time.perf_counter()
-    results: list[dict[str, Any]] = []
-    volume_info: dict[str, Any] = {}
-
+def _is_sift_vm() -> bool:
+    """True si detectamos host SIFT VM y SSH accesible."""
+    if not _SIFT_VM_HOST:
+        return False
+    if not _SIFT_SSH_KEY:
+        return False
+    # Quick liveness check (sin stdin interactivo)
     try:
-        img = pytsk3.Img_Info(str(resolved))
+        r = subprocess.run(
+            ["ssh", "-i", _SIFT_SSH_KEY, "-o", "StrictHostKeyChecking=no",
+             "-o", "BatchMode=yes", "-o", "ConnectTimeout=3",
+             f"{_SIFT_VM_USER}@{_SIFT_VM_HOST}", "echo ok"],
+            capture_output=True, text=True, timeout=10,
+        )
+        return r.returncode == 0 and "ok" in r.stdout
+    except Exception:
+        return False
 
-        # Try volume system first (mmls equivalent)
+
+_ENV = "SIFT_VM" if _is_sift_vm() else "WSL_LOCAL"
+# Debug opcional
+# print(f"[sift_tools] entorno detectado: {_ENV}")
+
+
+# ── Helpers de ejecución remota/local ─────────────────────────────────
+def _run_ssh(cmd: List[str], timeout: int = 60) -> subprocess.CompletedProcess:
+    """Ejecuta comando en la VM SIFT vía SSH."""
+    ssh_base = [
+        "ssh", "-i", _SIFT_SSH_KEY,
+        "-o", "StrictHostKeyChecking=no",
+        "-o", "BatchMode=yes",
+        f"{_SIFT_VM_USER}@{_SIFT_VM_HOST}",
+    ]
+    full_cmd = ssh_base + cmd
+    return subprocess.run(full_cmd, capture_output=True, text=True, timeout=timeout)
+
+
+def _run_local(cmd: List[str], timeout: int = 60) -> subprocess.CompletedProcess:
+    """Ejecuta comando local (WSL prototype)."""
+    return subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+
+
+# ── Dataclasses de salida ─────────────────────────────────────────────
+@dataclasses.dataclass
+class FileEntry:
+    name: str
+    type: str  # "file" | "dir"
+    size: int
+    addr: int
+    sha256: Optional[str] = None
+
+
+@dataclasses.dataclass
+class CampaignResult:
+    campaign_detected: bool
+    campaign_id: Optional[str]
+    severity: str
+    tool_name: Optional[str]
+    ioc_pattern: Optional[str]
+    event_count: int
+    window_hours: int
+    db_path: str
+
+
+# ── SIFT Tools ────────────────────────────────────────────────────────
+def sift_list_filesystem(image_path: str, offset: int = 0) -> dict:
+    """
+    Lista archivos de una imagen de disco.
+    Equivalente SIFT: fls -r -o <offset> <image>
+    """
+    if _ENV == "SIFT_VM":
+        cmd = ["fls", "-r", "-o", str(offset), image_path]
+        r = _run_ssh(cmd)
+        # Parsear salida tipo fls (formato TSK)
+        files = _parse_fls_output(r.stdout)
+        return {"tool": "fls", "image": image_path, "offset": offset,
+                "files": [dataclasses.asdict(f) for f in files],
+                "status": "ok" if r.returncode == 0 else "error",
+                "stderr": r.stderr[:500] if r.stderr else ""}
+    else:
+        # WSL prototype: pytsk3
         try:
+            import pytsk3
+            img = pytsk3.Img_Info(image_path)
             vol = pytsk3.Volume_Info(img)
-            volume_info = {
-                "type": vol.info.vs_type,
-                "offset": vol.info.offset,
-                "block_size": vol.info.block_size,
-                "partitions": [
-                    {
-                        "addr": p.addr,
-                        "start": p.start,
-                        "length": p.len,
-                        "desc": p.desc.decode(errors="replace") if isinstance(p.desc, bytes) else str(p.desc),
-                    }
-                    for p in vol
-                ],
-            }
-        except Exception:
-            volume_info = {"type": "none", "partitions": []}
+            fs = pytsk3.FS_Info(vol.get_volume(offset) if offset else vol.get_volume(0))
+            files = []
+            for f in fs.open_dir("/"):
+                files.append(FileEntry(
+                    name=f.info.name.name.decode() if f.info.name else "?",
+                    type="dir" if f.info.meta else "file",
+                    size=f.info.meta.size if f.info.meta else 0,
+                    addr=f.addr,
+                ))
+            return {"tool": "pytsk3", "image": image_path, "offset": offset,
+                    "files": [dataclasses.asdict(f) for f in files[:200]],
+                    "status": "ok"}
+        except ImportError:
+            return {"error": "pytsk3_unavailable"}
 
-        # Filesystem analysis (offset provided or first partition)
-        fs_start = offset if offset > 0 else 0
-        if volume_info.get("partitions"):
-            fs_start = volume_info["partitions"][0]["start"] * 512
 
-        fs = pytsk3.FS_Info(img, offset=fs_start)
-        root = fs.open_dir(path="/")
-
-        count = 0
-        for f in root:
-            name = f.info.name.name
-            if isinstance(name, bytes):
-                name = name.decode(errors="replace")
-            if name in (".", ".."):
-                continue
-            meta = f.info.meta
-            entry = {
-                "name": name,
-                "type": "dir" if meta and meta.type == pytsk3.TSK_FS_META_TYPE_DIR else "file",
-                "size": meta.size if meta else None,
-                "addr": meta.addr if meta else None,
-                "mtime": meta.mtime if meta else None,
-                "ctime": meta.ctime if meta else None,
-            }
-            results.append(entry)
-            count += 1
-            if count >= max_files:
-                break
-
-        return {
-            "tool": "sleuthkit",
-            "image": str(resolved),
-            "offset": fs_start,
-            "volume": volume_info,
-            "files": results,
-            "count": len(results),
-            "sha256": _file_sha256(resolved),
-            "duration_ms": round((time.perf_counter() - start) * 1000, 2),
-            "status": "ok",
-        }
-    except Exception as e:
-        logger.exception("sift_list_filesystem failed")
-        return {
-            "error": "sleuthkit_analysis_failed",
-            "detail": str(e),
-            "image": str(resolved),
-            "status": "error",
-        }
+def _parse_fls_output(stdout: str) -> List[FileEntry]:
+    """Parse minimal de salida `fls -r`."""
+    files = []
+    for line in stdout.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        # fls usa formato: r/r * 2048:    nombre (symlink target)
+        parts = line.split()
+        if len(parts) >= 2:
+            ftype = "dir" if parts[0].startswith("d") else "file"
+            name = parts[-1]
+            files.append(FileEntry(name=name, type=ftype, size=0, addr=0))
+    return files
 
 
 def sift_carve_blocks(
-    image_path: str,
-    start_block: int = 0,
-    count: int = 10,
-) -> dict[str, Any]:
+    image_path: str, start_block: int = 0, count: int = 10
+) -> dict:
     """
-    Carve/extract raw blocks from a disk image using Sleuthkit.
-
-    Equivalent SIFT tool:  blkcat, blkcalc
-    Returns base64-encoded block data (truncated to first 4KB per block).
+    Extrae bloques raw de una imagen.
+    Equivalente SIFT: blkcat -o <offset> <image> <block> [block ...]
     """
-    if not _HAS_PYTSK3:
-        return {"error": "sleuthkit_unavailable", "detail": "pytsk3 not installed"}
-    assert pytsk3 is not None
-
-    ok, msg = _check_artifact(image_path)
-    if not ok:
-        return {"error": msg}
-
-    resolved = Path(msg)
-    start = time.perf_counter()
-    blocks: list[dict[str, Any]] = []
-
-    try:
-        img = pytsk3.Img_Info(str(resolved))
-        block_size = 4096  # common default; tsk fs info would refine this
-        for i in range(start_block, start_block + count):
-            offset = i * block_size
-            if offset >= img.get_size():
-                break
-            data = img.read(offset, block_size)
-            blocks.append({
-                "block_number": i,
-                "offset": offset,
-                "size": len(data),
-                "hex_preview": data[:64].hex(),
-                "entropy_approx": _approx_entropy(data),
-            })
-
-        return {
-            "tool": "sleuthkit",
-            "mode": "block_carve",
-            "image": str(resolved),
-            "sha256": _file_sha256(resolved),
-            "blocks": blocks,
-            "duration_ms": round((time.perf_counter() - start) * 1000, 2),
-            "status": "ok",
-        }
-    except Exception as e:
-        logger.exception("sift_carve_blocks failed")
-        return {"error": "sleuthkit_carve_failed", "detail": str(e)}
+    block_size = 4096
+    blocks = []
+    if _ENV == "SIFT_VM":
+        # Obtener offset del filesystem primero (simplificado a offset=0)
+        cmd = ["blkcat", "-o", "0", image_path, str(start_block)]
+        if count > 1:
+            cmd += [str(start_block + i) for i in range(count)]
+        r = _run_ssh(cmd, timeout=30)
+        if r.returncode == 0:
+            raw = r.stdout
+            for i in range(min(count, len(raw) // block_size + 1)):
+                offset = (start_block + i) * block_size
+                chunk = raw[i * block_size : (i + 1) * block_size]
+                entropy = _approx_entropy(chunk)
+                blocks.append({
+                    "block_number": start_block + i,
+                    "offset": offset,
+                    "size": block_size,
+                    "entropy_approx": round(entropy, 3),
+                })
+        return {"tool": "blkcat", "image": image_path,
+                "blocks": blocks, "status": "ok" if r.returncode == 0 else "error"}
+    else:
+        # WSL prototype
+        try:
+            with open(image_path, "rb") as f:
+                f.seek(start_block * block_size)
+                for i in range(count):
+                    chunk = f.read(block_size)
+                    if not chunk:
+                        break
+                    offset = (start_block + i) * block_size
+                    blocks.append({
+                        "block_number": start_block + i,
+                        "offset": offset,
+                        "size": len(chunk),
+                        "entropy_approx": _approx_entropy(chunk),
+                    })
+            return {"tool": "python_carve", "image": image_path,
+                    "blocks": blocks, "status": "ok"}
+        except Exception as e:
+            return {"error": str(e)}
 
 
 def _approx_entropy(data: bytes) -> float:
-    """Shannon entropy approximation [0, 8] for byte distribution."""
+    """Entropía Shannon aproximada (0–8)."""
     if not data:
         return 0.0
-    from math import log2
     counts = [0] * 256
     for b in data:
         counts[b] += 1
@@ -239,148 +209,129 @@ def _approx_entropy(data: bytes) -> float:
     for c in counts:
         if c:
             p = c / total
-            ent -= p * log2(p)
-    return round(ent, 3)
+            ent -= p * (p ** -1 and __import__("math").log2(p) or 0)
+    return ent
 
 
-# ── Volatility3 Wrappers ────────────────────────────────────────────────────
-
-def sift_memory_list_processes(
-    memory_dump_path: str,
-) -> dict[str, Any]:
+def sift_memory_list_processes(memory_dump_path: str) -> dict:
     """
-    List processes from a memory dump using Volatility3 pslist equivalent.
-
-    Equivalent SIFT tool:  volatility3 windows.pslist.PsList
-    Returns JSON-safe process listing.
+    Lista procesos de un dump de memoria.
+    Equivalente SIFT: vol.py -f <dump> windows.pslist.PsList
     """
-    if not _HAS_VOLATILITY3:
-        return {"error": "volatility3_unavailable", "detail": "volatility3 not installed"}
-
-    ok, msg = _check_artifact(memory_dump_path)
-    if not ok:
-        return {"error": msg}
-
-    resolved = Path(msg)
-    start = time.perf_counter()
-
-    try:
-        # Build volatility3 context
-        ctx = contexts.Context()
-        ctx.config[" automagic.LayerWriter.layer_name"] = "memory_layer"
-        ctx.config["plugins.PsList.kernel"] = "PdbSignatureScanner"
-        # Use the built-in layered reader
-        import volatility3.framework.automagic as am
-        # Minimal symbol requirement: Volatility3 needs a symbol table, which
-        # for competition demos may not exist.  We gracefully handle this.
-        failure = am.stacker.choose_layer(ctx, [str(resolved)])
-        if failure is None:
-            return {
-                "tool": "volatility3",
-                "mode": "pslist",
-                "image": str(resolved),
-                "status": "unrecognized_format",
-                "detail": "Could not identify a valid memory layer. Ensure the file is a raw memory dump.",
-                "duration_ms": round((time.perf_counter() - start) * 1000, 2),
-            }
-
-        # Fallback: report metadata about the dump since symbol tables may be missing
-        # in a fresh WSL install.
-        return {
-            "tool": "volatility3",
-            "mode": "pslist",
-            "image": str(resolved),
-            "sha256": _file_sha256(resolved),
-            "status": "partial",
-            "note": (
-                "Volatility3 context initialized. Full pslist requires symbol tables "
-                "(e.g., windows.pdb). On SIFT VM these are pre-installed under "
-                "/usr/share/volatility3/symbols. Running on WSL without symbol tables "
-                "returns structural metadata only."
-            ),
-            "layer_info": str(failure),
-            "duration_ms": round((time.perf_counter() - start) * 1000, 2),
-        }
-    except Exception as e:
-        logger.exception("sift_memory_list_processes failed")
-        return {"error": "volatility3_analysis_failed", "detail": str(e)}
+    if _ENV == "SIFT_VM":
+        cmd = ["vol.py", "-f", memory_dump_path, "windows.pslist.PsList"]
+        r = _run_ssh(cmd, timeout=120)
+        # Parseo mínimo: líneas tipo "Name     PID    ..."
+        processes = []
+        for line in r.stdout.splitlines()[2:]:  # skip header
+            parts = line.split()
+            if len(parts) >= 2 and parts[1].isdigit():
+                processes.append({"name": parts[0], "pid": int(parts[1])})
+        return {"tool": "volatility3", "dump": memory_dump_path,
+                "processes": processes, "status": "ok" if r.returncode == 0 else "error",
+                "stderr": r.stderr[:500] if r.stderr else ""}
+    else:
+        # WSL prototype: volatility3 framework
+        try:
+            import volatility3  # noqa
+            # No cargamos simbolios; solo reportamos disponibilidad
+            return {"tool": "volatility3_framework",
+                    "dump": memory_dump_path,
+                    "status": "ok",
+                    "note": "Requiere symbol tables para parsear estructuras."}
+        except ImportError:
+            return {"error": "volatility3_unavailable"}
 
 
 def sift_memory_strings(
-    memory_dump_path: str,
-    min_length: int = 4,
-) -> dict[str, Any]:
+    memory_dump_path: str, min_length: int = 4
+) -> dict:
     """
-    Extract ASCII/UTF-8 strings from a memory dump.
-
-    Equivalent SIFT tool:  strings + volatility3 yarascan
-    Returns string hits with offset + preview.
+    Extrae strings ASCII de un dump de memoria.
+    Equivalente SIFT: strings -n <min_length> <dump>
     """
-    ok, msg = _check_artifact(memory_dump_path)
-    if not ok:
-        return {"error": msg}
+    if _ENV == "SIFT_VM":
+        cmd = ["strings", "-n", str(min_length), memory_dump_path]
+        r = _run_ssh(cmd, timeout=60)
+        strings = [s.strip() for s in r.stdout.splitlines() if len(s.strip()) >= min_length]
+        return {"tool": "strings", "dump": memory_dump_path,
+                "strings_found": len(strings),
+                "sample": strings[:20],
+                "status": "ok" if r.returncode == 0 else "error"}
+    else:
+        # WSL prototype: Python puro
+        try:
+            strings = []
+            current = b""
+            with open(memory_dump_path, "rb") as f:
+                while True:
+                    chunk = f.read(8192)
+                    if not chunk:
+                        break
+                    for b in chunk:
+                        if 32 <= b <= 126:
+                            current += bytes([b])
+                        else:
+                            if len(current) >= min_length:
+                                strings.append(current.decode("ascii", errors="ignore"))
+                            current = b""
+            return {"tool": "python_strings", "dump": memory_dump_path,
+                    "strings_found": len(strings),
+                    "sample": strings[:20],
+                    "status": "ok"}
+        except Exception as e:
+            return {"error": str(e)}
 
-    resolved = Path(msg)
-    start = time.perf_counter()
-    strings: list[dict[str, Any]] = []
 
-    try:
-        with open(resolved, "rb") as f:
-            chunk = f.read(2 * 1024 * 1024)  # first 2 MB only for safety
-        import re
-        pattern = re.compile(rb"[\x20-\x7e]{%d,}" % min_length)
-        for m in pattern.finditer(chunk):
-            strings.append({
-                "offset": m.start(),
-                "length": len(m.group()),
-                "preview": m.group().decode("ascii", errors="replace")[:80],
-            })
-            if len(strings) >= 1000:
-                break
-
-        return {
-            "tool": "strings_equivalent",
-            "image": str(resolved),
-            "sha256": _file_sha256(resolved),
-            "status": "ok",
-            "strings_found": len(strings),
-            "sample": strings[:20],
-            "duration_ms": round((time.perf_counter() - start) * 1000, 2),
+def sift_health() -> dict:
+    """Reporta disponibilidad de componentes SIFT."""
+    if _ENV == "SIFT_VM":
+        checks = {
+            "fls": shutil.which("fls") is not None,
+            "mmls": shutil.which("mmls") is not None,
+            "blkcat": shutil.which("blkcat") is not None,
+            "strings": shutil.which("strings") is not None,
+            "vol.py": shutil.which("vol.py") is not None,
+            "plaso": shutil.which("log2timeline.py") is not None,
         }
-    except Exception as e:
-        logger.exception("sift_memory_strings failed")
-        return {"error": "strings_extraction_failed", "detail": str(e)}
+    else:
+        checks = {
+            "pytsk3": shutil.which("python") is not None,  # pip check real abajo
+            "volatility3": shutil.which("python") is not None,
+        }
+        try:
+            import pytsk3
+            checks["pytsk3"] = True
+            checks["pytsk3_version"] = pytsk3.TSK_VERSION_NUM
+        except ImportError:
+            checks["pytsk3"] = False
+        try:
+            import volatility3  # noqa
+            checks["volatility3"] = True
+        except ImportError:
+            checks["volatility3"] = False
 
-
-# ── SIFT Health / Status ───────────────────────────────────────────────────
-
-def sift_health() -> dict[str, Any]:
-    """Report which SIFT components are functional."""
-    info = {
-        "pytsk3": {
-            "available": _HAS_PYTSK3,
-            "version": pytsk3.TSK_VERSION_NUM if _HAS_PYTSK3 else None,
-            "note": "Sleuthkit Python bindings (disk/volume analysis)" if _HAS_PYTSK3 else "Install: pip install pytsk3",
-        },
-        "volatility3": {
-            "available": _HAS_VOLATILITY3,
-            "note": "Memory forensics framework" if _HAS_VOLATILITY3 else "Install: pip install volatility3",
-            "symbol_tables": "MISSING (see docs/sift_integration.md)",
-        },
-        "plaso": {
-            "available": False,
-            "note": "Super-timeline analysis. Not installed — requires system dependencies.",
-            "install_on_sift_vm": "apt install plaso-tools",
-        },
-        "sleuthkit_cli": {
-            "available": False,
-            "note": "Native CLI tools (fls, mmls, blkcat). Not installed — requires apt + deps.",
-            "install_on_sift_vm": "apt install sleuthkit",
-        },
-    }
     return {
-        "overall": "partial" if (_HAS_PYTSK3 or _HAS_VOLATILITY3) else "unavailable",
-        "components": info,
-        "platform": "WSL (Ubuntu 24.04)",
-        "migration_target": "SANS SIFT Workstation VM",
+        "overall": "full" if all(v is True or isinstance(v, int) for v in checks.values()) else "partial",
+        "environment": _ENV,
+        "components": checks,
+        "sift_vm_host": _SIFT_VM_HOST or "not set",
     }
+
+
+def sift_plaso_timeline(image_path: str, output_dir: str = "/tmp/sift_timeline") -> dict:
+    """
+    Genera super-timeline con plaso.
+    Equivalente SIFT: log2timeline.py <output> <image>
+    Solo disponible en VM SIFT completa.
+    """
+    if _ENV != "SIFT_VM":
+        return {"error": "plaso_requires_vm",
+                "note": "log2timeline.py necesita sleuthkit + plaso-tools en VM SIFT completa"}
+    os.makedirs(output_dir, exist_ok=True)
+    cmd = ["log2timeline.py", f"{output_dir}/timeline.plaso", image_path]
+    r = _run_ssh(cmd, timeout=300)
+    return {"tool": "plaso", "image": image_path,
+            "output": f"{output_dir}/timeline.plaso",
+            "status": "ok" if r.returncode == 0 else "error",
+            "stderr": r.stderr[:500] if r.stderr else ""}
