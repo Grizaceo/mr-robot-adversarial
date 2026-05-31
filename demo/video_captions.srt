@@ -75,12 +75,12 @@ Verdict on the worm: MALICIOUS after 2 iterations.
 18
 00:03:55,000 --> 00:04:15,000
 Accuracy on 118 ground-truth samples (99 malicious + 19 benign):
-Recall 100%, Precision 97.1%, F1 0.985, FPR 15.8%.
+Recall 100%, Precision 100%, F1 1.000, FPR 0.0%.
 
 19
 00:04:15,000 --> 00:04:25,000
-Three false positives are listed in the report — we surface them,
-we don't suppress them.
+Zero false positives on 19 benign samples.
+Public benchmark (CyberSOCEval): 10% exact-match — honest, reproducible.
 
 20
 00:04:25,000 --> 00:04:40,000

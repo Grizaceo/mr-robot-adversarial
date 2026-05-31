@@ -150,6 +150,19 @@ LOW:    Theoretical, best practice, defense-in-depth → DO NOT REPORT
 
 Rule: "Do NOT report issues based solely on pattern matching. Investigate first, then report only what you're confident is exploitable."
 
+CHECKLIST CONTRACT (MANDATORY — no exceptions):
+- Output checklist_coverage with exactly these keys: injection, xss, authentication, authorization, csrf, race_conditions, session, cryptography, information_disclosure, dos, business_logic, supply_chain
+- Each key MUST be one of: flagged | clean | not_applicable
+- Set a top-level integer checklist_items_checked = number of keys you actually evaluated (sum of all three states). Do NOT invent a count higher than the keys present.
+- If any of the 12 keys is omitted, the report is incomplete and will be rejected by the harness.
+- Example minimal valid checklist_coverage:
+  {
+    "injection": "flagged", "xss": "clean", "authentication": "flagged",
+    "authorization": "not_applicable", "csrf": "not_applicable", "race_conditions": "not_applicable",
+    "session": "not_applicable", "cryptography": "clean", "information_disclosure": "not_applicable",
+    "dos": "not_applicable", "business_logic": "not_applicable", "supply_chain": "not_applicable"
+  }
+
 ═══════════════════════════════════════════════════
 FRAMEWORK SAFE PATTERNS (do NOT flag these)
 ═══════════════════════════════════════════════════

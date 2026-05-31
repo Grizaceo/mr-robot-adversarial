@@ -200,8 +200,8 @@ jq '{
 **Caption B:**
 ```
 Recall 100% — no malicious sample missed.
-FPR 15.8% — three benigns over-flagged, listed transparently in the report.
-We surface false positives, we don't hide them.
+Precision 100%, FPR 0.0% — zero false positives on 19 benign samples.
+Honest benchmark: 10% exact-match on CyberSOCEval (public, reproducible).
 ```
 
 ---

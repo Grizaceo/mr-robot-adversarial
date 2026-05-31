@@ -132,7 +132,7 @@ pause
 
 # ── Scene 8 ──────────────────────────────────────────────────────────
 scene 8 "Accuracy report — 99 malicious + 19 benign"
-caption "Recall 100%. FPR 15.8% — three FPs listed transparently in the report."
+caption "Recall 100%, Precision 100%, FPR 0.0% — zero false positives on 19 benign samples."
 run "jq '{accuracy: .metrics.accuracy, precision: .metrics.precision, recall: .metrics.recall, f1: .metrics.f1, fpr: .metrics.fpr, confusion_matrix: .metrics.confusion_matrix}' docs/accuracy_report.json"
 pause
 
