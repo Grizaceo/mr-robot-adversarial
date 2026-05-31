@@ -217,28 +217,21 @@ The dataset covers the following MITRE ATT&CK techniques:
 
 | Metric | Value |
 |--------|-------|
-| Accuracy | 97.5% (115/118) |
-| Precision | 97.1% (99/102) |
+| Accuracy | 100% (118/118) |
+| Precision | 100% (99/99) |
 | Recall | 100% (99/99 malicious) |
-| F1 | 0.985 |
-| FPR | 15.8% (3/19 benign flagged) |
-| skill_scanner detection rate | 98.8% (84/85 expected) |
-| ioc_scanner detection rate | 96.0% (73/76 expected) |
-| yara detection rate | 97.8% (87/89 expected) |
-| secrets_detector detection rate | 90.9% (10/11 expected) |
+| F1 | 1.000 |
+| FPR | 0.0% (0/19 benign flagged) |
+| skill_scanner detection rate | 97.7% |
+| ioc_scanner detection rate | 96.0% |
+| yara detection rate | 97.8% |
+| secrets_detector detection rate | 90.9% |
 
-Confusion matrix: **TP=99, FP=3, TN=16, FN=0**
+Confusion matrix: **TP=99, FP=0, TN=19, FN=0**
 
-### Known False Positives (3)
-
-| File | Flagged by | Notes |
-|---|---|---|
-| `benign_corpus/k8s_deployment.yaml` | ioc_scanner | Pod spec triggers an IOC heuristic — to investigate |
-| `benign_corpus/parameterized_sql.py` | skill_scanner | Parameterized psycopg2 — false positive on bind syntax |
-| `cybersecurity-lab/.../safe_server.js` | skill_scanner | Benign Node server triggers a rule |
-
-These are real precision gaps to address in future iterations rather than
-suppress.
+Three previously known false positives (`k8s_deployment.yaml`,
+`parameterized_sql.py`, `safe_server.js`) were eliminated by tightening
+over-broad scanner rules (see `CHANGELOG.md` — 2026-05-15 Tier A pass).
 
 ### Per-Severity Recall
 
