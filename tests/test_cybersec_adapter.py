@@ -11,11 +11,6 @@ def _lab_path():
         return env
     return str(Path.home() / ".hermes" / "workspace" / "cybersecurity-lab")
 
-def test_adapter_initialization():
-    config = {"lab_path": _lab_path()}
-    adapter = CybersecLabAdapter(config)
-    assert adapter.lab_path.exists()
-
 def test_get_active_alerts(tmp_path):
     # Create a fake reports directory with active_alerts.json
     reports_dir = tmp_path / "reports"

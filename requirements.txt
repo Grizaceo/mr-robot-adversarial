@@ -1,6 +1,20 @@
+# Core dependencies
 mcp==1.27.0
 pydantic==2.12.4
 PyYAML==6.0.3
 yara-python==4.5.*
 requests>=2.32.0
 cryptography>=42.0.0
+
+# Scanner dependencies
+pytsk3
+volatility3
+
+# Database
+# sqlite3 is stdlib
+
+# Crypto
+# cryptography already included
+
+# Optional: for NHI governance
+pyyaml  # already included as PyYAML

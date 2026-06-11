@@ -155,9 +155,12 @@ def run_triage_agent(filepath: str, scanner_results: Optional[dict] = None,
     if context_file:
         cmd.extend(["--context", str(context_file)])
 
+    # Pass API keys to subprocess
+    env = os.environ.copy()
+
     try:
         result = subprocess.run(cmd, capture_output=True, text=True,
-                                timeout=timeout, cwd=str(repo_root))
+                                timeout=timeout, cwd=str(repo_root), env=env)
         if result.returncode == 0 and result.stdout.strip():
             return json.loads(result.stdout)
         return {

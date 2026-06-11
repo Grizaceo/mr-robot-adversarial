@@ -117,13 +117,13 @@ class TriageFalsifier:
     Reinforced by Du et al. 2023 (arXiv:2305.14325) on multi-agent debate
     and Sharma et al. 2023 (arXiv:2310.13548) on LLM sycophancy.
 
-    Default provider: 'deepseek' (ΔA≈1 vs Nemotron propagator).
+    Default provider: 'falsifier' (ΔA≈1 vs DeepSeek-v4 propagator).
     """
 
     def __init__(self, provider: str = None):
-        # Default to DeepSeek for heterogeneity (ΔA≈1 vs Nemotron, τ low)
+        # Default to Nemotron Ultra for heterogeneity (ΔA≈1 vs DeepSeek-v4, τ low)
         # Per Shehata & Li (2026): same-family falsifier produces kinship lock
-        self.provider = provider or os.getenv("MR_ROBOT_PROVIDER", "deepseek")
+        self.provider = provider or os.getenv("MR_ROBOT_PROVIDER", "falsifier")
         # Import here to avoid circular deps
         from agents.mr_robot.triage import PROVIDERS, _get_api_key, _call_llm
         self.PROVIDERS = PROVIDERS

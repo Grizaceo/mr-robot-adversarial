@@ -1,0 +1,6 @@
+{
+  "audit_path": "/home/gris/.hermes/workspace/repos/find-evil-hackathon/reports/audit.jsonl",
+  "line_count": 0,
+  "created_at": "2026-06-08T23:48:10.690634+00:00",
+  "note": "Lines up to line_count predate the current HMAC verification baseline."
+}

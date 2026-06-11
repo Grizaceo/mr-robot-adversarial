@@ -1,0 +1,16 @@
+[
+    {
+        "timestamp": "2026-06-08T19:48:10.300821",
+        "level": "INFO",
+        "source": "SYSTEM",
+        "message": "Alert System smoke test initialized.",
+        "data": {}
+    },
+    {
+        "timestamp": "2026-06-08T19:48:10.301711",
+        "level": "WARN",
+        "source": "SCANNERS",
+        "message": "Alert System smoke test warning.",
+        "data": {}
+    }
+]

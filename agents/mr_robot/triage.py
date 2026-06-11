@@ -23,27 +23,44 @@ import time
 from pathlib import Path
 from datetime import datetime, timezone
 
+# Ensure find-evil-hackathon root is in path for prompt_injection_defense etc.
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
 # ── Provider Configuration ────────────────────────────────────────────────────
 
 PROVIDERS = {
+    # ── Propagator (MR. Robot Triage) ──
     "nvidia-nim": {
         "base": "https://integrate.api.nvidia.com/v1",
-        "model": os.getenv("NVIDIA_MODEL", "mistralai/mistral-nemotron"),
+        "model": os.getenv("NVIDIA_MODEL", "deepseek/deepseek-v4-pro"),
         "env_key": "NVIDIA_API_KEY",
         "fallback_models": [
+            "deepseek/deepseek-v4-flash",
+            "mistralai/mistral-nemotron",
             "meta/llama-4-maverick-17b-128e-instruct",
             "meta/llama-3.3-70b-instruct",
         ],
     },
-    "ollama-cloud": {
-        "base": "https://ollama.com/v1",
-        "model": os.getenv("OLLAMA_MODEL", "kimi-k2.5"),
-        "env_key": "OLLAMA_API_KEY",
+    # ── Falsifier (Auditor) — Heterogeneous via OpenRouter ──
+    "falsifier": {
+        "base": "https://openrouter.ai/api/v1",
+        "model": os.getenv("FALSIFIER_MODEL", "nvidia/nemotron-3-ultra-550b-a55b:free"),
+        "env_key": "OPENROUTER_API_KEY",
+        "extra_headers": {
+            "HTTP-Referer": "https://github.com/Grizaceo/mr-robot-adversarial",
+            "X-Title": "MR. Robot - Adversarial (Falsifier)",
+        },
         "fallback_models": [
-            "gemma3:12b",
-            "qwen3:8b",
+            "nvidia/nemotron-3-super-120b-a12b:free",
+            "poolside/laguna-m.1:free",
+            "deepseek/deepseek-chat-v3-0324:free",
+            "deepseek/deepseek-r1:free",
+            "qwen/qwen3-32b:free",
         ],
     },
+    # ── Fallback Propagator (OpenRouter free tier) ──
     "openrouter": {
         "base": "https://openrouter.ai/api/v1",
         "model": os.getenv("OPENROUTER_MODEL", "openai/gpt-oss-120b:free"),
@@ -60,26 +77,21 @@ PROVIDERS = {
             "meta-llama/llama-3.3-70b-instruct:free",
         ],
     },
-    # ── Heterogeneous auditor (Shehata & Li 2026, arXiv:2604.27274)
-    # DeepSeek is architecturally far from Nemotron (ΔA≈1, τ low).
-    # Used as the Falsifier backend to break the kinship lock.
-    "deepseek": {
-        "base": "https://openrouter.ai/api/v1",
-        "model": os.getenv("DEEPSEEK_MODEL", "deepseek/deepseek-chat-v3-0324:free"),
-        "env_key": "OPENROUTER_API_KEY",
-        "extra_headers": {
-            "HTTP-Referer": "https://github.com/Grizaceo/mr-robot-adversarial",
-            "X-Title": "MR. Robot - Adversarial (Falsifier)",
-        },
+    # ── Last resort: Ollama Cloud ──
+    "ollama-cloud": {
+        "base": "https://ollama.com/v1",
+        "model": os.getenv("OLLAMA_MODEL", "minimax-m3"),
+        "env_key": "OLLAMA_API_KEY",
         "fallback_models": [
-            "deepseek/deepseek-r1:free",
-            "qwen/qwen3-32b:free",
+            "kimi-k2.6",
+            "gemma3:12b",
+            "qwen3:8b",
         ],
     },
 }
 
 DEFAULT_PROVIDER = os.getenv("MR_ROBOT_PROVIDER", "nvidia-nim")
-FALLBACK_PROVIDER_ORDER = ["nvidia-nim", "ollama-cloud", "openrouter"]
+FALLBACK_PROVIDER_ORDER = ["nvidia-nim", "openrouter", "ollama-cloud"]
 MAX_TRIAGE_FILE_BYTES = int(os.getenv("MR_ROBOT_MAX_TRIAGE_FILE_BYTES", str(50 * 1024)))
 LLM_TIMEOUT_SECONDS = int(os.getenv("MR_ROBOT_LLM_TIMEOUT_SECONDS", "30"))
 
@@ -465,8 +477,8 @@ def _call_llm(provider: str, prompt: str, system: str = "") -> tuple[str, str]:
         try:
             if provider == "ollama-cloud":
                 resp = _call_ollama_cloud(prompt, model=model, system=system)
-            elif provider in ("openrouter", "deepseek"):
-                # deepseek uses OpenRouter as transport (different model family, same API)
+            elif provider in ("openrouter", "falsifier"):
+                # falsifier uses OpenRouter as transport (different model family, same API)
                 resp = _call_openrouter(prompt, model=model, system=system)
             elif provider == "nvidia-nim":
                 resp = _call_nvidia_nim(prompt, model=model, system=system)
