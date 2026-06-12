@@ -19,7 +19,7 @@ REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$REPO_ROOT"
 
 AUTO="${AUTO:-0}"
-AUTO_DELAY="${AUTO_DELAY:-6}"
+AUTO_DELAY="${AUTO_DELAY:-3}"
 SKIP_PROVIDERS="${SKIP_PROVIDERS:-0}"
 
 # Colors (turn off with NO_COLOR=1)
@@ -74,25 +74,24 @@ else
   echo "MR. Robot Adversarial"
 fi
 echo
-echo "  Autonomous AI Cyber Defense — SANS FIND EVIL! Hackathon 2026"
+echo "  Autonomous AI Cyber Defense — SANS FIND EVIL! 2026"
 pause
 
 # ── Scene 2 ──────────────────────────────────────────────────────────
 scene 2 "The problem"
-caption "AI-driven adversaries breach in <8 minutes."
-caption "Human analysts still alt-tab between tools."
+caption "AI adversaries breach in <8 min. Humans still alt-tab."
 caption "We close the gap: scan → triage → adversarial review → verdict, ~30s."
 pause
 
 # ── Scene 3 ──────────────────────────────────────────────────────────
 scene 3 "Architecture"
 caption "Three trust layers, two model families, one rule-based judge."
-run "sed -n '20,68p' README.md"
+run "sed -n '20,50p' README.md"
 pause
 
 # ── Scene 4 ──────────────────────────────────────────────────────────
 scene 4 "Health check"
-caption "Providers, scanners, and audit DB report ready."
+caption "Providers, scanners, audit DB ready."
 if needs_providers; then
   run "python agents/mr_robot/triage.py --health"
 fi
@@ -100,18 +99,18 @@ pause
 
 # ── Scene 5 ──────────────────────────────────────────────────────────
 scene 5 "Malicious sample — Python bind shell"
-caption "Expected verdict: MALICIOUS."
-run "head -20 \"$LAB_ROOT/test-corpus/malicious/bind_shell.py\""
+caption "Expected: MALICIOUS."
+run "head -15 \"$LAB_ROOT/test-corpus/malicious/bind_shell.py\""
 echo
 if needs_providers; then
-  caption "Pipeline: scanners → MR. Robot (Nemotron) → Falsifier (DeepSeek)"
-  run "python triage_orchestrator.py \"$LAB_ROOT/test-corpus/malicious/bind_shell.py\" --provider deepseek 2>/dev/null | jq '{verdict: .final_verdict, rationale, propagator: ._meta.propagator_family, auditor: ._meta.auditor_family, kinship_lock_risk: ._meta.kinship_lock_risk}'"
+  caption "Pipeline: scanners → MR. Robot → Falsifier → Synthesizer"
+  run "python triage_orchestrator.py \"$LAB_ROOT/test-corpus/malicious/bind_shell.py\" 2>/dev/null | jq '{verdict: .final_verdict, rationale, propagator: ._meta.propagator_family, auditor: ._meta.auditor_family, kinship_lock_risk: ._meta.kinship_lock_risk}'"
 fi
 pause
 
 # ── Scene 6 ──────────────────────────────────────────────────────────
 scene 6 "Benign sample — Django view with parameterized ORM"
-caption "Expected verdict: BENIGN. Framework-aware Falsifier should refute any FP."
+caption "Expected: BENIGN. Falsifier refutes FPs."
 run "cat benign_corpus/django_user_view.py"
 echo
 if needs_providers; then
@@ -121,18 +120,18 @@ pause
 
 # ── Scene 7 ──────────────────────────────────────────────────────────
 scene 7 "Self-correction loop — obfuscated npm worm"
-caption "Triage uncertain on first pass; Falsifier triggers a re-run."
-run "head -25 \"$LAB_ROOT/test-corpus/malicious/mr_robot_npm_worm.js\""
+caption "Triage uncertain → Falsifier triggers re-run → confident MALICIOUS."
+run "head -20 \"$LAB_ROOT/test-corpus/malicious/mr_robot_npm_worm.js\""
 echo
 if needs_providers; then
-  caption "Max 2 iterations (Shehata & Li 2026: more cycles with same family amplify error)."
+  caption "Max 2 iterations (Shehata & Li 2026: same family amplifies error)."
   run "python triage_orchestrator.py \"$LAB_ROOT/test-corpus/malicious/mr_robot_npm_worm.js\" 2>/dev/null | jq '{verdict: .final_verdict, iterations: (.correction_history | length), history: [.correction_history[] | {iter: .iteration, status: .falsifier_status, auditor: .heterogeneity.auditor_family}]}'"
 fi
 pause
 
 # ── Scene 8 ──────────────────────────────────────────────────────────
 scene 8 "Accuracy report — 99 malicious + 19 benign"
-caption "Recall 100%, Precision 100%, FPR 0.0% — zero false positives on 19 benign samples."
+caption "Recall 100%, Precision 100%, FPR 0.0% — zero FPs on 19 benign."
 run "jq '{accuracy: .metrics.accuracy, precision: .metrics.precision, recall: .metrics.recall, f1: .metrics.f1, fpr: .metrics.fpr, confusion_matrix: .metrics.confusion_matrix}' docs/accuracy_report.json"
 pause
 
@@ -142,7 +141,7 @@ caption "Every tool call logged. SQLite WAL, JSON-exportable."
 if [[ -f logs/audit_trail.db ]]; then
   run "sqlite3 logs/audit_trail.db '.headers on' '.mode column' 'SELECT tool_name, verdict, confidence, duration_ms FROM executions ORDER BY id DESC LIMIT 5;'"
 else
-  caption "(no audit DB yet — run any scenario first to populate)"
+  caption "(run a scenario first to populate)"
 fi
 pause
 
