@@ -119,13 +119,14 @@ fi
 pause
 
 # ── Scene 7 ──────────────────────────────────────────────────────────
-scene 7 "Self-correction loop — obfuscated npm worm"
-caption "Triage uncertain → Falsifier triggers re-run → confident MALICIOUS."
-run "head -20 \"$LAB_ROOT/test-corpus/malicious/mr_robot_npm_worm.js\""
+scene 7 "Self-correction loop — adversarial review on Python bind shell"
+caption "Triage LLM (gpt-oss) → MALICIOUS, 0.97 conf. Falsifier (nemotron-ultra) reviews."
+caption "Heterogeneity enforced: different model families → τ low, ΔA=1.0"
+run "head -10 \"\$LAB_ROOT/test-corpus/malicious/bind_shell.py\""
 echo
 if needs_providers; then
-  caption "Max 2 iterations (Shehata & Li 2026: same family amplifies error)."
-  run "python triage_orchestrator.py \"$LAB_ROOT/test-corpus/malicious/mr_robot_npm_worm.js\" 2>/dev/null | jq '{verdict: .final_verdict, iterations: (.correction_history | length), history: [.correction_history[] | {iter: .iteration, status: .falsifier_status, auditor: .heterogeneity.auditor_family}]}'"
+  caption "Forcing adversarial review (MR_ROBOT_FORCE_FALSIFIER=1) — see self-correction in audit trail."
+  run "MR_ROBOT_FORCE_FALSIFIER=1 python triage_orchestrator.py \"\$LAB_ROOT/test-corpus/malicious/bind_shell.py\" 2>/dev/null | jq '{verdict: .final_verdict, rationale, propagator: ._meta.propagator_model, auditor: ._meta.auditor_model, kinship_lock_risk: ._meta.kinship_lock_risk, iterations: [.correction_history[] | {iter: .iteration, status: .falsifier_status, audit_family: .heterogeneity.auditor_family, dist: .heterogeneity.architectural_distance}]}'"
 fi
 pause
 
