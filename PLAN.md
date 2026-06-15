@@ -3,7 +3,7 @@
 
 ## Context
 
-Submission deadline: June 15, 2026. Code is feature-complete and 123 tests pass.
+Submission deadline: June 15, 2026. Code is feature-complete and 181 tests pass.
 Three targeted improvements before the demo video, targeting two weak SANS rubric dimensions:
 - **"Self-improving agents"** — static today; no learning from past verdicts
 - **"IR Accuracy"** — CyberSOCEval public benchmark at 10% (below 23-34% paper baseline)

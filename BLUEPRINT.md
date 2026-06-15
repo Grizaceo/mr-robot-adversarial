@@ -84,7 +84,7 @@ File → Scanners → MR. Robot Triage → Falsifier Review → Final Report
 | # | Requirement | Status | Notes |
 |---|------------|--------|-------|
 | 1 | Repo GitHub publico | ✅ | https://github.com/Grizaceo/mr-robot-adversarial |
-| 2 | Demo video (3 min) | ⏳ | Guion + SRT + OBS checklist listos en `demo/` |
+| 2 | Demo video (≤5 min, 3:10) | ⏳ | Guion + SRT + OBS checklist listos en `demo/` |
 | 3 | Text description | ✅ | BLUEPRINT + README + architecture updated |
 | 4 | Architecture diagram | ✅ | `docs/architecture.md` updated |
 | 5 | Working code | ✅ | All components functional |

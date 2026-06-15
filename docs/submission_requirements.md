@@ -3,14 +3,15 @@
 ## 📦 Required Artifacts
 
 1. **Public GitHub repository** (this repo)
-2. **Demo video** ≤ 3 minutes, uploaded to YouTube or Vimeo (public)
+2. **Demo video** ≤ 5 minutes, uploaded to YouTube or Vimeo (public). Our submitted video runs 3:10.
 3. **Text description** (README + this document)
 4. **Architecture diagram** (in `docs/architecture.md`)
 5. **Working code** that can be installed and run
 
-## 🎬 Video Content (3 min max)
+## 🎬 Video Content (5 min max)
 
-**Structure suggested:**
+**Structure suggested** (an early 3-minute outline; the final video uses the
+fuller scene plan in `demo/video_script.md` and runs 3:10):
 - 0:00–0:30 — Introduction: "What we built and why"
 - 0:30–1:30 — Scenario 1: Malware detection + auto-containment
 - 1:30–2:30 — Scenario 2: APT chain correlation + blocking

@@ -37,7 +37,7 @@ The system is a 4-stage pipeline:
 
 ### How we built it
 - **Stack:** Python 3.11, Pydantic, SQLite WAL, OpenRouter (gpt-oss-120b propagator) + OpenRouter (nemotron-3-ultra falsifier) — heterogeneous by default, ΔA≈1; NVIDIA NIM (mistral-nemotron) supported as an alternate propagator
-- **159 tests** passing, 4 skipped (3:06 runtime)
+- **181 tests** passing, 4 skipped (verified locally and on the SANS SIFT Workstation VM)
 - **Architectural pattern (per SANS taxonomy):** **Direct Agent Extension + Custom MCP Server hybrid** — extended Protocol SIFT's agent loop with rigorous guardrails and added an MCP server for typed tool access
 - **Novel angle:** the **heterogeneity mandate** is enforced *architecturally* (different LLM families + rule-based synthesizer) rather than prompted — the synthesizer is τ=0 and can override either LLM
 
@@ -154,7 +154,7 @@ python triage_orchestrator.py /path/to/suspicious/file.py
 # 7. View the audit trail
 sqlite3 logs/audit_trail.db "SELECT tool_name, verdict, confidence, duration_ms FROM executions ORDER BY id DESC LIMIT 10;"
 
-# 8. Run the test suite (159 tests, ~3 min)
+# 8. Run the test suite (181 tests)
 python -m pytest tests/ -v
 ```
 
