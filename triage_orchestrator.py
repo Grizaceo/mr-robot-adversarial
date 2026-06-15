@@ -401,6 +401,8 @@ def orchestrate(
 
         audit.log("orchestrator_route", {"candidate": str(candidate)},
                   {"route": "falsifier", "iterations": len(correction_history),
+                   "verdict": triage_report.get("verdict", "UNKNOWN"),
+                   "confidence": triage_report.get("confidence", 0.0),
                    "final_status": falsifier_result.get("status", "N/A") if falsifier_result else "N/A"}, 0)
 
     # ── Phase 4: Synthesizer — non-LLM, τ=0 ──────────────────────────────

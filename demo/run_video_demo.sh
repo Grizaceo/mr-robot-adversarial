@@ -131,16 +131,16 @@ fi
 pause
 
 # ── Scene 8 ──────────────────────────────────────────────────────────
-scene 8 "Accuracy report — 99 malicious + 19 benign"
-caption "Recall 100%, Precision 100%, FPR 0.0% — zero FPs on 19 benign."
+scene 8 "Accuracy report — 173 samples (135 malicious + 38 benign)"
+caption "Recall 100% (no missed malicious). Precision 99.26%. FPR 2.63% (1 FP)."
 run "jq '{accuracy: .metrics.accuracy, precision: .metrics.precision, recall: .metrics.recall, f1: .metrics.f1, fpr: .metrics.fpr, confusion_matrix: .metrics.confusion_matrix}' docs/accuracy_report.json"
 pause
 
 # ── Scene 9 ──────────────────────────────────────────────────────────
 scene 9 "Audit trail — SANS requirement #8"
-caption "Every tool call logged. SQLite WAL, JSON-exportable."
+caption "Every tool call logged. SQLite WAL, JSON-exportable, with timestamps."
 if [[ -f logs/audit_trail.db ]]; then
-  run "sqlite3 logs/audit_trail.db '.headers on' '.mode column' 'SELECT tool_name, verdict, confidence, duration_ms FROM executions ORDER BY id DESC LIMIT 5;'"
+  run "sqlite3 logs/audit_trail.db '.headers on' '.mode column' 'SELECT tool_name, verdict, confidence, duration_ms, created_at FROM executions WHERE verdict IS NOT NULL ORDER BY id DESC LIMIT 5;'"
 else
   caption "(run a scenario first to populate)"
 fi
