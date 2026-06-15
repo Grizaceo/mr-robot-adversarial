@@ -2,55 +2,75 @@
 
 ## System Architecture
 
+**Architectural pattern (SANS taxonomy):** **Direct Agent Extension + Custom MCP Server (hybrid)**
+— the agent extends the SANS SIFT Workstation's analysis loop, and *every* tool is reached only
+through a typed, allow-listed MCP server (no free-form shell).
+
+**Guardrail legend (read the diagram with this):**
+🛡️**A** = *architectural* guardrail — enforced by code / types / process / filesystem isolation;
+**cannot be prompted away.**  📝**P** = *prompt-based* guardrail — soft instruction the model may
+ignore. Security rests on the 🛡️A layer; 📝P is for analysis *quality* only. Full catalogue:
+[`architectural_guardrails.md`](architectural_guardrails.md) (11 architectural · 3 hybrid · 5 prompt-based).
+
 ```mermaid
 graph TB
-    subgraph Input["📁 Input"]
-        FILE[Candidate File<br/>Python/JS/YAML/Shell]
+    subgraph SIFT["🖥️ SANS SIFT Workstation — host env & data source"]
+        CASE[Case artifacts / evidence<br/>files · disk images · logs<br/>read-only]
+        FTOOLS[SIFT forensic tooling available<br/>fls · mmls · volatility3<br/>log2timeline · bulk_extractor<br/>for artifact extraction]
     end
 
-    subgraph Scanners["🔍 Scanner Suite (τ=0, deterministic)"]
-        SS[skill_scanner<br/>44 rules: YARA-like + AST<br/>+ prompt injection<br/>+ ClawDefender patterns]
-        IS[ioc_scanner<br/>12 URLs + 6 domains<br/>+ 10 heuristics]
-        YR[scan_yara<br/>22KB custom rules<br/>C2 + backdoor primitives]
-        SD[secrets_detector<br/>API keys + tokens<br/>+ credentials]
+    subgraph MCPS["🔌 MCP Server — typed tool access · 🛡️A"]
+        MCPT[scan_file · triage_artifact · falsify_triage<br/>orchestrate_complete · health · get_baseline<br/>allow-list only · no rm/chmod/exec · inputs validated]
     end
 
-    subgraph AI["🤖 AI Pipeline (heterogeneous)"]
-        MR[MR. Robot<br/>gpt-oss-120b propagator<br/>5-phase review<br/>confidence levels<br/>framework-aware FP reduction]
-        FALS[Falsifier<br/>Nemotron-3-Ultra auditor<br/>ΔA≈1 vs gpt-oss<br/>framework-safe-pattern<br/>refutation]
-        SYN[Orchestrator<br/>Rule-based synthesizer<br/>τ=0, non-LLM<br/>deterministic verdict]
+    subgraph Scanners["🔍 Scanner Suite — τ=0 deterministic · 🛡️A"]
+        SS[skill_scanner<br/>44 rules: YARA-like + AST<br/>+ prompt injection]
+        IS[ioc_scanner<br/>URLs + domains + heuristics]
+        YR[scan_yara<br/>22KB custom rules]
+        SD[secrets_detector<br/>API keys + tokens]
     end
 
-    subgraph Audit["📋 Audit Trail"]
-        LOG[Execution Logger<br/>SQLite WAL mode<br/>12 fields per decision<br/>τ + ΔA metrics]
-        JSONL[audit_trail.jsonl<br/>SANS requirement #8]
+    subgraph AI["🤖 AI Pipeline — heterogeneous"]
+        MR[MR. Robot · gpt-oss-120b propagator<br/>5-phase review · 📝P<br/>framework-aware FP reduction]
+        FALS[Falsifier · Nemotron-3-Ultra auditor<br/>ΔA≈1 vs gpt-oss · heterogeneity in code · 🛡️A<br/>framework-safe-pattern refutation]
+        SYN[Orchestrator · rule-based synthesizer<br/>τ=0 · non-LLM · 🛡️A<br/>no LLM can override the verdict]
     end
 
-    subgraph Output["📊 Output"]
-        VERDICT[Final Verdict<br/>MALICIOUS/SUSPICIOUS<br/>/BENIGN/INCONCLUSIVE]
-        REPORT[Structured Report<br/>confidence + severity<br/>MITRE ATT&CK mapping<br/>recommended actions]
+    subgraph Audit["📋 Audit Trail — 🛡️A"]
+        LOG[Execution Logger · SQLite WAL<br/>per-agent rows under one run_id<br/>scanner / triage / falsifier / self_correction<br/>SANS requirement #8]
     end
 
-    FILE --> Scanners
+    subgraph Output["📊 Output pipeline"]
+        VERDICT[Final verdict + structured report<br/>confidence · severity · MITRE ATT&CK<br/>recommended actions]
+    end
+
+    CASE --> MCPS
+    FTOOLS -. artifact extraction .-> CASE
+    MCPS --> Scanners
     Scanners --> MR
-    MR -->|confidence ≥ 0.90<br/>+ scanner agreement| SYN
-    MR -->|confidence < 0.90<br/>or disagreement| FALS
+    MR -->|conf ≥ 0.90 + scanner agree| SYN
+    MR -->|conf < 0.90 / disagree / forced| FALS
     FALS -->|SURVIVED| SYN
-    FALS -->|FALSIFIED<br/>max 2 iterations| MR
+    FALS -->|FALSIFIED · max 2 iter| MR
     SYN --> VERDICT
-    SYN --> REPORT
     MR --> LOG
     FALS --> LOG
-    LOG --> JSONL
+    SYN --> LOG
     VERDICT --> Output
-    REPORT --> Output
 
-    style Input fill:#1a1a2e,stroke:#16213e,color:#e94560
+    style SIFT fill:#0b3d2e,stroke:#16213e,color:#e8f5e9
+    style MCPS fill:#3a2d0f,stroke:#16213e,color:#ffe082
     style Scanners fill:#0f3460,stroke:#16213e,color:#e94560
     style AI fill:#533483,stroke:#16213e,color:#e94560
     style Audit fill:#1a1a2e,stroke:#16213e,color:#e94560
     style Output fill:#16213e,stroke:#0f3460,color:#e94560
 ```
+
+> **Where security is enforced (🛡️A, at a glance):** input validation + read-only case mounts
+> (TB1) · deterministic scanner sandbox, no network (TB2) · heterogeneity check + τ=0 synthesizer
+> so no LLM overrides the verdict (TB3) · MCP allow-list, no destructive commands (TB4). The 5-phase
+> review prompt is the only 📝P element and is **never** load-bearing for security — see the
+> prompt-vs-architectural table below.
 
 ## Trust Boundaries
 
@@ -79,6 +99,27 @@ graph TB
 │ • All inputs validated before processing                        │
 └─────────────────────────────────────────────────────────────────┘
 ```
+
+## Guardrails — architectural vs prompt-based (at a glance)
+
+The SANS rubric requires these be **clearly distinguished**. Security is carried by the
+🛡️**A** (architectural) layer — enforced in code, no LLM authority. 📝**P** (prompt-based) is
+*quality only*. Full catalogue with file:line and bypass analysis in
+[`architectural_guardrails.md`](architectural_guardrails.md).
+
+| Guardrail | Type | Enforced where (file) | If the LLM ignores it… |
+|---|---|---|---|
+| Path validation / read-only roots | 🛡️A | `mcp_tools.py` `validate_target_file` | runs *before* any LLM call — no effect |
+| File-size cap on LLM ingestion | 🛡️A | `agents/mr_robot/triage.py` `MAX_TRIAGE_FILE_BYTES` | short-circuits to INCONCLUSIVE |
+| Subprocess-isolated scanners, no network | 🛡️A | `mcp_tools.py` scanner runners | scanners are τ=0, not LLM-driven |
+| MCP allow-list (no rm/chmod/exec) | 🛡️A | `mcp_server.py` tool registry | tool simply doesn't exist to call |
+| **τ=0 rule-based synthesizer** | 🛡️A | `triage_orchestrator.py` `_compute_synthesizer_verdict` | **no LLM can override the final verdict** |
+| **Heterogeneity / kinship-lock check** | 🛡️A | `triage_orchestrator.py` `_check_heterogeneity` | flagged in audit even if the model is silent |
+| Bounded correction (max 2 iters) | 🛡️A | `triage_orchestrator.py` loop bound | loop cannot run away |
+| Per-agent audit trail under run_id | 🛡️A | `execution_logger.py` + `audit.log(...)` | logging is outside the model's control |
+| Prompt-injection sentinel boundary | 🛡️A+📝 (hybrid) | `prompt_injection_defense.scan_and_wrap` | architectural wrap holds; notice is the soft half |
+| Framework-aware FP refutation | 🛡️A+📝 (hybrid) | falsifier review path | scanner/synthesizer still bound the result |
+| 5-phase review discipline | 📝P | system prompt in `agents/mr_robot/triage.py` | analysis quality drops; **security unaffected** |
 
 ## Data Flow
 

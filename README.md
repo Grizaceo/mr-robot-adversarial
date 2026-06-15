@@ -96,7 +96,7 @@ mandate (Shehata & Li 2026) is enforced architecturally at the rule-based synthe
 not prompted at the LLMs**. The synthesizer is τ=0 — no LLM decides the final verdict.
 
 See [`docs/architectural_guardrails.md`](docs/architectural_guardrails.md) for the
-full catalogue (9 architectural + 3 hybrid + 5 prompt-based guardrails).
+full catalogue (11 architectural + 3 hybrid + 5 prompt-based guardrails).
 
 ## Key Features
 
