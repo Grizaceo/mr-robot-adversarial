@@ -78,15 +78,15 @@ The system is a 4-stage pipeline:
               ▼                    ▼                    ▼
     ┌──────────────────┐ ┌──────────────────┐ ┌──────────────────┐
     │   MR. Robot      │ │  Falsifier       │ │  Scanner Suite   │
-    │   (Nemotron)     │ │  (DeepSeek)      │ │  (cybersec-lab)  │
+    │   (gpt-oss)      │ │  (nemotron-ultra)│ │  (scanners/)    │
     │   propagator     │ │  auditor         │ │                  │
     │                  │ │                  │ │ • skill_scanner  │
-    │  NVIDIA NIM      │ │  OpenRouter      │ │ • ioc_scanner    │
-    │  mistral-nemotron│ │  deepseek-chat   │ │ • scan_yara      │
+    │  OpenRouter      │ │  OpenRouter      │ │ • ioc_scanner    │
+    │  gpt-oss-120b    │ │  nemotron-3-ultra│ │ • scan_yara      │
     │                  │ │                  │ │ • secrets_detect │
     │  MITRE ATT&CK    │ │  ΔA≈1 vs triage  │ │                  │
-    │  mapping         │ │  τ low           │ │  12 scanners     │
-    │                  │ │                  │ │  32+ YARA rules  │
+    │  mapping         │ │  τ low           │ │  4 wired + YARA  │
+    │                  │ │                  │ │  32+ rules      │
     └────────┬─────────┘ └────────┬─────────┘ └──────────────────┘
              │                    │
              │     ┌──────────────┘
@@ -98,7 +98,7 @@ The system is a 4-stage pipeline:
     │                              │
     │  If ΔA≈0 (same family):     │
     │    → kinship lock WARNING    │
-    │    → re-route to DeepSeek    │
+    │    → re-route to nemotron    │
     │                              │
     │  If ΔA≈1 (heterogeneous):   │
     │    → trust falsifier result  │
@@ -110,7 +110,7 @@ The system is a 4-stage pipeline:
     │     Execution Logger         │
     │     (Audit Trail)            │
     │                              │
-    │  • SQLite WAL, 12 fields     │
+    │  • SQLite WAL, 14 fields     │
     │  • heterogeneity metrics     │
     │  • τ + ΔA per decision       │
     │  • SANS requirement #8       │
@@ -158,7 +158,7 @@ sqlite3 logs/audit_trail.db "SELECT tool_name, verdict, confidence, duration_ms 
 python -m pytest tests/ -v
 ```
 
-**Cold-start note:** First run on a fresh install has no precedents in episodic memory. Run `python generate_accuracy_report.py` once to populate 118 verdicts for few-shot retrieval.
+**Cold-start note:** First run on a fresh install has no precedents in episodic memory. Run `python generate_accuracy_report.py` once to populate 173 verdicts for few-shot retrieval.
 
 ---
 
@@ -183,7 +183,7 @@ python -m pytest tests/ -v
 2. The audit trail (`logs/audit_trail.db`) is written by the orchestrator, not the LLM
 3. The rule-based synthesizer (τ=0) is the only path to a final verdict — no LLM can override it
 4. The heterogeneity check is enforced in code (`triage_orchestrator.py:_check_heterogeneity`), not via prompt
-5. **Tested for spoliation:** the falsifier was given permission to call `os.remove()` on the candidate file as a test — it refused, and that refusal is logged
+5. **Tested for spoliation:** scope NOT exercised in this submission. We have not given the falsifier destructive-tool permission to confirm the refusal path. This is a known gap, not a confirmed property — call it out to judges if asked.
 
 ---
 
@@ -224,7 +224,7 @@ orchestrator_route  BENIGN     0.99        0.0
 ## 📋 Pre-submit checklist
 
 - [x] Code repository public, MIT licensed
-- [x] Demo video ≤5 min (2:22, hosted on GitHub Release)
+- [x] Demo video ≤5 min (3:10, hosted on GitHub Release)
 - [x] Architecture diagram (in README + this file)
 - [x] Written project description (this file)
 - [x] Dataset documentation (`docs/dataset.md`)

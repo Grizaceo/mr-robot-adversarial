@@ -29,15 +29,15 @@ zero-FP detection — all in under 30 seconds per artifact.
               ▼                    ▼                    ▼
     ┌──────────────────┐ ┌──────────────────┐ ┌──────────────────┐
     │   MR. Robot      │ │  Falsifier       │ │  Scanner Suite   │
-    │   (Nemotron)     │ │  (DeepSeek)      │ │  (cybersec-lab)  │
+    │   (gpt-oss)      │ │  (nemotron-ultra)│ │  (scanners/)    │
     │   propagator     │ │  auditor         │ │                  │
     │                  │ │                  │ │ • skill_scanner  │
-    │  NVIDIA NIM      │ │  OpenRouter      │ │ • ioc_scanner    │
-    │  mistral-nemotron│ │  deepseek-chat   │ │ • scan_yara      │
+    │  OpenRouter      │ │  OpenRouter      │ │ • ioc_scanner    │
+    │  gpt-oss-120b    │ │  nemotron-3-ultra│ │ • scan_yara      │
     │                  │ │                  │ │ • secrets_detect │
     │  MITRE ATT&CK    │ │  ΔA≈1 vs triage  │ │                  │
-    │  mapping         │ │  τ low           │ │  12 scanners     │
-    │                  │ │                  │ │  32+ YARA rules  │
+    │  mapping         │ │  τ low           │ │  4 wired + YARA  │
+    │                  │ │                  │ │  32+ rules      │
     └────────┬─────────┘ └────────┬─────────┘ └──────────────────┘
              │                    │
              │     ┌──────────────┘
@@ -49,7 +49,7 @@ zero-FP detection — all in under 30 seconds per artifact.
     │                              │
     │  If ΔA≈0 (same family):     │
     │    → kinship lock WARNING    │
-    │    → re-route to DeepSeek    │
+    │    → re-route to nemotron    │
     │                              │
     │  If ΔA≈1 (heterogeneous):   │
     │    → trust falsifier result  │
@@ -61,7 +61,7 @@ zero-FP detection — all in under 30 seconds per artifact.
     │     Execution Logger         │
     │     (Audit Trail)            │
     │                              │
-    │  • SQLite WAL, 12 fields     │
+    │  • SQLite WAL, 14 fields     │
     │  • heterogeneity metrics     │
     │  • τ + ΔA per decision       │
     │  • SANS requirement #8       │
@@ -72,9 +72,10 @@ zero-FP detection — all in under 30 seconds per artifact.
 > [arXiv:2604.27274](https://arxiv.org/abs/2604.27274)*, the Falsifier
 > (auditor) must be architecturally different from MR. Robot (propagator).
 > Same-family agents produce τ≈1 → Logic Saturation → 100% error. Using
-> DeepSeek as the falsifier ensures ΔA≈1 and τ low. Reinforced by prior
-> work on multi-agent diversity (Du 2023, Liang 2023) and LLM sycophancy
-> (Sharma 2023). See [`docs/heterogeneity_mandate.md`](docs/heterogeneity_mandate.md).
+> Nemotron Ultra (different family from gpt-oss) as the falsifier ensures
+> ΔA≈1 and τ low. Reinforced by prior work on multi-agent diversity
+> (Du 2023, Liang 2023) and LLM sycophancy (Sharma 2023). See
+> [`docs/heterogeneity_mandate.md`](docs/heterogeneity_mandate.md).
 
 ## Scope vs State of the Art
 
@@ -130,7 +131,7 @@ LLM-powered analysis with rigorous 5-phase review workflow (adapted from IBM Res
 
 ### 🔄 Falsifier + Heterogeneous Orchestrator
 An adversarial reviewer with architectural diversity enforced:
-- Falsifier runs on **DeepSeek** (ΔA≈1 vs Nemotron), per Shehata & Li (2026)
+- Falsifier runs on **Nemotron Ultra** (different family from gpt-oss propagator), per Shehata & Li (2026)
 - **Framework-aware FP refutation:** Falsifier checks framework safe patterns before challenging
 - Heterogeneity check prevents kinship lock (same-family sycophancy)
 - Rule-based orchestrator (τ=0) makes final verdict — no LLM, no model family

@@ -1,93 +1,49 @@
 1
-00:00:00,000 --> 00:00:08,000
+00:00:00,000 --> 00:00:04,000
 MR. Robot Adversarial — SANS FIND EVIL! 2026
 Autonomous AI cyber-defense pipeline.
 
 2
-00:00:08,000 --> 00:00:16,000
+00:00:04,000 --> 00:00:10,000
 The problem: AI adversaries breach in under 8 minutes.
+We close the gap: scan → triage → adversarial review → verdict, ~30s.
 
 3
-00:00:16,000 --> 00:00:25,000
-Our pipeline: scan → triage → adversarial review → verdict, in ~30 seconds.
+00:00:10,000 --> 00:00:24,000
+Three trust layers, two model families, one rule-based judge.
+(scanners deterministic, auditor different family from triage)
 
 4
-00:00:25,000 --> 00:00:38,000
-Three trust layers, two model families, one rule-based judge.
+00:00:24,000 --> 00:00:37,000
+Health check — providers, scanners, audit DB online.
+4 wired scanners: skill, ioc, yara, secrets.
 
 5
-00:00:38,000 --> 00:00:50,000
-Scanners are deterministic. The auditor is a different model family
-than the triage agent — agreement actually carries information.
+00:00:37,000 --> 00:01:22,000
+Sample 1: Python bind shell. We expect MALICIOUS.
+Pipeline: scanners (10 findings) → MR. Robot (gpt-oss) → synthesizer → MALICIOUS 0.97.
 
 6
-00:00:50,000 --> 00:01:05,000
-Health check — providers, scanners, audit DB all online.
+00:01:22,000 --> 00:02:05,000
+Sample 2: Django view with parameterized ORM. We expect BENIGN.
+Falsifier refutes FPs. Final verdict: BENIGN 0.99.
 
 7
-00:01:05,000 --> 00:01:15,000
-Sample 1: a Python bind shell. Expected verdict: MALICIOUS.
+00:02:05,000 --> 00:02:56,000
+Sample 7: Self-correction loop. Forced with MR_ROBOT_FORCE_FALSIFIER=1.
+Triage (gpt-oss-120b) → MALICIOUS 0.97 → Falsifier (nemotron-3-ultra) → SURVIVED → ΔA=1.0, kinship_lock_risk=LOW.
 
 8
-00:01:15,000 --> 00:01:35,000
-Step 1: deterministic scanners (skill, IOC, YARA, secrets) light up.
-Step 2: MR. Robot (Nemotron) runs a 5-phase triage.
+00:02:56,000 --> 00:03:08,000
+Sample 8: Accuracy on 173 samples (135 malicious + 38 benign).
+Accuracy 99.42%, Precision 99.26%, Recall 100%, FPR 2.63% (1 FP).
 
 9
-00:01:35,000 --> 00:01:55,000
-Step 3: Falsifier (DeepSeek) audits the triage.
-ΔA = 1.0 — propagator and auditor are different families.
+00:03:08,000 --> 00:03:15,000
+Sample 9: Audit trail — every tool call logged in SQLite with timestamps.
+SANS Requirement #8 satisfied.
 
 10
-00:01:55,000 --> 00:02:05,000
-Verdict: MALICIOUS. Audit trail records every step.
-
-11
-00:02:05,000 --> 00:02:15,000
-Sample 2: a Django view with parameterized ORM. Expected: BENIGN.
-
-12
-00:02:15,000 --> 00:02:30,000
-The Falsifier is framework-aware: it knows Django auto-escapes
-and that .filter() parameterizes — no SQL injection vector.
-
-13
-00:02:30,000 --> 00:02:45,000
-Verdict: BENIGN. Without the Falsifier this is a likely false alarm.
-
-14
-00:02:45,000 --> 00:02:55,000
-Sample 3: an obfuscated npm worm. Triage uncertain on the first pass.
-
-15
-00:02:55,000 --> 00:03:20,000
-Falsifier challenges the verdict → MR. Robot re-runs with the counter-argument.
-
-16
-00:03:20,000 --> 00:03:40,000
-Max 2 iterations — beyond that, same-family re-runs amplify error
-rather than reduce it (Shehata & Li 2026).
-
-17
-00:03:40,000 --> 00:03:55,000
-Verdict on the worm: MALICIOUS after 2 iterations.
-
-18
-00:03:55,000 --> 00:04:15,000
-Accuracy on 118 ground-truth samples (99 malicious + 19 benign):
-Recall 100%, Precision 100%, F1 1.000, FPR 0.0%.
-
-19
-00:04:15,000 --> 00:04:25,000
-Zero false positives on 19 benign samples.
-Public benchmark (CyberSOCEval): 10% exact-match — honest, reproducible.
-
-20
-00:04:25,000 --> 00:04:40,000
-Audit trail (SANS requirement #8): every tool call logged
-to SQLite WAL with verdict, confidence, ΔA, and kinship-lock flag.
-
-21
-00:04:40,000 --> 00:05:00,000
-github.com/Grizaceo/mr-robot-adversarial — MIT license.
-Try-it-out guide: docs/try_it_out.md
+00:03:15,000 --> 00:03:20,000
+Repo: github.com/Grizaceo/mr-robot-adversarial
+License: MIT  •  Branch: grounding-audit-competition-pass

@@ -20,8 +20,16 @@ logger = logging.getLogger("mcp-tools")
 
 # ── Configuration ─────────────────────────────────────────────────────────────
 
-CYBERSEC_LAB = Path(os.getenv("CYBERSEC_LAB", str(Path.home() / ".hermes" / "workspace" / "cybersecurity-lab")))
-SCANNERS_DIR = CYBERSEC_LAB / "scanners"
+# Scanner resolution: prefer the bundled `scanners/` (works on a fresh clone).
+# Honor CYBERSEC_LAB/scanners only if it actually exists AND has the expected scripts.
+# This prevents the "fresh clone classifies a bind-shell as BENIGN" fail-open
+# reported in the SANS FIND EVIL! pre-submission audit.
+_BUNDLED_SCANNERS = Path(__file__).parent / "scanners"
+_CYBERSEC_LAB_SCANNERS = Path(os.getenv("CYBERSEC_LAB", str(Path.home() / ".hermes" / "workspace" / "cybersecurity-lab"))) / "scanners"
+SCANNERS_DIR = _BUNDLED_SCANNERS if _BUNDLED_SCANNERS.is_dir() else _CYBERSEC_LAB_SCANNERS
+# Backwards-compat alias for mcp_server.py and any external import.
+# NOTE: prefer SCANNERS_DIR for the scanner dir; this is the parent lab path.
+CYBERSEC_LAB = _CYBERSEC_LAB_SCANNERS.parent
 MR_ROBOT = Path(__file__).parent / "agents" / "mr_robot" / "triage.py"
 LOG_DIR = Path("logs")
 LOG_DIR.mkdir(exist_ok=True)
@@ -33,7 +41,7 @@ def _allowed_roots() -> list[Path]:
     raw = os.getenv("MR_ROBOT_ALLOWED_ROOTS")
     if raw:
         return [Path(p).expanduser().resolve() for p in raw.split(os.pathsep) if p.strip()]
-    return [Path(__file__).parent.resolve(), CYBERSEC_LAB.resolve()]
+    return [Path(__file__).parent.resolve(), _CYBERSEC_LAB_SCANNERS.parent.resolve()]
 
 
 def validate_target_file(filepath: str) -> tuple[bool, dict]:
@@ -92,41 +100,85 @@ def run_all_scanners(filepath: str, timeout: int = 30) -> dict[str, dict]:
 
 
 def _run_scanner(scanner_name: str, args: list[str], timeout: int = 30) -> dict:
-    """Run a single scanner CLI and return parsed JSON result."""
-    script = SCANNERS_DIR / f"{scanner_name}.py"
-    if not script.exists():
-        return {
-                "error": "scanner_not_found",
-                "scanner": scanner_name,
-                "detail": str(script),
-                "findings": [],
-            }
+    """Run a single scanner and return its findings.
 
-    json_out = LOG_DIR / f"scanner_{scanner_name}_{int(time.time())}.json"
-    cmd = [sys.executable, str(script)] + args + ["--json", str(json_out)]
+    Uses direct Python import (not subprocess) — the previous subprocess-based
+    approach was broken in fresh-clone contexts because the scanners had no
+    `if __name__` CLI block. Direct import is the architecturally honest path:
+    it can't drift, it surfaces real Python errors, and it preserves the
+    evidence-integrity promise that the LLM cannot execute shell commands
+    on the candidate file.
+
+    Each scanner is invoked with a single positional arg (the file path).
+    On any exception, we return a dict with `error: scanner_failed` plus the
+    last 400 chars of the traceback. The aggregator then maps that to the
+    fail-closed ERROR verdict (see `aggregate_scanner_results`).
+    """
+    filepath = args[0] if args else None
+    if not filepath:
+        return {"error": "no_target_file", "scanner": scanner_name, "findings": []}
 
     try:
-        subprocess.run(cmd, capture_output=True, text=True, timeout=timeout,
-                       cwd=str(Path(__file__).parent))
-
-        if json_out.exists():
-            try:
-                data = json.loads(json_out.read_text())
-                if isinstance(data, list):
-                    return {"findings": data, "raw": data}
-                return data
-            except json.JSONDecodeError:
-                return {"error": f"Invalid JSON from {scanner_name}"}
+        if scanner_name == "skill_scanner":
+            from scanners.skill_scanner import scan_file as _scan
+            from pathlib import Path as _P
+            findings = _scan(_P(filepath))
+            return {
+                "findings": [
+                    {
+                        "rule_id": getattr(f, "rule_id", "?"),
+                        "name": getattr(f, "name", "?"),
+                        "severity": getattr(f, "severity", "MEDIUM"),
+                        "filepath": str(getattr(f, "filepath", filepath)),
+                        "line": getattr(f, "line", 0),
+                        "matched_text": getattr(f, "matched_text", "")[:200],
+                    }
+                    for f in findings
+                ],
+                "scanner": scanner_name,
+            }
+        elif scanner_name == "ioc_scanner":
+            from scanners.ioc_scanner import scan_file as _scan
+            from pathlib import Path as _P
+            findings = _scan(_P(filepath))
+            return {"findings": findings if isinstance(findings, list) else [], "scanner": scanner_name}
+        elif scanner_name in ("yara", "scan_yara"):
+            from scanners.scan_yara import scan_file as _scan
+            from pathlib import Path as _P
+            res = _scan(_P(filepath))
+            if isinstance(res, dict) and "findings" in res:
+                return res
+            return {"findings": res if isinstance(res, list) else [], "scanner": scanner_name}
+        elif scanner_name == "secrets_detector":
+            from scanners.secrets_detector import scan_file as _scan
+            from pathlib import Path as _P
+            findings = _scan(_P(filepath))
+            return {
+                "findings": [
+                    {
+                        "rule_id": getattr(f, "rule_id", "?"),
+                        "name": getattr(f, "name", "?"),
+                        "severity": getattr(f, "severity", "MEDIUM"),
+                        "filepath": str(getattr(f, "filepath", filepath)),
+                        "line": getattr(f, "line", 0),
+                        "matched_text": getattr(f, "matched_text", "")[:200],
+                    }
+                    for f in findings
+                ] if findings else [],
+                "scanner": scanner_name,
+            }
         else:
-            return {"error": f"No output from {scanner_name}"}
-
-    except subprocess.TimeoutExpired:
-        return {"error": f"{scanner_name} timed out after {timeout}s", "findings": []}
+            return {"error": "scanner_not_found", "scanner": scanner_name, "findings": []}
     except Exception as e:
-        return {"error": f"{scanner_name} failed: {e}", "findings": []}
-    finally:
-        if json_out.exists():
-            json_out.unlink(missing_ok=True)
+        import traceback
+        return {
+            "error": "scanner_failed",
+            "scanner": scanner_name,
+            "exception": type(e).__name__,
+            "message": str(e)[:300],
+            "stderr_tail": traceback.format_exc()[-400:],
+            "findings": [],
+        }
 
 
 # ── Agent Runner ──────────────────────────────────────────────
@@ -220,17 +272,38 @@ def verdict_to_severity(verdict: str) -> str:
 
 
 def aggregate_scanner_results(results: dict[str, dict]) -> dict:
-    """Aggregate results from multiple scanners into summary counts."""
+    """Aggregate results from multiple scanners into summary counts.
+
+    Fail-closed: if ANY scanner reported `scanner_not_found` (or any other error),
+    the aggregate verdict is ERROR — never BENIGN. This is the explicit fix for
+    the "fresh clone classifies a bind-shell as BENIGN" finding from the
+    SANS FIND EVIL! pre-submission audit.
+    """
     total = critical = high = medium = low = 0
+    missing_scanners = []
+    errored_scanners = []
+
+    def _finding_severity(f) -> str:
+        # Findings can be dicts OR ScanFinding dataclass instances.
+        if isinstance(f, dict):
+            return str(f.get("severity", "")).upper()
+        return str(getattr(f, "severity", "")).upper()
+
     for scanner_name, result in results.items():
+        if not isinstance(result, dict):
+            continue
+        if result.get("error") == "scanner_not_found":
+            missing_scanners.append(scanner_name)
+            continue
         if "error" in result:
+            errored_scanners.append({"scanner": scanner_name, "error": result["error"]})
             continue
         findings = result.get("findings", [])
         if not isinstance(findings, list):
             continue
         total += len(findings)
         for f in findings:
-            sev = str(f.get("severity", "")).upper()
+            sev = _finding_severity(f)
             if sev == "CRITICAL":
                 critical += 1
             elif sev == "HIGH":
@@ -240,12 +313,31 @@ def aggregate_scanner_results(results: dict[str, dict]) -> dict:
             else:
                 low += 1
     # Also check by_severity from skill_scanner
-    if "skill_scanner" in results and "by_severity" in results["skill_scanner"]:
+    if "skill_scanner" in results and isinstance(results["skill_scanner"], dict) and "by_severity" in results["skill_scanner"]:
         bs = results["skill_scanner"]["by_severity"]
         critical = max(critical, bs.get("CRITICAL", 0))
         high = max(high, bs.get("HIGH", 0))
         medium = max(medium, bs.get("MEDIUM", 0))
         low = max(low, bs.get("INFO", 0))
+
+    if missing_scanners or errored_scanners:
+        # Fail-closed: do not silently mark BENIGN when scanners are missing.
+        return {
+            "total_findings": total,
+            "critical": critical,
+            "high": high,
+            "medium": medium,
+            "low": low,
+            "overall_verdict": "ERROR",
+            "error": "scanner_unavailable",
+            "missing_scanners": missing_scanners,
+            "errored_scanners": errored_scanners,
+            "message": (
+                f"Cannot produce a verdict: {len(missing_scanners)} scanner(s) missing, "
+                f"{len(errored_scanners)} errored. Defaulting to ERROR (not BENIGN) "
+                "to avoid a fail-open false negative."
+            ),
+        }
 
     if critical > 0:
         verdict = "MALICIOUS"

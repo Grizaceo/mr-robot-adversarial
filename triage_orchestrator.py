@@ -275,6 +275,12 @@ def orchestrate(
     start_time = time.time()
     candidate = Path(candidate_path)
 
+    # Stable run_id for this orchestration: ties scanner runs + triage + falsifier
+    # + synthesizer together so judges can trace a verdict to its decision chain.
+    import uuid
+    run_id = f"orch_{uuid.uuid4().hex[:12]}"
+    logger.info(f"Starting orchestration run_id={run_id} for {candidate_path}")
+
     if not candidate.exists():
         return {
             "final_verdict": "ERROR",
@@ -327,10 +333,14 @@ def orchestrate(
     # Rule: HIGH confidence + clear verdict → skip falsifier
     # Override: MR_ROBOT_FORCE_FALSIFIER=1 forces the falsifier for demo/audit mode
     force_falsifier = os.getenv("MR_ROBOT_FORCE_FALSIFIER", "0") == "1"
+    route_start = time.time()
     if not force_falsifier and confidence >= HIGH_CONFIDENCE_STRAIGHT_TO_VERDICT and verdict in ("MALICIOUS", "BENIGN"):
         logger.info(f"High confidence ({confidence:.2f}), bypassing falsifier for {verdict}")
+        route_duration_ms = (time.time() - route_start) * 1000
         audit.log("orchestrator_route", {"candidate": str(candidate)},
-                  {"route": "direct", "verdict": verdict, "confidence": confidence}, 0)
+                  {"route": "direct", "verdict": verdict, "confidence": confidence,
+                   "rule": "HIGH_CONFIDENCE_STRAIGHT_TO_VERDICT"},
+                  route_duration_ms, run_id=run_id, agent_id="synthesizer")
 
     # Rule: everything else → falsifier with heterogeneous model
     else:
@@ -403,7 +413,9 @@ def orchestrate(
                   {"route": "falsifier", "iterations": len(correction_history),
                    "verdict": triage_report.get("verdict", "UNKNOWN"),
                    "confidence": triage_report.get("confidence", 0.0),
-                   "final_status": falsifier_result.get("status", "N/A") if falsifier_result else "N/A"}, 0)
+                   "final_status": falsifier_result.get("status", "N/A") if falsifier_result else "N/A"},
+                  (time.time() - route_start) * 1000,
+                  run_id=run_id, agent_id="synthesizer")
 
     # ── Phase 4: Synthesizer — non-LLM, τ=0 ──────────────────────────────
     synthesizer_result = _compute_synthesizer_verdict(

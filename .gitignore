@@ -33,3 +33,4 @@ logs/
 # Claude config (may contain tokens)
 .claude/
 *.local.json
+.git.backup-1781502476/
