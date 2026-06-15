@@ -190,37 +190,40 @@ The full 609-question run is one command away (`--limit 0`). See
 [`docs/cybersoceval_results.md`](docs/cybersoceval_results.md) for honest
 assessment + reproduction instructions.
 
-### Internal accuracy report (99 malicious + 19 benign = 118 samples)
+### Internal accuracy report (135 malicious + 38 benign = 173 samples)
 
 | Metric | Value |
 |--------|-------|
-| **Accuracy** | 100% (118/118) |
-| **Precision** | 100% (99/99) |
-| **Recall** | 100% (99/99 malicious detected) |
-| **F1** | 1.000 |
-| **FPR** | 0.0% (0/19 benigns flagged) |
-| **skill_scanner** | 97.7% |
-| **ioc_scanner** | 96.0% |
-| **yara** | 97.8% |
-| **secrets_detector** | 90.9% |
+| **Accuracy** | 99.42% (172/173) |
+| **Precision** | 99.26% (135/136) |
+| **Recall** | 100% (135/135 malicious detected) |
+| **F1** | 0.9963 |
+| **FPR** | 2.63% (1/38 benigns flagged) |
+| **skill_scanner** | 99.0% |
+| **ioc_scanner** | 98.2% |
+| **yara** | 100.0% |
+| **secrets_detector** | 91.7% |
 
-Confusion matrix: **TP=99, FP=0, TN=19, FN=0**
+Confusion matrix: **TP=135, FP=1, TN=37, FN=0**
 
-The benign corpus combines 12 hand-written samples in `benign_corpus/`
+The benign corpus combines 14 hand-written samples in `benign_corpus/`
 (framework-safe Django/React/FastAPI/SQLAlchemy snippets, hardened Kubernetes
-and Dockerfile manifests, CI configs) with 7 samples from
+and Dockerfile manifests, CI configs) with 24 samples from
 `cybersecurity-lab/test-corpus/benign/`. Three previously-known FPs
 (`k8s_deployment`, `parameterized_sql`, `safe_server`) were eliminated by
-tightening three over-broad scanner rules (see `CHANGELOG.md`).
+tightening three over-broad scanner rules (see `CHANGELOG.md`). The single
+remaining FP is on `benign_corpus/typescript_dto.ts` (flagged by
+`secrets_detector` for an AWS-key-shaped fixture string) — known, documented,
+and queued for a scanner-rule fix.
 
 ### Per-Severity Breakdown
 
 | Severity | Total | Detected | Recall |
 |----------|-------|----------|--------|
-| Critical | 33 | 33 | 100% |
-| High | 59 | 59 | 100% |
+| Critical | 66 | 66 | 100% |
+| High | 62 | 62 | 100% |
 | Medium | 7 | 7 | 100% |
-| Benign | 19 | 19 TN | — |
+| Benign | 38 | 37 TN + 1 FP | 97.4% TN |
 
 ### E2E Test (5 scenarios with Falsifier)
 

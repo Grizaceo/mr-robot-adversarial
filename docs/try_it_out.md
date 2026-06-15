@@ -33,8 +33,11 @@ export OPENROUTER_API_KEY=sk-or-...
 ### 3. Health Check
 
 ```bash
-python agents/mr_robot/triage --health
-# Expected: ✅ nvidia-nim/mistralai/mistral-nemotron OK
+python agents/mr_robot/triage.py --health
+# OR equivalently:
+python -m agents.mr_robot.triage --health
+# Expected: ✅ openrouter/openai/gpt-oss-120b:free OK
+# (or your configured provider, e.g. ✅ nvidia-nim/mistral-nimotron OK)
 ```
 
 ### 4. Scan a File
@@ -189,5 +192,5 @@ echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"scan_file"
 ## Next Steps
 
 - [Architecture Diagram](architecture.md) — System design and trust boundaries
-- [Dataset Documentation](dataset.md) — 99 adversarial scenarios
+- [Dataset Documentation](dataset.md) — 173 ground-truth samples (135 malicious + 38 benign)
 - [Accuracy Report](accuracy_report.json) — Full benchmark results
