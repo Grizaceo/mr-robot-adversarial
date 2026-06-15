@@ -288,6 +288,7 @@ def run_self_correction_loop(candidate_path: str, scanner_findings: dict = None,
 
     history = []
     context = None
+    prev_verdict = None
 
     for iteration in range(max_iterations):
         logger.info(f"Self-correction iteration {iteration + 1}/{max_iterations}")
@@ -312,6 +313,18 @@ def run_self_correction_loop(candidate_path: str, scanner_findings: dict = None,
             "confidence": confidence,
             "summary": triage_report.get("summary", "")[:200],
         })
+
+        # If this iteration is a re-run triggered by a prior FALSIFIED (context
+        # carries the falsifier challenge), the verdict we just computed is the
+        # *corrected* one — record the before/after so a verdict FLIP is captured
+        # in the audit trail, not only the terminal SURVIVED no-op.
+        if context is not None and prev_verdict is not None:
+            audit.log("self_correction",
+                      {"candidate": candidate_path, "iteration": iteration + 1},
+                      {"verdict_before": prev_verdict, "verdict_after": verdict,
+                       "flipped": prev_verdict != verdict, "confidence": confidence},
+                      0, agent_id="mr_robot")
+        prev_verdict = verdict
 
         # If confidence is high and verdict is clear, stop
         if confidence >= confidence_threshold and verdict in ("MALICIOUS", "BENIGN"):

@@ -3,8 +3,9 @@
 A set of realistic, legitimate code samples used to measure the **false positive
 rate** of the MR. Robot Adversarial pipeline.
 
-Together with the 7 benign files in `cybersecurity-lab/test-corpus/benign/`,
-this gives ~18-19 benign samples balanced against 99 malicious scenarios.
+Together with the benign files in `cybersecurity-lab/test-corpus/benign/`,
+this contributes to the 38 benign samples balanced against 135 malicious
+scenarios in the 173-sample benchmark.
 
 ## Why this exists
 

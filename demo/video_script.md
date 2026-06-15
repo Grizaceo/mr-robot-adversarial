@@ -84,27 +84,27 @@ head -20 "$CYBERSEC_LAB/test-corpus/malicious/bind_shell.py"
 **Caption B (next ~40s, swap as commands run):**
 ```
 Step 1/3 — deterministic scanners (skill / IOC / YARA / secrets)
-Step 2/3 — MR. Robot triage (Nemotron, 5-phase review)
-Step 3/3 — Falsifier (DeepSeek) audits the triage
+Step 2/3 — MR. Robot triage (gpt-oss-120b, 5-phase review)
+Step 3/3 — Falsifier (Nemotron-3-Ultra) audits the triage
 ```
 
 **Terminal:**
 ```bash
-python triage_orchestrator.py \
+MR_ROBOT_FORCE_FALSIFIER=1 python triage_orchestrator.py \
   "$CYBERSEC_LAB/test-corpus/malicious/bind_shell.py" \
-  --provider deepseek 2>/dev/null | jq '{
+  --provider falsifier 2>/dev/null | jq '{
     verdict: .final_verdict,
     rationale,
     propagator: ._meta.propagator_family,
     auditor: ._meta.auditor_family,
-    architectural_distance: .triage_report._meta // empty
+    kinship_lock_risk: ._meta.kinship_lock_risk
   }'
 ```
 
 **Caption C (final ~10s, on the verdict):**
 ```
 Verdict: MALICIOUS
-Propagator: nemotron   Auditor: deepseek   ΔA = 1.0  (heterogeneous)
+Propagator: gpt-oss   Auditor: nemotron   ΔA = 1.0  (heterogeneous)
 ```
 
 ---
@@ -140,40 +140,46 @@ Verdict: BENIGN — without the Falsifier this would have been a false alarm.
 
 ---
 
-## Scene 7 — Self-correction loop  (2:45 – 3:40, 55s)
+## Scene 7 — Adversarial review loop  (2:45 – 3:40, 55s)
 
 **Caption A:**
 ```
-Sample 3: an obfuscated npm worm. Triage uncertain on first pass.
+Sample 3: the Python bind shell again — this time we FORCE the adversarial
+review (MR_ROBOT_FORCE_FALSIFIER=1) to show the full loop end-to-end.
 ```
 
 **Terminal:**
 ```bash
-head -25 "$CYBERSEC_LAB/test-corpus/malicious/mr_robot_npm_worm.js"
+head -10 "$CYBERSEC_LAB/test-corpus/malicious/bind_shell.py"
 ```
 
 **Caption B (during run):**
 ```
-Falsifier challenges the triage → MR. Robot re-runs with the counter-argument
-→ second-pass verdict is confident MALICIOUS.
-Max 2 iterations (Shehata & Li 2026: more cycles with same family amplify error).
+Triage (gpt-oss-120b) → MALICIOUS → Falsifier (Nemotron-3-Ultra) audits it.
+Heterogeneous auditor (ΔA=1.0) → the verdict SURVIVES the challenge (upheld, not overturned).
+Had the falsifier returned FALSIFIED, MR. Robot re-runs with the counter-argument
+(max 2 iterations). That genuine verdict-flip path is exercised by
+tests/test_orchestrator_audit.py::test_self_correction_flip_recorded.
 ```
 
 **Terminal:**
 ```bash
-python triage_orchestrator.py \
-  "$CYBERSEC_LAB/test-corpus/malicious/mr_robot_npm_worm.js" 2>/dev/null \
+MR_ROBOT_FORCE_FALSIFIER=1 python triage_orchestrator.py \
+  "$CYBERSEC_LAB/test-corpus/malicious/bind_shell.py" 2>/dev/null \
   | jq '{
       verdict: .final_verdict,
-      iterations: (.correction_history | length),
-      history: [.correction_history[] | {iter: .iteration, status: .falsifier_status, auditor: .heterogeneity.auditor_family}]
+      propagator: ._meta.propagator_family,
+      auditor: ._meta.auditor_family,
+      kinship_lock_risk: ._meta.kinship_lock_risk,
+      history: [.correction_history[] | {iter: .iteration, status: .falsifier_status, auditor: .heterogeneity.auditor_family, dist: .heterogeneity.architectural_distance}]
     }'
 ```
 
 **Caption C:**
 ```
-Verdict: MALICIOUS after 2 iterations.
-Heterogeneous auditor (deepseek) made the re-run trustworthy.
+Verdict: MALICIOUS — SURVIVED adversarial review by a heterogeneous auditor (ΔA=1.0).
+Every step is in the audit trail; a real verdict flip is logged as a
+self_correction row (verdict_before → verdict_after) when the falsifier wins.
 ```
 
 ---
@@ -182,7 +188,7 @@ Heterogeneous auditor (deepseek) made the re-run trustworthy.
 
 **Caption A:**
 ```
-Real numbers: 99 malicious + 19 benign = 118 ground-truth samples.
+Real numbers: 135 malicious + 38 benign = 173 ground-truth samples.
 ```
 
 **Terminal:**
@@ -200,7 +206,7 @@ jq '{
 **Caption B:**
 ```
 Recall 100% — no malicious sample missed.
-Precision 100%, FPR 0.0% — zero false positives on 19 benign samples.
+Precision 99.26%, FPR 2.63% — 1 false positive on 38 benign samples.
 Honest benchmark: 10% exact-match on CyberSOCEval (public, reproducible).
 ```
 
@@ -264,7 +270,7 @@ in DaVinci Resolve / Premiere / Kdenlive.
 | 4 Health | 0:50 | 1:05 | 15s |
 | 5 Malicious | 1:05 | 2:00 | 55s |
 | 6 Benign | 2:00 | 2:45 | 45s |
-| 7 Self-correction | 2:45 | 3:40 | 55s |
+| 7 Adversarial review | 2:45 | 3:40 | 55s |
 | 8 Metrics | 3:40 | 4:15 | 35s |
 | 9 Audit trail | 4:15 | 4:40 | 25s |
 | 10 Closing | 4:40 | 5:00 | 20s |

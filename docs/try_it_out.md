@@ -17,7 +17,7 @@ Step-by-step guide to run the MR. Robot Adversarial pipeline from scratch.
 ```bash
 git clone https://github.com/Grizaceo/mr-robot-adversarial.git
 cd mr-robot-adversarial
-pip install mcp pydantic pyyaml
+pip install -r requirements.txt   # includes yara-python (YARA scanner), pydantic, mcp
 ```
 
 ### 2. Set API Key
@@ -166,14 +166,14 @@ echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"scan_file"
 ### "All models exhausted"
 - Check your API key: `echo $NVIDIA_API_KEY`
 - Try a different provider: `python triage_orchestrator.py file.py --provider openrouter`
-- Check provider health: `python agents/mr_robot/triage --health`
+- Check provider health: `python agents/mr_robot/triage.py --health`
 
 ### "cybersecurity-lab not found"
 - Set the env var: `export CYBERSEC_LAB=/path/to/cybersecurity-lab`
 - Or use Docker: `-v /path/to/cybersecurity-lab:/lab:ro -e CYBERSEC_LAB=/lab`
 
 ### "No module named 'mcp'"
-- Install dependencies: `pip install mcp pydantic pyyaml`
+- Install dependencies: `pip install -r requirements.txt` (the minimal `mcp pydantic pyyaml` omits `yara-python`, which the YARA scanner needs)
 
 ### Docker: "no configuration file provided"
 - The demo requires a config file. Use the debug profile instead:
@@ -187,7 +187,7 @@ echo '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"scan_file"
 | Triage (MR. Robot) | ~12s |
 | Falsification | ~15s |
 | Full pipeline | ~30s |
-| Accuracy benchmark (99 scenarios) | ~22s (scanners only) |
+| Accuracy benchmark (173 samples) | ~22s (scanners only) |
 
 ## Next Steps
 

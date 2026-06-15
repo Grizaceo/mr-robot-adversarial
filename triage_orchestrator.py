@@ -105,11 +105,19 @@ MODEL_FAMILIES = {
 def _detect_family(model_name: str) -> str:
     """Heuristic model family detection from model name."""
     model_lower = model_name.lower()
+    # Order matters: NVIDIA Nemotron variants also carry "llama"/"mistral" in their
+    # names, so nemotron must be matched first to attribute them correctly.
     for family_id, keywords in [
         ("nemotron", ["nemotron", "nvidia"]),
         ("deepseek", ["deepseek"]),
+        ("gpt-oss", ["gpt-oss", "gpt_oss", "openai"]),
         ("llama", ["llama"]),
         ("mistral", ["mistral"]),
+        ("qwen", ["qwen"]),
+        ("minimax", ["minimax"]),
+        ("glm", ["glm", "z-ai"]),
+        ("gemma", ["gemma"]),
+        ("kimi", ["kimi"]),
     ]:
         if any(kw in model_lower for kw in keywords):
             return family_id
@@ -124,7 +132,7 @@ def _check_heterogeneity(propagator_model: str, auditor_model: str) -> dict:
     p_family = _detect_family(propagator_model)
     a_family = _detect_family(auditor_model)
 
-    same_family = (p_family == a_family == "nemotron")
+    same_family = (p_family == a_family and p_family != "unknown")
 
     return {
         "propagator_family": p_family,
@@ -299,6 +307,15 @@ def orchestrate(
             scanner_findings = {}
     scanner_duration = time.time() - scanner_start
 
+    # Log the scanner sweep as its own audit row so a run trace shows every
+    # stage (agent_id="scanner"), not just the final synthesizer route.
+    _scan_summary = _summarize_scanners(scanner_findings)
+    audit.log("scanner_sweep", {"candidate": str(candidate)},
+              {"verdict": "FLAGGED" if _scan_summary["total_findings"] else "CLEAN",
+               "total_findings": _scan_summary["total_findings"],
+               "scanners_fired": _scan_summary["scanners"]},
+              scanner_duration * 1000, run_id=run_id, agent_id="scanner")
+
     # ── Phase 2: MR. Robot triage (propagator, Nemotron) ─────────────────
     triage_start = time.time()
     from agents.mr_robot.triage import triage
@@ -320,6 +337,12 @@ def orchestrate(
     verdict = triage_report.get("verdict", "INCONCLUSIVE")
     confidence = triage_report.get("confidence", 0.0)
     triage_model = triage_report.get("_meta", {}).get("model", "unknown")
+
+    # Log the propagator (MR. Robot triage) call as its own audit row.
+    audit.log("triage", {"candidate": str(candidate)},
+              {"verdict": verdict, "confidence": confidence,
+               "severity": triage_report.get("severity"), "model": triage_model},
+              triage_duration * 1000, run_id=run_id, agent_id="mr_robot")
 
     # ── Phase 3: Decision routing ────────────────────────────────────────
     falsifier_result = None
@@ -357,13 +380,23 @@ def orchestrate(
             falsifier_result = falsifier.falsify(
                 triage_report, str(candidate), scanner_findings
             )
-            time.time() - falsifier_start
+            falsifier_duration_ms = (time.time() - falsifier_start) * 1000
 
             f_status = falsifier_result.get("status", "ERROR")
             f_model = falsifier_result.get("_meta", {}).get("model", "unknown")
 
             # Compute heterogeneity metrics
             heterogeneity = _check_heterogeneity(triage_model, f_model)
+
+            # Log the falsifier (auditor) call as its own audit row, capturing the
+            # heterogeneity diagnostics (ΔA + kinship-lock flag) per SANS req #8.
+            audit.log("falsifier",
+                      {"candidate": str(candidate), "iteration": iteration + 1,
+                       "reviewing_verdict": verdict},
+                      {"status": f_status, "model": f_model,
+                       "architectural_distance": heterogeneity["architectural_distance"],
+                       "kinship_lock_risk": heterogeneity["kinship_lock_risk"]},
+                      falsifier_duration_ms, run_id=run_id, agent_id="falsifier")
 
             correction_history.append({
                 "iteration": iteration + 1,
@@ -388,7 +421,8 @@ def orchestrate(
                     audit.log("kinship_lock_warning",
                               {"candidate": str(candidate), "propagator": triage_model,
                                "auditor": f_model, "τ_risk": "HIGH"},
-                              {"iteration": iteration + 1}, 0)
+                              {"iteration": iteration + 1}, 0,
+                              run_id=run_id, agent_id="falsifier")
 
                 # Re-run triage with counter-argument
                 from agents.mr_robot.triage import triage as retriage
@@ -397,6 +431,8 @@ def orchestrate(
                     "falsifier_challenge": falsifier_result.get("summary", ""),
                     "falsifier_model": f_model,
                 }
+                prev_verdict = verdict
+                retriage_start = time.time()
                 triage_report = retriage(
                     str(candidate),
                     findings=scanner_findings,
@@ -405,6 +441,18 @@ def orchestrate(
                 )
                 verdict = triage_report.get("verdict", verdict)
                 confidence = triage_report.get("confidence", confidence)
+
+                # Genuine self-correction record: the auditor challenged the verdict
+                # and the propagator re-ran. Log the before/after so a verdict FLIP
+                # is captured in the audit trail (not just a SURVIVED no-op).
+                audit.log("self_correction",
+                          {"candidate": str(candidate), "iteration": iteration + 1,
+                           "falsifier_challenge": falsifier_result.get("summary", "")[:200]},
+                          {"verdict_before": prev_verdict, "verdict_after": verdict,
+                           "flipped": prev_verdict != verdict,
+                           "confidence_after": confidence},
+                          (time.time() - retriage_start) * 1000,
+                          run_id=run_id, agent_id="mr_robot")
             else:
                 # ERROR or INCONCLUSIVE from falsifier — stop iterating
                 break
@@ -463,6 +511,43 @@ def _summarize_scanners(scanner_findings: Optional[dict]) -> dict:
     return summary
 
 
+def trace_run(run_id: Optional[str] = None, db_path: str = "logs/audit_trail.db") -> dict:
+    """Reconstruct the full decision chain for an orchestration run.
+
+    Returns the ordered audit rows for a single run_id (scanner → triage →
+    falsifier → self_correction → synthesizer route) so a judge can trace a
+    verdict back to every tool call that produced it (SANS requirement #8).
+    With run_id=None, the most recent orchestration run is used.
+    """
+    from execution_logger import get_logger
+    audit = get_logger(db_path)
+
+    if run_id is None:
+        recent = audit.query(limit=500)
+        orch = [r for r in recent if str(r.get("run_id", "")).startswith("orch_")]
+        if not orch:
+            return {"run_id": None, "step_count": 0, "steps": [],
+                    "error": "no orchestration runs found in audit trail"}
+        run_id = orch[0]["run_id"]
+
+    rows = audit.get_run(run_id)
+    steps = []
+    for r in rows:
+        out = r.get("output_json")
+        try:
+            out = json.loads(out) if isinstance(out, str) else out
+        except (ValueError, TypeError):
+            pass
+        steps.append({
+            "agent": r.get("agent_id"),
+            "tool": r.get("tool_name"),
+            "verdict": r.get("verdict"),
+            "duration_ms": r.get("duration_ms"),
+            "output": out,
+        })
+    return {"run_id": run_id, "step_count": len(steps), "steps": steps}
+
+
 # ── CLI entry point ──────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
@@ -472,7 +557,15 @@ if __name__ == "__main__":
 
     if len(sys.argv) < 2:
         print("Usage: python triage_orchestrator.py <candidate_path> [--provider falsifier|nvidia-nim|openrouter|ollama-cloud]")
+        print("       python triage_orchestrator.py --trace [run_id]   # show a run's full decision chain")
+        print("       python triage_orchestrator.py --last             # trace the most recent run")
         sys.exit(1)
+
+    # Trace mode: reconstruct a run's audit chain (SANS req #8) instead of triaging.
+    if sys.argv[1] in ("--trace", "--last"):
+        rid = sys.argv[2] if (sys.argv[1] == "--trace" and len(sys.argv) > 2) else None
+        print(json.dumps(trace_run(rid), indent=2, default=str))
+        sys.exit(0)
 
     path = sys.argv[1]
     provider = "falsifier"

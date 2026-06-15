@@ -12,12 +12,12 @@ integrating with the existing `cybersecurity-lab` to demonstrate real-world impa
 ### Last review (2026-05-16)
 End-to-end repo review, ruff hygiene pass, and metrics sync. All tests pass.
 
-### Accuracy Report (118 samples — 99 malicious + 19 benign)
-- Accuracy: 100.0%
-- Precision: 100.0%
+### Accuracy Report (173 samples — 135 malicious + 38 benign)
+- Accuracy: 99.42%
+- Precision: 99.26%
 - Recall: 100.0%
-- F1: 1.000
-- FPR: 0.0% (0/19 benign flagged)
+- F1: 0.9963
+- FPR: 2.63% (1/38 benign flagged)
 - See `docs/accuracy_report.json` for full results
 
 ## What We Built
@@ -71,12 +71,12 @@ File → Scanners → MR. Robot Triage → Falsifier Review → Final Report
 
 **Result: 5/5 correct (100%)**
 
-### Accuracy Report (118 samples — 99 malicious + 19 benign)
-- Accuracy: 100.0%
-- Precision: 100.0%
+### Accuracy Report (173 samples — 135 malicious + 38 benign)
+- Accuracy: 99.42%
+- Precision: 99.26%
 - Recall: 100.0%
-- F1: 1.000
-- FPR: 0.0% (0/19 benign flagged)
+- F1: 0.9963
+- FPR: 2.63% (1/38 benign flagged)
 - See `docs/accuracy_report.json` for full results
 
 ## Submission Requirements Checklist

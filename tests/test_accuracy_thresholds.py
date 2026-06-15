@@ -81,6 +81,8 @@ def test_f1_above_threshold(metrics):
 
 
 def test_benign_corpus_covered(metrics):
-    """Report must include at least 19 benign samples (12 in benign_corpus/ + 7 test-corpus)."""
+    """Report must cover the full benign corpus: 38 samples (12 in benign_corpus/ +
+    26 in cybersecurity-lab/test-corpus/benign/). Floor guards against silently
+    dropping benigns (which would inflate precision); growth still passes."""
     total_benign = metrics["TN"] + metrics["FP"]
-    assert total_benign >= 19, f"Only {total_benign} benign samples in report; expected ≥ 19"
+    assert total_benign >= 38, f"Only {total_benign} benign samples in report; expected ≥ 38"

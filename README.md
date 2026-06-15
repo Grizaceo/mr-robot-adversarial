@@ -14,7 +14,8 @@ Human analysts still spend minutes searching for CLI flags during an active inci
 
 **MR. Robot Adversarial** addresses the narrowest defensible slice of that asymmetry:
 per-file triage with verifiable heterogeneity, end-to-end audit trail, and
-zero-FP detection — all in under 30 seconds per artifact.
+framework-aware false-positive reduction (99.26% precision, 1 FP on 173 samples) —
+all in under 30 seconds per artifact.
 
 ## Architecture
 
@@ -145,6 +146,17 @@ Every tool call is logged with full context:
 - SQLite WAL mode for concurrent writes
 - JSON export for SANS submission (Requirement #8)
 
+Each orchestration stage writes its **own** audit row under a shared `run_id`
+with per-agent attribution — `scanner_sweep` (agent `scanner`), `triage`
+(agent `mr_robot`), `falsifier` (agent `falsifier`, with ΔA + kinship-lock
+flag), and `self_correction` (records `verdict_before` → `verdict_after` when a
+heterogeneous auditor flips the verdict). Reconstruct any run's decision chain:
+
+```bash
+python triage_orchestrator.py --last            # trace the most recent run
+python triage_orchestrator.py --trace <run_id>  # trace a specific run
+```
+
 ### 🛡️ Prompt-Injection Defense Layer
 Every byte that crosses the trust boundary "candidate file → triage LLM" goes
 through [`prompt_injection_defense.py`](prompt_injection_defense.py):
@@ -206,9 +218,9 @@ assessment + reproduction instructions.
 
 Confusion matrix: **TP=135, FP=1, TN=37, FN=0**
 
-The benign corpus combines 14 hand-written samples in `benign_corpus/`
+The benign corpus combines 12 hand-written samples in `benign_corpus/`
 (framework-safe Django/React/FastAPI/SQLAlchemy snippets, hardened Kubernetes
-and Dockerfile manifests, CI configs) with 24 samples from
+and Dockerfile manifests, CI configs) with 26 samples from
 `cybersecurity-lab/test-corpus/benign/`. Three previously-known FPs
 (`k8s_deployment`, `parameterized_sql`, `safe_server`) were eliminated by
 tightening three over-broad scanner rules (see `CHANGELOG.md`). The single
@@ -257,7 +269,7 @@ and queued for a scanner-rule fix.
 ```bash
 git clone https://github.com/Grizaceo/mr-robot-adversarial.git
 cd mr-robot-adversarial
-pip install mcp pydantic pyyaml
+pip install -r requirements.txt   # includes yara-python (YARA scanner), pydantic, mcp
 ```
 
 ### Set API Key
@@ -275,7 +287,7 @@ export OPENROUTER_API_KEY=sk-or-...
 ### Run
 ```bash
 # Health check
-python agents/mr_robot/triage --health
+python agents/mr_robot/triage.py --health
 
 # Scan a file
 python -c "
@@ -304,7 +316,7 @@ result = orchestrate_complete('/path/to/file.py')
 print(json.dumps(json.loads(result), indent=2))
 "
 
-# Generate accuracy report (99 scenarios)
+# Generate accuracy report (173 samples)
 python generate_accuracy_report.py --output docs/accuracy_report.json
 
 # Run local demo (no API keys needed)

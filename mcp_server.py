@@ -230,7 +230,7 @@ def orchestrate_complete(filepath: str, scenario_id: str = "") -> str:
     Executes the complete pipeline with heterogeneity mandate (Shehata & Li 2026):
     1. Scanner suite (deterministic, τ=0)
     2. MR. Robot triage (Nemotron propagator) with 5-phase review
-    3. Falsifier (DeepSeek, ΔA≈1) for adversarial review
+    3. Falsifier (Nemotron-3-Ultra via the heterogeneous `falsifier` provider, ΔA≈1) for adversarial review
     4. Rule-based synthesizer (τ=0) for final verdict
     """
     start = time.perf_counter()
@@ -246,7 +246,7 @@ def orchestrate_complete(filepath: str, scenario_id: str = "") -> str:
         from triage_orchestrator import orchestrate
         report = orchestrate(
             filepath,
-            falsifier_provider="deepseek",
+            falsifier_provider="falsifier",
             max_iterations=2,
         )
         result = json.dumps(report, indent=2, default=str)

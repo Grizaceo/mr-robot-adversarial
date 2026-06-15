@@ -19,7 +19,7 @@
 | **Agent Execution Logs (DB)** | https://github.com/Grizaceo/mr-robot-adversarial/blob/grounding-audit-competition-pass/logs/audit_trail.db |
 
 > **Demo video v2 highlights** (3:10 min, with TTS narration):
-> - Scene 7 now shows the **actual self-correction loop** running: triage (gpt-oss-120b) → MALICIOUS 0.97 → falsifier (nemotron-3-ultra) → SURVIVED → ΔA=1.0, kinship_lock_risk=LOW
+> - Scene 7 now shows the **adversarial falsification loop** running on a real provider: triage (gpt-oss-120b) → MALICIOUS 0.97 → falsifier (nemotron-3-ultra) → **SURVIVED** (verdict upheld under challenge, not overturned) → ΔA=1.0, kinship_lock_risk=LOW. The same loop re-runs the triage when the falsifier returns FALSIFIED (max 2 iterations).
 > - Set `MR_ROBOT_FORCE_FALSIFIER=1` env var to force adversarial review for demo/audit mode (legitimate testing feature)
 
 ---
@@ -36,14 +36,14 @@ The system is a 4-stage pipeline:
 4. **Rule-based synthesizer** (τ=0, no LLM) — final verdict with full audit trail, MITRE ATT&CK mapping, and proof stage confirmation
 
 ### How we built it
-- **Stack:** Python 3.11, Pydantic, SQLite WAL, NVIDIA NIM (mistral-nemotron propagator) + OpenRouter (falsifier)
+- **Stack:** Python 3.11, Pydantic, SQLite WAL, OpenRouter (gpt-oss-120b propagator) + OpenRouter (nemotron-3-ultra falsifier) — heterogeneous by default, ΔA≈1; NVIDIA NIM (mistral-nemotron) supported as an alternate propagator
 - **159 tests** passing, 4 skipped (3:06 runtime)
 - **Architectural pattern (per SANS taxonomy):** **Direct Agent Extension + Custom MCP Server hybrid** — extended Protocol SIFT's agent loop with rigorous guardrails and added an MCP server for typed tool access
 - **Novel angle:** the **heterogeneity mandate** is enforced *architecturally* (different LLM families + rule-based synthesizer) rather than prompted — the synthesizer is τ=0 and can override either LLM
 
 ### Results
 - **Internal accuracy:** 99.42% accuracy, 100% recall, 99.26% precision, 1 FP on 173 samples (135 malicious + 38 benign)
-- **E2E with Falsifier (forced, see demo video scene 7):** triage (gpt-oss-120b) → MALICIOUS 0.97 → falsifier (nemotron-3-ultra) → SURVIVED → ΔA=1.0
+- **E2E with Falsifier (forced, see demo video scene 7):** triage (gpt-oss-120b) → MALICIOUS 0.97 → falsifier (nemotron-3-ultra) → SURVIVED (verdict upheld under adversarial review) → ΔA=1.0
 - **Performance:** ~30s per artifact end-to-end (scanners: 200ms, triage: 12s, falsify: 15s)
 - **CyberSOCEval honest sub-baseline:** 10% exact-match, Jaccard 0.413 (documented with reproduction path; full 609-question run one flag away)
 
@@ -172,7 +172,7 @@ python -m pytest tests/ -v
 | **F1** | 99.63% |
 | **FPR (benign corpus)** | 2.63% (1/38) |
 | **Confusion matrix** | TP=135, FP=1, TN=37, FN=0 |
-| **Per-severity recall** | Critical: 33/33, High: 59/59, Medium: 7/7 |
+| **Per-severity recall** | Critical: 66/66, High: 62/62, Medium: 7/7 |
 | **E2E with Falsifier** | 5/5 scenarios correct (100%) |
 | **CyberSOCEval (n=30 subset)** | 10% exact-match, Jaccard 0.413 (honest sub-baseline; full 609-question run is one flag away) |
 

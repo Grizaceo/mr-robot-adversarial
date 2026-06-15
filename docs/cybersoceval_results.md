@@ -5,7 +5,7 @@
 A real evaluation on a real public benchmark.
 
 The MR. Robot pipeline's primary accuracy report (`docs/accuracy_report.json`)
-runs on a self-built corpus of 99 malicious scenarios + 19 benign samples.
+runs on a self-built corpus of 135 malicious scenarios + 38 benign samples (173 total).
 That number is informative but **not comparable** to other hackathon
 submissions because it is private to this project.
 

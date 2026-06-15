@@ -40,9 +40,9 @@ if examples:
 
 **Pre-demo warm-up** (not code, just a one-time step before recording):
 ```bash
-python generate_accuracy_report.py  # runs 118 samples → populates snippets in audit_trail.db
+python generate_accuracy_report.py  # runs 173 samples → populates snippets in audit_trail.db
 ```
-After this, the store has 118 precedents and the demo will visibly retrieve malicious examples
+After this, the store has 173 precedents and the demo will visibly retrieve malicious examples
 for malicious files.
 
 **`tests/test_retrieval.py`** (new, 7 tests):

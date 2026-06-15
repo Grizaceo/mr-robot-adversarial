@@ -3,13 +3,13 @@
 ## Overview
 
 The MR. Robot Adversarial evaluation corpus consists of **135 adversarial malicious
-scenarios** and **38 benign samples** (10 in this repo's `benign_corpus/` +
-27 in `cybersecurity-lab/test-corpus/benign/`), for a total of **173 ground-truth
+scenarios** and **38 benign samples** (12 in this repo's `benign_corpus/` +
+26 in `cybersecurity-lab/test-corpus/benign/`), for a total of **173 ground-truth
 labelled samples** used to measure both recall and false-positive rate.
 
 **Sources:**
 - Malicious: `cybersecurity-lab/test-corpus/malicious/` (lab total: 140 files; evaluation subset: 135 scannable)
-- Benign: `benign_corpus/` (this repo, 10 samples) + `cybersecurity-lab/test-corpus/benign/` (27 samples)
+- Benign: `benign_corpus/` (this repo, 12 samples) + `cybersecurity-lab/test-corpus/benign/` (26 samples)
 
 **Format:** Raw source files (Python, JS, YAML, shell, etc.) — what a real IR responder would encounter
 **License:** MIT (same as repository)
@@ -40,16 +40,22 @@ labelled samples** used to measure both recall and false-positive rate.
 
 ## Per-Detector Performance
 
-| Detector | Detected / Total | Recall |
-|----------|------------------|--------|
-| `behavioral_monitor` | 0/0 | 0% |
-| `drift` | 0/0 | 0% |
-| `ioc_scanner` | 0/0 | 0% |
-| `secrets_detector` | 0/0 | 0% |
-| `sigma` | 0/0 | 0% |
-| `skill_scanner` | 0/0 | 0% |
-| `suricata` | 0/0 | 0% |
-| `yara` | 0/0 | 0% |
+| Detector | Detected / Total | Recall | Status |
+|----------|------------------|--------|--------|
+| `yara` | 125/125 | 100.0% | wired |
+| `skill_scanner` | 96/97 | 99.0% | wired |
+| `ioc_scanner` | 108/110 | 98.2% | wired |
+| `secrets_detector` | 11/12 | 91.7% | wired |
+| `behavioral_monitor` | 0/4 | 0.0% | **not wired** |
+| `drift` | 0/71 | 0.0% | **not wired** (no implementation) |
+| `sigma` | 0/32 | 0.0% | **not wired** (scenario-labelled, no scanner in pipeline) |
+| `suricata` | 0/3 | 0.0% | **not wired** |
+
+> Only 4 of the 8 scenario-expected detector *labels* correspond to scanners that
+> actually run (`yara`, `skill_scanner`, `ioc_scanner`, `secrets_detector`). The
+> other 4 are ground-truth labels from the scenario corpus with no backing scanner
+> in this pipeline — their 0% is structural, not a missed detection. Overall recall
+> is still 100% because every malicious sample is caught by at least one wired scanner.
 
 ## Attack Category Distribution (per-tag recall)
 

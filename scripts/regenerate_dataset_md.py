@@ -26,12 +26,19 @@ rec = metrics["recall"]
 f1 = metrics["f1"]
 fpr = metrics["fpr"]
 
-# Count files actually in the corpora
+# Derive the benign split from what the report ACTUALLY evaluated (results array),
+# not a fragile disk-walk: a hardcoded extension list silently drops .jsx and the
+# extensionless Dockerfile, producing the wrong split (10+27 instead of 12+26).
 import os
+results = ACC.get("results", [])
+benign_results = [r for r in results if str(r.get("gt", "")).upper() == "BENIGN"]
+local_ben = sum(1 for r in benign_results if "benign_corpus" in str(r.get("file", "")))
+lab_ben = sum(1 for r in benign_results if "benign_corpus" not in str(r.get("file", "")))
+# lab_mal is the raw on-disk malicious file count (the report scans a scannable subset);
+# falls back to the evaluated malicious total when the lab is not mounted.
 LAB = Path(os.environ.get("CYBERSEC_LAB", "/home/gris/.hermes/workspace/cybersecurity-lab"))
-lab_mal = sum(1 for f in (LAB / "test-corpus" / "malicious").iterdir() if f.is_file()) if (LAB / "test-corpus" / "malicious").exists() else 0
-lab_ben = sum(1 for f in (LAB / "test-corpus" / "benign").iterdir() if f.is_file()) if (LAB / "test-corpus" / "benign").exists() else 0
-local_ben = sum(1 for f in Path("benign_corpus").iterdir() if f.is_file() and f.suffix in (".py", ".js", ".ts", ".yaml", ".yml", ".go", ".rb", ".rs", ".java", ".sh")) if Path("benign_corpus").exists() else 0
+_lab_mal_dir = LAB / "test-corpus" / "malicious"
+lab_mal = sum(1 for f in _lab_mal_dir.iterdir() if f.is_file()) if _lab_mal_dir.exists() else mal
 
 sev_rows = []
 for sev in ["critical", "high", "medium", "none"]:
@@ -39,10 +46,27 @@ for sev in ["critical", "high", "medium", "none"]:
         s = per_sev[sev]
         sev_rows.append(f"| {sev.capitalize()} | {s['total']} | {s['recall']*100:.0f}% ({s['detected']}/{s['total']}) |")
 
+# Only 4 of the 8 scenario-expected detector labels have a scanner that actually
+# runs; the other 4 are ground-truth labels with no backing scanner, so their 0%
+# is structural, not a missed detection. Annotate this explicitly so the 0% rows
+# aren't read as failures.
+WIRED_DETECTORS = {"yara", "skill_scanner", "ioc_scanner", "secrets_detector"}
+NOT_WIRED_NOTE = {
+    "sigma": "**not wired** (scenario-labelled, no scanner in pipeline)",
+    "drift": "**not wired** (no implementation)",
+    "behavioral_monitor": "**not wired**",
+    "suricata": "**not wired**",
+}
+det_items = [(n, d) for n, d in per_detector.items() if isinstance(d, dict)]
+# wired scanners first (highest detection rate first), then unwired labels
+det_items.sort(key=lambda kv: (kv[0] not in WIRED_DETECTORS, -kv[1].get("detection_rate", 0)))
 det_rows = []
-for det_name, det in per_detector.items():
-    if isinstance(det, dict):
-        det_rows.append(f"| `{det_name}` | {det.get('detected', 0)}/{det.get('total', 0)} | {det.get('recall', 0)*100:.0f}% |")
+for det_name, det in det_items:
+    rate = det.get("detection_rate", 0) * 100
+    status = "wired" if det_name in WIRED_DETECTORS else NOT_WIRED_NOTE.get(det_name, "**not wired**")
+    det_rows.append(
+        f"| `{det_name}` | {det.get('actually_flagged', 0)}/{det.get('expected', 0)} | {rate:.1f}% | {status} |"
+    )
 
 tag_rows = []
 for tag, t in per_tag.items():
@@ -88,9 +112,15 @@ labelled samples** used to measure both recall and false-positive rate.
 
 ## Per-Detector Performance
 
-| Detector | Detected / Total | Recall |
-|----------|------------------|--------|
-{chr(10).join(det_rows) if det_rows else '| (no per-detector data in this report) | — | — |'}
+| Detector | Detected / Total | Recall | Status |
+|----------|------------------|--------|--------|
+{chr(10).join(det_rows) if det_rows else '| (no per-detector data in this report) | — | — | — |'}
+
+> Only 4 of the 8 scenario-expected detector *labels* correspond to scanners that
+> actually run (`yara`, `skill_scanner`, `ioc_scanner`, `secrets_detector`). The
+> other 4 are ground-truth labels from the scenario corpus with no backing scanner
+> in this pipeline — their 0% is structural, not a missed detection. Overall recall
+> is still 100% because every malicious sample is caught by at least one wired scanner.
 
 ## Attack Category Distribution (per-tag recall)
 

@@ -67,26 +67,32 @@ distinguish** between:
 Applied **Corollary 1** from the paper:
 
 ```
-MR. Robot (Nemotron) → Falsifier (DeepSeek) → Orchestrator (rule-based)
-     propagator            auditor (ΔA≈1)        synthesizer (τ=0)
+MR. Robot (gpt-oss-120b) → Falsifier (Nemotron-3-Ultra) → Orchestrator (rule-based)
+     propagator                  auditor (ΔA≈1)               synthesizer (τ=0)
 ```
 
 | Component | Model Family | τ | Role |
 |---|---|---|---|
-| MR. Robot | Nemotron | — | Propagator: initial triage |
-| Falsifier | **DeepSeek** | τ low | Auditor: ΔA≈1 vs Nemotron |
+| MR. Robot | gpt-oss (OpenAI) | — | Propagator: initial triage |
+| Falsifier | **Nemotron (NVIDIA)** | τ low | Auditor: ΔA≈1 vs gpt-oss |
 | Orchestrator | **Non-LLM** | **τ=0** | Synthesizer: deterministic rules |
 
-### Why DeepSeek?
+> The default propagator is `openai/gpt-oss-120b` (the `openrouter` provider) and the
+> default auditor is `nvidia/nemotron-3-ultra` (the `falsifier` provider) — two
+> different families, so ΔA=1.0 holds out of the box. NVIDIA NIM (`mistralai/mistral-nemotron`)
+> is supported as an *alternate* propagator, but pairing it with the Nemotron auditor
+> is same-family (ΔA=0); `_check_heterogeneity` flags that as `kinship_lock_risk=HIGH`.
 
-DeepSeek is architecturally far from Nemotron:
+### Why a different family for the auditor?
+
+The auditor (`nemotron-3-ultra`) is architecturally far from the gpt-oss propagator:
 - Different training data distribution
-- Different architecture (MLA vs standard attention)
+- Different architecture and tokenizer lineage
 - Different optimization target
-- **ΔA ≈ 1** (maximum architectural distance)
+- **ΔA ≈ 1** (cross-family distance — breaks the kinship lock)
 
-Fallback chain for falsifier: `deepseek-chat-v3` → `deepseek-r1` → `qwen3-32b`
-(All architecturally distant from Nemotron).
+Fallback chain for the falsifier: `nemotron-3-super` → `laguna-m.1` → `deepseek-chat-v3`
+→ `deepseek-r1` → `qwen3-32b` (all distinct from the gpt-oss propagator family).
 
 ### Why Rule-Based Orchestrator?
 

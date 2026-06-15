@@ -16,8 +16,8 @@ graph TB
     end
 
     subgraph AI["🤖 AI Pipeline (heterogeneous)"]
-        MR[MR. Robot<br/>Nemotron propagator<br/>5-phase review<br/>confidence levels<br/>framework-aware FP reduction]
-        FALS[Falsifier<br/>DeepSeek auditor<br/>ΔA≈1 vs Nemotron<br/>framework-safe-pattern<br/>refutation]
+        MR[MR. Robot<br/>gpt-oss-120b propagator<br/>5-phase review<br/>confidence levels<br/>framework-aware FP reduction]
+        FALS[Falsifier<br/>Nemotron-3-Ultra auditor<br/>ΔA≈1 vs gpt-oss<br/>framework-safe-pattern<br/>refutation]
         SYN[Orchestrator<br/>Rule-based synthesizer<br/>τ=0, non-LLM<br/>deterministic verdict]
     end
 
@@ -67,8 +67,8 @@ graph TB
 │ • Read-only file access                                         │
 ├─────────────────────────────────────────────────────────────────┤
 │ TRUST BOUNDARY 3: AI Pipeline (heterogeneous)                   │
-│ • MR. Robot (Nemotron) — propagator only                       │
-│ • Falsifier (DeepSeek) — auditor only, ΔA≈1 enforced           │
+│ • MR. Robot (gpt-oss-120b) — propagator only                   │
+│ • Falsifier (Nemotron-3-Ultra) — auditor only, ΔA≈1 enforced   │
 │ • Orchestrator (rule-based) — τ=0, no LLM                      │
 │ • Max 2 correction iterations (Shehata & Li 2026)               │
 ├─────────────────────────────────────────────────────────────────┤
@@ -102,7 +102,7 @@ File Input
          ▼
 ┌──────────────────┐     ┌──────────────────┐
 │ MR. Robot        │────→│ Falsifier        │ ← Trust Boundary 3
-│ (Nemotron)       │     │ (DeepSeek, ΔA≈1) │
+│ (gpt-oss-120b)   │     │ (Nemotron, ΔA≈1) │
 │ 5-phase review   │←────│ max 2 iterations │
 └────────┬─────────┘     └──────────────────┘
          │
@@ -127,9 +127,9 @@ Reinforced by prior multi-agent diversity literature (Du 2023, Liang 2023,
 Wang 2022) and LLM sycophancy research (Sharma 2023). Full references in
 [`docs/heterogeneity_mandate.md`](heterogeneity_mandate.md).
 
-Our enforcement:
-- **Propagator:** NVIDIA Nemotron (mistralai/mistral-nemotron)
-- **Auditor:** DeepSeek (deepseek/deepseek-chat-v3-0324)
+Our enforcement (default configuration):
+- **Propagator:** gpt-oss-120b (openai/gpt-oss-120b, the `openrouter` provider)
+- **Auditor:** Nemotron-3-Ultra (nvidia/nemotron-3-ultra, the `falsifier` provider)
 - **Synthesizer:** Rule-based (τ=0, no model family)
-- **ΔA ≈ 1.0** (architecturally different families)
+- **ΔA ≈ 1.0** (architecturally different families — gpt-oss vs Nemotron)
 - **Max 2 iterations** (paper proves >2 with same family makes error worse)
