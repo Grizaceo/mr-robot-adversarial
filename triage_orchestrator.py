@@ -78,6 +78,7 @@ Usage:
 """
 
 import json
+import os
 import time
 import logging
 from pathlib import Path
@@ -252,7 +253,7 @@ def _compute_synthesizer_verdict(
 def orchestrate(
     candidate_path: str,
     scanner_findings: Optional[dict] = None,
-    falsifier_provider: str = "deepseek",
+    falsifier_provider: str = "falsifier",
     max_iterations: int = MAX_CORRECTION_ITERATIONS,
 ) -> dict:
     """
@@ -324,7 +325,9 @@ def orchestrate(
                      "heterogeneity_mandate_met": False}
 
     # Rule: HIGH confidence + clear verdict → skip falsifier
-    if confidence >= HIGH_CONFIDENCE_STRAIGHT_TO_VERDICT and verdict in ("MALICIOUS", "BENIGN"):
+    # Override: MR_ROBOT_FORCE_FALSIFIER=1 forces the falsifier for demo/audit mode
+    force_falsifier = os.getenv("MR_ROBOT_FORCE_FALSIFIER", "0") == "1"
+    if not force_falsifier and confidence >= HIGH_CONFIDENCE_STRAIGHT_TO_VERDICT and verdict in ("MALICIOUS", "BENIGN"):
         logger.info(f"High confidence ({confidence:.2f}), bypassing falsifier for {verdict}")
         audit.log("orchestrator_route", {"candidate": str(candidate)},
                   {"route": "direct", "verdict": verdict, "confidence": confidence}, 0)
@@ -454,11 +457,11 @@ if __name__ == "__main__":
                         format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 
     if len(sys.argv) < 2:
-        print("Usage: python triage_orchestrator.py <candidate_path> [--provider deepseek|ollama-cloud]")
+        print("Usage: python triage_orchestrator.py <candidate_path> [--provider falsifier|nvidia-nim|openrouter|ollama-cloud]")
         sys.exit(1)
 
     path = sys.argv[1]
-    provider = "deepseek"
+    provider = "falsifier"
     for i, arg in enumerate(sys.argv):
         if arg == "--provider" and i + 1 < len(sys.argv):
             provider = sys.argv[i + 1]
