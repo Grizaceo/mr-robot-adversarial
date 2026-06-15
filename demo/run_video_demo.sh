@@ -119,14 +119,16 @@ fi
 pause
 
 # ── Scene 7 ──────────────────────────────────────────────────────────
-scene 7 "Self-correction loop — adversarial review on Python bind shell"
-caption "Triage LLM (gpt-oss) → MALICIOUS, 0.97 conf. Falsifier (nemotron-ultra) reviews."
-caption "Heterogeneity enforced: different model families → τ low, ΔA=1.0"
-run "head -10 \"\$LAB_ROOT/test-corpus/malicious/bind_shell.py\""
+scene 7 "Self-correction sequence — a real verdict flip (BENIGN → SUSPICIOUS)"
+caption "Django view. First-pass triage (gpt-oss) → BENIGN. We force the heterogeneous review."
+caption "Falsifier (nemotron-3-ultra, ΔA=1.0) FALSIFIES it → MR. Robot re-runs → escalates."
+run "head -15 benign_corpus/django_user_view.py"
 echo
 if needs_providers; then
-  caption "Forcing adversarial review (MR_ROBOT_FORCE_FALSIFIER=1) — see self-correction in audit trail."
-  run "MR_ROBOT_FORCE_FALSIFIER=1 python triage_orchestrator.py \"\$LAB_ROOT/test-corpus/malicious/bind_shell.py\" 2>/dev/null | jq '{verdict: .final_verdict, rationale, propagator: ._meta.propagator_model, auditor: ._meta.auditor_model, kinship_lock_risk: ._meta.kinship_lock_risk, iterations: [.correction_history[] | {iter: .iteration, status: .falsifier_status, audit_family: .heterogeneity.auditor_family, dist: .heterogeneity.architectural_distance}]}'"
+  caption "Note: 4 live LLM calls (~4-5 min). The flip is reproducible on real providers."
+  run "MR_ROBOT_FORCE_FALSIFIER=1 python triage_orchestrator.py benign_corpus/django_user_view.py 2>/dev/null | jq '{final: .final_verdict, history: [.correction_history[] | {iter: .iteration, status: .falsifier_status, auditor: .heterogeneity.auditor_family, dist: .heterogeneity.architectural_distance}]}'"
+  caption "The correction is recorded in the audit trail, not narrated:"
+  run "python triage_orchestrator.py --last 2>/dev/null | jq '.steps[] | select(.tool==\"self_correction\") | .output'"
 fi
 pause
 

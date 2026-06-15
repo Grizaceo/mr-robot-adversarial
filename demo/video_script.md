@@ -140,46 +140,50 @@ Verdict: BENIGN — without the Falsifier this would have been a false alarm.
 
 ---
 
-## Scene 7 — Adversarial review loop  (2:45 – 3:40, 55s)
+## Scene 7 — Self-correction sequence: a real verdict flip  (2:45 – 3:40, 55s)
+
+> **Recording note:** this run makes 4 live LLM calls (triage → falsify → re-triage →
+> re-falsify) and takes ~4–5 min. Run it *before* recording, or capture it and
+> speed-up/cut the wait in post — the payload to show is the output + the audit row,
+> not the latency. The flip is **reproducible** (observed 2/2 on real providers).
 
 **Caption A:**
 ```
-Sample 3: the Python bind shell again — this time we FORCE the adversarial
-review (MR_ROBOT_FORCE_FALSIFIER=1) to show the full loop end-to-end.
+Sample 3: a Django view. MR. Robot's first-pass triage calls it BENIGN.
+We force the heterogeneous adversarial review.
 ```
 
 **Terminal:**
 ```bash
-head -10 "$CYBERSEC_LAB/test-corpus/malicious/bind_shell.py"
+head -15 benign_corpus/django_user_view.py
 ```
 
 **Caption B (during run):**
 ```
-Triage (gpt-oss-120b) → MALICIOUS → Falsifier (Nemotron-3-Ultra) audits it.
-Heterogeneous auditor (ΔA=1.0) → the verdict SURVIVES the challenge (upheld, not overturned).
-Had the falsifier returned FALSIFIED, MR. Robot re-runs with the counter-argument
-(max 2 iterations). That genuine verdict-flip path is exercised by
-tests/test_orchestrator_audit.py::test_self_correction_flip_recorded.
+Falsifier (Nemotron-3-Ultra, ΔA=1.0) FALSIFIES the BENIGN call — it spots a
+missed authorization-bypass / information-disclosure path. MR. Robot re-runs with
+the counter-argument and ESCALATES the verdict. The second review then SURVIVES.
 ```
 
 **Terminal:**
 ```bash
 MR_ROBOT_FORCE_FALSIFIER=1 python triage_orchestrator.py \
-  "$CYBERSEC_LAB/test-corpus/malicious/bind_shell.py" 2>/dev/null \
-  | jq '{
-      verdict: .final_verdict,
-      propagator: ._meta.propagator_family,
-      auditor: ._meta.auditor_family,
-      kinship_lock_risk: ._meta.kinship_lock_risk,
-      history: [.correction_history[] | {iter: .iteration, status: .falsifier_status, auditor: .heterogeneity.auditor_family, dist: .heterogeneity.architectural_distance}]
-    }'
+  benign_corpus/django_user_view.py 2>/dev/null \
+  | jq '{final: .final_verdict,
+         history: [.correction_history[] | {iter: .iteration, status: .falsifier_status, auditor: .heterogeneity.auditor_family, dist: .heterogeneity.architectural_distance}]}'
+# → final: "SUSPICIOUS", history: [{iter 1, FALSIFIED}, {iter 2, SURVIVED}]
 ```
 
-**Caption C:**
+**Caption C (the correction is recorded, not narrated):**
 ```
-Verdict: MALICIOUS — SURVIVED adversarial review by a heterogeneous auditor (ΔA=1.0).
-Every step is in the audit trail; a real verdict flip is logged as a
-self_correction row (verdict_before → verdict_after) when the falsifier wins.
+The self-correction lives in the audit trail: verdict_before BENIGN → verdict_after SUSPICIOUS.
+```
+
+**Terminal:**
+```bash
+python triage_orchestrator.py --last 2>/dev/null \
+  | jq '.steps[] | select(.tool=="self_correction") | .output'
+# → {"verdict_before":"BENIGN","verdict_after":"SUSPICIOUS","flipped":true,"confidence_after":0.93}
 ```
 
 ---
@@ -270,7 +274,7 @@ in DaVinci Resolve / Premiere / Kdenlive.
 | 4 Health | 0:50 | 1:05 | 15s |
 | 5 Malicious | 1:05 | 2:00 | 55s |
 | 6 Benign | 2:00 | 2:45 | 45s |
-| 7 Adversarial review | 2:45 | 3:40 | 55s |
+| 7 Self-correction | 2:45 | 3:40 | 55s |
 | 8 Metrics | 3:40 | 4:15 | 35s |
 | 9 Audit trail | 4:15 | 4:40 | 25s |
 | 10 Closing | 4:40 | 5:00 | 20s |
