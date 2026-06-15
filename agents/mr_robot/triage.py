@@ -34,13 +34,13 @@ PROVIDERS = {
     # ── Propagator (MR. Robot Triage) ──
     "nvidia-nim": {
         "base": "https://integrate.api.nvidia.com/v1",
-        "model": os.getenv("NVIDIA_MODEL", "deepseek/deepseek-v4-pro"),
+        "model": os.getenv("NVIDIA_MODEL", "mistralai/mistral-nemotron"),
         "env_key": "NVIDIA_API_KEY",
         "fallback_models": [
-            "deepseek/deepseek-v4-flash",
-            "mistralai/mistral-nemotron",
-            "meta/llama-4-maverick-17b-128e-instruct",
             "meta/llama-3.3-70b-instruct",
+            "nvidia/llama-3.3-nemotron-super-49b-v1",
+            "meta/llama-3.3-70b-instruct",
+            "nvidia/llama-3.1-nemotron-70b-instruct",
         ],
     },
     # ── Falsifier (Auditor) — Heterogeneous via OpenRouter ──
@@ -90,8 +90,8 @@ PROVIDERS = {
     },
 }
 
-DEFAULT_PROVIDER = os.getenv("MR_ROBOT_PROVIDER", "nvidia-nim")
-FALLBACK_PROVIDER_ORDER = ["nvidia-nim", "openrouter", "ollama-cloud"]
+DEFAULT_PROVIDER = os.getenv("MR_ROBOT_PROVIDER", "openrouter")
+FALLBACK_PROVIDER_ORDER = ["openrouter", "nvidia-nim", "ollama-cloud"]
 MAX_TRIAGE_FILE_BYTES = int(os.getenv("MR_ROBOT_MAX_TRIAGE_FILE_BYTES", str(50 * 1024)))
 LLM_TIMEOUT_SECONDS = int(os.getenv("MR_ROBOT_LLM_TIMEOUT_SECONDS", "30"))
 
