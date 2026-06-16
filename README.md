@@ -388,11 +388,7 @@ mr-robot-adversarial/
 | 7 | Try-it-out instructions | ✅ | `docs/try_it_out.md` |
 | 8 | Agent execution logs | ✅ | `execution_logger.py` (SQLite WAL + JSONL) |
 
-## Related Work
 
-- [cybersecurity-lab](~/.hermes/workspace/cybersecurity-lab/) — Scanner suite + 100 adversarial scenarios
-- [KISS Discovery Engine](~/.hermes/workspace/repos/kiss_discovery_engine/) — FastTracker (audit trail base)
-- [AGENTIC_RIEMANN_TROPICAL](~/.hermes/workspace/repos/AGENTIC_RIEMANN_TROPICAL/) — Falsifier pattern
 
 ## License
 
