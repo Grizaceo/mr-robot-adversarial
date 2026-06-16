@@ -15,6 +15,7 @@
 set -uo pipefail
 
 LAB_ROOT="${CYBERSEC_LAB:-$HOME/.hermes/workspace/cybersecurity-lab}"
+LAB_DISPLAY="\$LAB_ROOT"
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$REPO_ROOT"
 
@@ -100,11 +101,13 @@ pause
 # ── Scene 5 ──────────────────────────────────────────────────────────
 scene 5 "Malicious sample — Python bind shell"
 caption "Expected: MALICIOUS."
-run "head -15 \"$LAB_ROOT/test-corpus/malicious/bind_shell.py\""
+printf "%s$%s head -15 \"%s/test-corpus/malicious/bind_shell.py\"\n" "$C_GREEN" "$C_RST" "$LAB_DISPLAY"
+head -15 "$LAB_ROOT/test-corpus/malicious/bind_shell.py"
 echo
 if needs_providers; then
   caption "Pipeline: scanners → MR. Robot → Falsifier → Synthesizer"
-  run "python triage_orchestrator.py \"$LAB_ROOT/test-corpus/malicious/bind_shell.py\" 2>/dev/null | jq '{verdict: .final_verdict, rationale, propagator: ._meta.propagator_family, auditor: ._meta.auditor_family, kinship_lock_risk: ._meta.kinship_lock_risk}'"
+  printf "%s$%s python triage_orchestrator.py \"%s/test-corpus/malicious/bind_shell.py\" 2>/dev/null | jq '{verdict: .final_verdict, rationale, propagator: ._meta.propagator_family, auditor: ._meta.auditor_family, kinship_lock_risk: ._meta.kinship_lock_risk}'\n" "$C_GREEN" "$C_RST" "$LAB_DISPLAY"
+  python triage_orchestrator.py "$LAB_ROOT/test-corpus/malicious/bind_shell.py" 2>/dev/null | jq '{verdict: .final_verdict, rationale, propagator: ._meta.propagator_family, auditor: ._meta.auditor_family, kinship_lock_risk: ._meta.kinship_lock_risk}'
 fi
 pause
 

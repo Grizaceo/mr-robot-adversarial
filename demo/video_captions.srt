@@ -1,49 +1,49 @@
 1
-00:00:00,000 --> 00:00:04,000
+00:00:00,000 --> 00:00:08,000
 MR. Robot Adversarial — SANS FIND EVIL! 2026
 Autonomous AI cyber-defense pipeline.
 
 2
-00:00:04,000 --> 00:00:10,000
-The problem: AI adversaries breach in under 8 minutes.
+00:00:08,000 --> 00:00:22,000
+The problem: AI adversaries move in minutes.
 We close the gap: scan → triage → adversarial review → verdict, ~30s.
 
 3
-00:00:10,000 --> 00:00:24,000
+00:00:22,000 --> 00:00:40,000
 Three trust layers, two model families, one rule-based judge.
-(scanners deterministic, auditor different family from triage)
+Scanners are deterministic; the auditor is a different model family.
 
 4
-00:00:24,000 --> 00:00:37,000
-Health check — providers, scanners, audit DB online.
-4 wired scanners: skill, ioc, yara, secrets.
+00:00:40,000 --> 00:01:00,000
+Health and quality gate: providers, scanners, audit DB.
+The submitted tree passes 181 tests, with 4 skipped.
 
 5
-00:00:37,000 --> 00:01:22,000
-Sample 1: Python bind shell. We expect MALICIOUS.
-Pipeline: scanners (10 findings) → MR. Robot (gpt-oss) → synthesizer → MALICIOUS 0.97.
+00:01:00,000 --> 00:01:36,000
+Sample 1: Python bind shell. Expected verdict: MALICIOUS.
+C2 URL, socket bind, and subprocess loop are visible evidence.
 
 6
-00:01:22,000 --> 00:02:05,000
-Sample 2: Django view with parameterized ORM. We expect BENIGN.
-Falsifier refutes FPs. Final verdict: BENIGN 0.99.
+00:01:36,000 --> 00:02:08,000
+Sample 2: Django view with parameterized ORM. Expected verdict: BENIGN.
+Framework-aware review avoids a false alarm.
 
 7
-00:02:05,000 --> 00:02:56,000
-Sample 3: real self-correction. Forced review (MR_ROBOT_FORCE_FALSIFIER=1).
-Triage → BENIGN → Falsifier (nemotron-3-ultra, ΔA=1.0) → FALSIFIED → re-run → SUSPICIOUS (verdict_before BENIGN → after SUSPICIOUS).
+00:02:08,000 --> 00:02:46,000
+Self-correction evidence from SQLite.
+First verdict BENIGN → heterogeneous review → SUSPICIOUS, flipped=true, ΔA=1.0.
 
 8
-00:02:56,000 --> 00:03:08,000
-Sample 8: Accuracy on 173 samples (135 malicious + 38 benign).
-Accuracy 99.42%, Precision 99.26%, Recall 100%, FPR 2.63% (1 FP).
+00:02:46,000 --> 00:02:58,000
+Accuracy on 173 samples: 135 malicious + 38 benign.
+Accuracy 99.42%, Precision 99.26%, Recall 100%, FPR 2.63%.
 
 9
-00:03:08,000 --> 00:03:15,000
-Sample 9: Audit trail — every tool call logged in SQLite with timestamps.
-SANS Requirement #8 satisfied.
+00:02:58,000 --> 00:03:05,500
+Audit trail: every decision stage writes structured evidence.
+Tool, verdict, confidence, and timestamp are reconstructable.
 
 10
-00:03:15,000 --> 00:03:20,000
+00:03:05,500 --> 00:03:10,500
 Repo: github.com/Grizaceo/mr-robot-adversarial
-License: MIT  •  Branch: grounding-audit-competition-pass
+Video: demo/demo_run_v3.mp4  •  License: MIT

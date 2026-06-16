@@ -2,20 +2,19 @@
 """Regenerate demo/video_captions.srt to match the v3 video (3:10, 173 samples, 1 FP)."""
 from pathlib import Path
 
-# Per-scene subtitles matching the v3 video render.
-# Each scene is held for ~1.5s title + reveals + ~3s final.
-# Scene start/end times are derived from the actual rendered video.
+# Per-scene subtitles matching demo/demo_run_v3.mp4.
+# Scene start/end times are derived from scripts/render_demo_video_v3.py.
 SCENES = [
-    (0.0, 4.0, "MR. Robot Adversarial — SANS FIND EVIL! 2026\nAutonomous AI cyber-defense pipeline."),
-    (4.0, 10.0, "The problem: AI adversaries breach in under 8 minutes.\nWe close the gap: scan → triage → adversarial review → verdict, ~30s."),
-    (10.0, 24.0, "Three trust layers, two model families, one rule-based judge.\n(scanners deterministic, auditor different family from triage)"),
-    (24.0, 37.0, "Health check — providers, scanners, audit DB online.\n4 wired scanners: skill, ioc, yara, secrets."),
-    (37.0, 82.0, "Sample 1: Python bind shell. We expect MALICIOUS.\nPipeline: scanners (10 findings) → MR. Robot (gpt-oss) → synthesizer → MALICIOUS 0.97."),
-    (82.0, 125.0, "Sample 2: Django view with parameterized ORM. We expect BENIGN.\nFalsifier refutes FPs. Final verdict: BENIGN 0.99."),
-    (125.0, 176.0, "Sample 7: Self-correction loop. Forced with MR_ROBOT_FORCE_FALSIFIER=1.\nTriage (gpt-oss-120b) → MALICIOUS 0.97 → Falsifier (nemotron-3-ultra) → SURVIVED → ΔA=1.0, kinship_lock_risk=LOW."),
-    (176.0, 188.0, "Sample 8: Accuracy on 173 samples (135 malicious + 38 benign).\nAccuracy 99.42%, Precision 99.26%, Recall 100%, FPR 2.63% (1 FP)."),
-    (188.0, 195.0, "Sample 9: Audit trail — every tool call logged in SQLite with timestamps.\nSANS Requirement #8 satisfied."),
-    (195.0, 200.0, "Repo: github.com/Grizaceo/mr-robot-adversarial\nLicense: MIT  •  Branch: grounding-audit-competition-pass"),
+    (0.0, 8.0, "MR. Robot Adversarial — SANS FIND EVIL! 2026\nAutonomous AI cyber-defense pipeline."),
+    (8.0, 22.0, "The problem: AI adversaries move in minutes.\nWe close the gap: scan → triage → adversarial review → verdict, ~30s."),
+    (22.0, 40.0, "Three trust layers, two model families, one rule-based judge.\nScanners are deterministic; the auditor is a different model family."),
+    (40.0, 60.0, "Health and quality gate: providers, scanners, audit DB.\nThe submitted tree passes 181 tests, with 4 skipped."),
+    (60.0, 96.0, "Sample 1: Python bind shell. Expected verdict: MALICIOUS.\nC2 URL, socket bind, and subprocess loop are visible evidence."),
+    (96.0, 128.0, "Sample 2: Django view with parameterized ORM. Expected verdict: BENIGN.\nFramework-aware review avoids a false alarm."),
+    (128.0, 166.0, "Self-correction evidence from SQLite.\nFirst verdict BENIGN → heterogeneous review → SUSPICIOUS, flipped=true, ΔA=1.0."),
+    (166.0, 178.0, "Accuracy on 173 samples: 135 malicious + 38 benign.\nAccuracy 99.42%, Precision 99.26%, Recall 100%, FPR 2.63%."),
+    (178.0, 185.5, "Audit trail: every decision stage writes structured evidence.\nTool, verdict, confidence, and timestamp are reconstructable."),
+    (185.5, 190.5, "Repo: github.com/Grizaceo/mr-robot-adversarial\nVideo: demo/demo_run_v3.mp4  •  License: MIT"),
 ]
 
 

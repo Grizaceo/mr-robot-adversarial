@@ -10,7 +10,7 @@
 | Field | URL |
 |-------|-----|
 | **Code Repository** | https://github.com/Grizaceo/mr-robot-adversarial/tree/grounding-audit-competition-pass |
-| **Demo Video (v2 — with audio narration + self-correction)** | https://github.com/Grizaceo/mr-robot-adversarial/releases/download/v1.0-find-evil-hackathon/demo_run_v2.mp4 |
+| **Demo Video (v3 — 1080p, audio narration + self-correction)** | https://github.com/Grizaceo/mr-robot-adversarial/releases/download/v1.0-find-evil-hackathon/demo_run_v3.mp4 |
 | **Demo Video Page** | https://github.com/Grizaceo/mr-robot-adversarial/releases/tag/v1.0-find-evil-hackathon |
 | **Try It Out Guide** | https://github.com/Grizaceo/mr-robot-adversarial/blob/grounding-audit-competition-pass/docs/try_it_out.md |
 | **Architecture Diagram** | https://github.com/Grizaceo/mr-robot-adversarial/blob/grounding-audit-competition-pass/README.md#architecture |
@@ -18,7 +18,7 @@
 | **Dataset Documentation** | https://github.com/Grizaceo/mr-robot-adversarial/blob/grounding-audit-competition-pass/docs/dataset.md |
 | **Agent Execution Logs (DB)** | https://github.com/Grizaceo/mr-robot-adversarial/blob/grounding-audit-competition-pass/logs/audit_trail.db |
 
-> **Demo video highlights** (4:31 min, with audio narration):
+> **Demo video highlights** (3:10 min, with audio narration):
 > - Scene 7 shows a **real self-correction sequence** on a Django view: first-pass triage says **BENIGN**, the heterogeneous falsifier (nemotron-3-ultra, ΔA=1.0) returns **FALSIFIED** (a missed authorization-bypass / information-disclosure path), MR. Robot re-runs with the counter-argument and **escalates to SUSPICIOUS**. The flip is recorded in the audit trail as a `self_correction` row (`verdict_before=BENIGN → verdict_after=SUSPICIOUS`, `flipped=true`), shown live via `triage_orchestrator.py --last`. Reproducible on real providers.
 > - Set `MR_ROBOT_FORCE_FALSIFIER=1` env var to force adversarial review for demo/audit mode (legitimate testing feature)
 
@@ -224,7 +224,7 @@ orchestrator_route  BENIGN     0.99        0.0
 ## 📋 Pre-submit checklist
 
 - [x] Code repository public, MIT licensed
-- [x] Demo video ≤5 min (4:31, audio narration, hosted on GitHub Release)
+- [x] Demo video ≤5 min (3:10, audio narration; upload `demo/demo_run_v3.mp4` to the GitHub Release as `demo_run_v3.mp4`)
 - [x] Architecture diagram (in README + this file)
 - [x] Written project description (this file)
 - [x] Dataset documentation (`docs/dataset.md`)
