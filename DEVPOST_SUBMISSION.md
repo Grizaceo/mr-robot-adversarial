@@ -18,8 +18,8 @@
 | **Dataset Documentation** | https://github.com/Grizaceo/mr-robot-adversarial/blob/grounding-audit-competition-pass/docs/dataset.md |
 | **Agent Execution Logs (DB)** | https://github.com/Grizaceo/mr-robot-adversarial/blob/grounding-audit-competition-pass/logs/audit_trail.db |
 
-> **Demo video v2 highlights** (3:10 min, with TTS narration):
-> - Scene 7 now shows the **adversarial falsification loop** running on a real provider: triage (gpt-oss-120b) → MALICIOUS 0.97 → falsifier (nemotron-3-ultra) → **SURVIVED** (verdict upheld under challenge, not overturned) → ΔA=1.0, kinship_lock_risk=LOW. The same loop re-runs the triage when the falsifier returns FALSIFIED (max 2 iterations).
+> **Demo video highlights** (4:31 min, with audio narration):
+> - Scene 7 shows a **real self-correction sequence** on a Django view: first-pass triage says **BENIGN**, the heterogeneous falsifier (nemotron-3-ultra, ΔA=1.0) returns **FALSIFIED** (a missed authorization-bypass / information-disclosure path), MR. Robot re-runs with the counter-argument and **escalates to SUSPICIOUS**. The flip is recorded in the audit trail as a `self_correction` row (`verdict_before=BENIGN → verdict_after=SUSPICIOUS`, `flipped=true`), shown live via `triage_orchestrator.py --last`. Reproducible on real providers.
 > - Set `MR_ROBOT_FORCE_FALSIFIER=1` env var to force adversarial review for demo/audit mode (legitimate testing feature)
 
 ---
@@ -43,7 +43,7 @@ The system is a 4-stage pipeline:
 
 ### Results
 - **Internal accuracy:** 99.42% accuracy, 100% recall, 99.26% precision, 1 FP on 173 samples (135 malicious + 38 benign)
-- **E2E with Falsifier (forced, see demo video scene 7):** triage (gpt-oss-120b) → MALICIOUS 0.97 → falsifier (nemotron-3-ultra) → SURVIVED (verdict upheld under adversarial review) → ΔA=1.0
+- **Self-correction (forced, see demo video scene 7):** Django view → triage BENIGN → falsifier (nemotron-3-ultra, ΔA=1.0) FALSIFIED → MR. Robot re-runs → **escalates to SUSPICIOUS** (audit row: verdict_before=BENIGN → verdict_after=SUSPICIOUS). Reproducible 2/2 on real providers.
 - **Performance:** ~30s per artifact end-to-end (scanners: 200ms, triage: 12s, falsify: 15s)
 - **CyberSOCEval honest sub-baseline:** 10% exact-match, Jaccard 0.413 (documented with reproduction path; full 609-question run one flag away)
 
@@ -224,7 +224,7 @@ orchestrator_route  BENIGN     0.99        0.0
 ## 📋 Pre-submit checklist
 
 - [x] Code repository public, MIT licensed
-- [x] Demo video ≤5 min (3:10, hosted on GitHub Release)
+- [x] Demo video ≤5 min (4:31, audio narration, hosted on GitHub Release)
 - [x] Architecture diagram (in README + this file)
 - [x] Written project description (this file)
 - [x] Dataset documentation (`docs/dataset.md`)
