@@ -76,25 +76,7 @@ zero-FP detection — all in under 30 seconds per artifact.
 > work on multi-agent diversity (Du 2023, Liang 2023) and LLM sycophancy
 > (Sharma 2023). See [`docs/heterogeneity_mandate.md`](docs/heterogeneity_mandate.md).
 
-## Scope vs State of the Art
 
-| Dimension | Microsoft MDASH | Claude Mythos | **MR. Robot** |
-|---|---|---|---|
-| Agent count | 100+ specialised roles | 1 monolithic model | 2 LLM + 1 rule-based |
-| Public benchmark | CyberGym 88.45% (1,507 tasks) | OSS-Fuzz, OpenBSD/Firefox | CyberSOCEval subset |
-| PoC generation | Yes | Yes (full RCE chains) | No |
-| Cross-stack correlation | Yes (identity+endpoint+cloud) | N/A | No (per-file scope) |
-| Audit trail | Not disclosed | Not disclosed | SQLite WAL, sentinel scan, ΔA per row |
-| Heterogeneity formal | No | N/A | **Yes — Shehata & Li (2026), enforced at synthesizer** |
-| Availability | Preview (Jun 2026) | Gated (Project Glasswing) | **MIT open source** |
-
-This submission is not a competitor to MDASH. It is the smallest defensible pipeline
-that meets all six SANS rubric criteria, with one novel angle: **the heterogeneity
-mandate (Shehata & Li 2026) is enforced architecturally at the rule-based synthesizer,
-not prompted at the LLMs**. The synthesizer is τ=0 — no LLM decides the final verdict.
-
-See [`docs/architectural_guardrails.md`](docs/architectural_guardrails.md) for the
-full catalogue (9 architectural + 3 hybrid + 5 prompt-based guardrails).
 
 ## Key Features
 
